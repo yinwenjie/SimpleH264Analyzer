@@ -30,6 +30,7 @@ CStreamFile::CStreamFile(TCHAR *fileName)
 	m_pFileName = fileName;
 	if (m_pFileName)
 	{
+		FileInfo(m_pFileName);
 		_tfopen_s(&m_pFile_In, m_pFileName, _T("rb"));
 		if (NULL == m_pFile_In)
 		{
@@ -45,4 +46,9 @@ CStreamFile::~CStreamFile()
 		fclose(m_pFile_In);
 		m_pFile_In = NULL;
 	}
+}
+
+void CStreamFile::Parse_h264_bitstream()
+{
+
 }

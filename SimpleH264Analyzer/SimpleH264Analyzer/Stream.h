@@ -7,6 +7,8 @@ public:
 	CStreamFile(TCHAR *fileName);
 	~CStreamFile();
 	
+	void Parse_h264_bitstream();
+
 private:
 	FILE	*m_pFile_In;
 	TCHAR	*m_pFileName;
