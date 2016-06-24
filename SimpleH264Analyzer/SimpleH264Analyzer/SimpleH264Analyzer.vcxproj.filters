@@ -27,6 +27,9 @@
     <ClInclude Include="Stream.h">
       <Filter>Stream</Filter>
     </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Application</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleH264Analyzer.cpp">
