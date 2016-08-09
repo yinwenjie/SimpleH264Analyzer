@@ -1,162 +1,146 @@
 #include "stdafx.h"
 #include "Stream.h"
+#include "NALUnit.h"
 
 #include <iostream>
 
 using namespace std;
 
-void FileInfo(TCHAR *pFileName)
-{
-	wcout << L"File name: " << pFileName << endl;
-}
-
-void ErrorInfo(int nIdx)
-{
-	switch (nIdx)
-	{
-	case 0:
-		wcout << L"Illegal command line format." << endl;
-		break;
-	case 1:
-		wcout << L"Opening bit stream file failed." << endl;
-		break;
-	default:
-		break;
-	}	
-}
-
+// 构造函数
 CStreamFile::CStreamFile(TCHAR *fileName)
 {
-	m_pFileName = fileName;
-	if (m_pFileName)
+	m_fileName = fileName;
+	file_info();
+	_tfopen_s(&m_inputFile, m_fileName, _T("rb"));
+	if (NULL ==  m_inputFile)
 	{
-		FileInfo(m_pFileName);
-		_tfopen_s(&m_pFile_In, m_pFileName, _T("rb"));
-		if (NULL == m_pFile_In)
-		{
-			ErrorInfo(2);
-		}
+		file_error(0);
+	}
+
+}
+
+//析构函数
+CStreamFile::~CStreamFile()
+{
+	if (NULL != m_inputFile)
+	{
+		fclose(m_inputFile);
+		m_inputFile = NULL;
 	}
 }
 
-CStreamFile::~CStreamFile()
+void CStreamFile::file_info()
 {
-	if (NULL != m_pFile_In)
+	if (m_fileName)
 	{
-		fclose(m_pFile_In);
-		m_pFile_In = NULL;
+		wcout << L"File name :" << m_fileName << endl;
+	}
+}
+
+void CStreamFile::file_error(int idx)
+{
+	switch (idx)
+	{
+	case 0:
+		wcout << L"Error: opening input file failed." << endl;
+		break;
+	default:
+		break;
 	}
 }
 
 int CStreamFile::Parse_h264_bitstream()
 {
-	int		ret = 0;
-	ret = find_first_NAL_unit();		//Find position of 1st nal unit
-	if (!ret)
-	{
-		return ret;
-	}
-
+	int ret = 0;
+	uint8 nalType = 0;
 	do 
 	{
-		ret = extract_nal_unit();
+		ret = find_nal_prefix();
+		//解析NAL UNIT
+		if (m_nalVec.size())
+		{
+			uint8 nalType = m_nalVec[0] & 0x1F;
+			wcout << L"NAL Unit Type: " << nalType << endl;
+			ebsp_to_sodb();
+			CNALUnit nalUnit(&m_nalVec[1], m_nalVec.size() - 1);
+		}
+		
 	} while (ret);
-
-	return ret;
+	return 0;
 }
 
-int CStreamFile::find_first_NAL_unit()
+int CStreamFile::find_nal_prefix()
 {
-	int getStartCode = 0;
-	while (! feof (m_pFile_In))
+	uint8 prefix[3] = { 0 };
+	uint8 fileByte;
+	/*
+	[0][1][2] = {0 0 0} -> [1][2][0] ={0 0 0} -> [2][0][1] = {0 0 0}
+	getc() = 1 -> 0 0 0 1
+	[0][1][2] = {0 0 1} -> [1][2][0] ={0 0 1} -> [2][0][1] = {0 0 1}
+	*/
+
+	m_nalVec.clear();
+
+	int pos = 0, getPrefix = 0;
+	for (int idx = 0; idx < 3; idx++)
 	{
-		if (0x01 == peek_bytes(3))
+		prefix[idx] = getc(m_inputFile);
+		m_nalVec.push_back(prefix[idx]);
+	}
+
+	while (!feof(m_inputFile))
+	{
+		if ((prefix[pos % 3] == 0) && (prefix[(pos + 1) % 3] == 0) && (prefix[(pos + 2) % 3] == 1))
 		{
-			//find start code  "00 00 01"
-			for (int nIdx = 0; nIdx < 3; nIdx++)
-			{
-				getc(m_pFile_In);
-			}
-			getStartCode = 1;
+			//0x 00 00 01 found
+			getPrefix = 1;
+			m_nalVec.pop_back();
+			m_nalVec.pop_back();
+			m_nalVec.pop_back();
 			break;
 		}
-		else if (0x01 == peek_bytes(4))
+		else if ((prefix[pos % 3] == 0) && (prefix[(pos + 1) % 3] == 0) && (prefix[(pos + 2) % 3] == 0))
 		{
-			//find start code  "00 00 00 01"
-			for (int nIdx = 0; nIdx < 4; nIdx++)
+			if (1 == getc(m_inputFile))
 			{
-				getc(m_pFile_In);
+				//0x 00 00 00 01 found
+				getPrefix = 2;
+				m_nalVec.pop_back();
+				m_nalVec.pop_back();
+				m_nalVec.pop_back();
+				break;
 			}
-			getStartCode = 1;
-			break;
-		}
-		getc(m_pFile_In);
-	}
-
-	if (getStartCode)
-	{
-		return 1;
-	} 
-	else
-	{
-		wcout << L"End of file reached." << endl;
-		return 0;
-	}
-}
-
-int CStreamFile::peek_bytes(int n)
-{
-	if (n > 4)
-	{
-		wcout << L"Error: Too many bytes to peek." << endl;
-		return -3;
-	}
-
-	int nOut = 0;
-	fpos_t pos;
-	fgetpos (m_pFile_In,&pos);
-	uint8 nBuf = 0;
-	for (int nIdx = 0; nIdx < n; nIdx++)
-	{
-		nBuf = (uint8)getc(m_pFile_In);
-		nOut = (nOut << 8) | nBuf;
-	}
-	fsetpos (m_pFile_In,&pos);
-	return nOut;
-}
-
-int CStreamFile::extract_nal_unit()
-{
-	m_NalVec.clear();
-
-	uint8 nThis = 0;
-	while (! feof (m_pFile_In))
-	{
-		if (0x01 == peek_bytes(3))
-		{
-			//find start code  "00 00 01"
-			for (int nIdx = 0; nIdx < 3; nIdx++)
-			{
-				getc(m_pFile_In);
-			}
-			return 1;
-		}
-		else if (0x01 == peek_bytes(4))
-		{
-			//find start code  "00 00 00 01"
-			for (int nIdx = 0; nIdx < 4; nIdx++)
-			{
-				getc(m_pFile_In);
-			}
-			return 1;
 		}
 		else
 		{
-			// not start code
-			m_NalVec.push_back((uint8)getc(m_pFile_In));
+			fileByte = getc(m_inputFile);
+			prefix[(pos++) % 3] = fileByte;
+			m_nalVec.push_back(fileByte);
 		}
 	}
 
-	wcout << L"End of file reached." << endl;
-	return 0;
+	return getPrefix;
 }
+
+void CStreamFile::ebsp_to_sodb()
+{
+	if (m_nalVec.size() < 3)
+	{
+		return;
+	}
+
+	for (vector<uint8>::iterator itor = m_nalVec.begin() + 2; itor != m_nalVec.end(); )
+	{
+		if ((3 == *itor) && (0 == *(itor-1)) && (0 == *(itor-2)))
+		{
+			vector<uint8>::iterator temp = m_nalVec.erase(itor);
+			itor = temp;
+		}
+		else
+		{
+			itor++;
+		}
+	}
+}
+
+
