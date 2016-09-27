@@ -17,6 +17,13 @@ CStreamFile::CStreamFile(TCHAR *fileName)
 		file_error(0);
 	}
 
+#if TRACE_CONFIG_LOGOUT
+	g_traceFile.open(L"trace.txt");
+	if (!g_traceFile.is_open())
+	{
+		file_error(1);
+	}
+#endif
 }
 
 //Îö¹¹º¯Êý
@@ -44,6 +51,9 @@ void CStreamFile::file_error(int idx)
 	case 0:
 		wcout << L"Error: opening input file failed." << endl;
 		break;
+	case 1:
+		wcout << L"Error: opening output trace file failed." << endl;
+		break;
 	default:
 		break;
 	}
@@ -52,16 +62,23 @@ void CStreamFile::file_error(int idx)
 int CStreamFile::Parse_h264_bitstream()
 {
 	int ret = 0;
-	uint8 nalType = 0;
+	UINT8 nalType = 0;
 	do 
 	{
 		ret = find_nal_prefix();
 		//½âÎöNAL UNIT
 		if (m_nalVec.size())
 		{
-			uint8 nalType = m_nalVec[0] & 0x1F;
-			wcout << L"NAL Unit Type: " << nalType << endl;
+			UINT8 nalType = m_nalVec[0] & 0x1F;
+			Dump_NAL_type(nalType);
 			ebsp_to_sodb();
+			switch (nalType)
+			{
+			case 7:
+
+			default:
+				break;
+			}
 			CNALUnit nalUnit(&m_nalVec[1], m_nalVec.size() - 1);
 		}
 		
@@ -69,10 +86,21 @@ int CStreamFile::Parse_h264_bitstream()
 	return 0;
 }
 
+void CStreamFile::Dump_NAL_type(UINT8 nalType)
+{
+#if TRACE_CONFIG_CONSOLE
+	wcout << L"NAL Unit Type: " << nalType << endl;
+#endif
+
+#if TRACE_CONFIG_LOGOUT
+	g_traceFile << "NAL Unit Type: " << to_string(nalType) << endl;
+#endif
+}
+
 int CStreamFile::find_nal_prefix()
 {
-	uint8 prefix[3] = { 0 };
-	uint8 fileByte;
+	UINT8 prefix[3] = { 0 };
+	UINT8 fileByte;
 	/*
 	[0][1][2] = {0 0 0} -> [1][2][0] ={0 0 0} -> [2][0][1] = {0 0 0}
 	getc() = 1 -> 0 0 0 1
@@ -129,11 +157,11 @@ void CStreamFile::ebsp_to_sodb()
 		return;
 	}
 
-	for (vector<uint8>::iterator itor = m_nalVec.begin() + 2; itor != m_nalVec.end(); )
+	for (vector<UINT8>::iterator itor = m_nalVec.begin() + 2; itor != m_nalVec.end(); )
 	{
 		if ((3 == *itor) && (0 == *(itor-1)) && (0 == *(itor-2)))
 		{
-			vector<uint8>::iterator temp = m_nalVec.erase(itor);
+			vector<UINT8>::iterator temp = m_nalVec.erase(itor);
 			itor = temp;
 		}
 		else

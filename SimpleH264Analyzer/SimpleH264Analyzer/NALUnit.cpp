@@ -2,7 +2,7 @@
 #include "NALUnit.h"
 
 
-CNALUnit::CNALUnit(uint8	*pSODB, uint32	SODBLength)
+CNALUnit::CNALUnit(UINT8	*pSODB, UINT32	SODBLength)
 {
 	m_pSODB = pSODB;
 	m_SODBLength = SODBLength;

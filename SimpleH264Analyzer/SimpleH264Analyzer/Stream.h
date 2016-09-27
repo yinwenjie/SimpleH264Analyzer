@@ -11,11 +11,12 @@ public:
 
 	//Open API
 	int Parse_h264_bitstream();
+	void Dump_NAL_type(UINT8 nalType);
 
 private:
 	FILE	*m_inputFile;
 	TCHAR	*m_fileName;
-	std::vector<uint8> m_nalVec;
+	std::vector<UINT8> m_nalVec;
 	
 	void	file_info();
 	void	file_error(int idx);

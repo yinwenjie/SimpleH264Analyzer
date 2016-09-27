@@ -2,11 +2,11 @@
 class CNALUnit
 {
 public:
-	CNALUnit(uint8	*pSODB, uint32	SODBLength);
+	CNALUnit(UINT8	*pSODB, UINT32	SODBLength);
 	~CNALUnit();
 
 private:
-	uint8	*m_pSODB;
-	uint32	m_SODBLength;
+	UINT8	*m_pSODB;
+	UINT32	m_SODBLength;
 };
 

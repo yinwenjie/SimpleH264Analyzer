@@ -1,15 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Application">
+    <Filter Include="0.Global">
+      <UniqueIdentifier>{7df57407-c974-4d3f-bfbc-6f13c023b67a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Application">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Stream">
+    <Filter Include="2.Stream">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="NAL Unit">
+    <Filter Include="3.NAL Unit">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
@@ -18,34 +21,40 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Application</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Application</Filter>
-    </ClInclude>
     <ClInclude Include="Stream.h">
-      <Filter>Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>Application</Filter>
+      <Filter>2.Stream</Filter>
     </ClInclude>
     <ClInclude Include="NALUnit.h">
-      <Filter>NAL Unit</Filter>
+      <Filter>3.NAL Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>1.Application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleH264Analyzer.cpp">
-      <Filter>Application</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Application</Filter>
+      <Filter>1.Application</Filter>
     </ClCompile>
     <ClCompile Include="Stream.cpp">
-      <Filter>Stream</Filter>
+      <Filter>2.Stream</Filter>
     </ClCompile>
     <ClCompile Include="NALUnit.cpp">
-      <Filter>NAL Unit</Filter>
+      <Filter>3.NAL Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>0.Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Configuration.cpp">
+      <Filter>1.Application</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
