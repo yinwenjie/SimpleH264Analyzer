@@ -3,6 +3,8 @@
 
 #include <vector>
 
+class CSeqParamSet;
+
 class CStreamFile
 {
 public:
@@ -22,6 +24,8 @@ private:
 	void	file_error(int idx);
 	int		find_nal_prefix();
 	void	ebsp_to_sodb();
+
+	CSeqParamSet *m_sps;
 };
 
 

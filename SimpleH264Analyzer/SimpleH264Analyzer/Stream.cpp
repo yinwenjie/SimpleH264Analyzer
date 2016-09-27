@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Stream.h"
 #include "NALUnit.h"
+#include "SeqParamSet.h"
 
 #include <iostream>
 
@@ -10,6 +11,8 @@ using namespace std;
 CStreamFile::CStreamFile(TCHAR *fileName)
 {
 	m_fileName = fileName;
+	m_sps = NULL;
+
 	file_info();
 	_tfopen_s(&m_inputFile, m_fileName, _T("rb"));
 	if (NULL ==  m_inputFile)
@@ -34,6 +37,15 @@ CStreamFile::~CStreamFile()
 		fclose(m_inputFile);
 		m_inputFile = NULL;
 	}
+
+	if (NULL != m_sps)
+	{
+		delete m_sps;
+	}
+
+#if TRACE_CONFIG_LOGOUT
+	g_traceFile.close();
+#endif
 }
 
 void CStreamFile::file_info()
@@ -72,14 +84,19 @@ int CStreamFile::Parse_h264_bitstream()
 			UINT8 nalType = m_nalVec[0] & 0x1F;
 			Dump_NAL_type(nalType);
 			ebsp_to_sodb();
+
+			CNALUnit nalUnit(&m_nalVec[1], m_nalVec.size() - 1, nalType);
 			switch (nalType)
 			{
 			case 7:
-
+				if (m_sps)
+				{
+					delete m_sps;// new SPS detected, delete old one..
+				}
+				m_sps = new CSeqParamSet;
 			default:
 				break;
 			}
-			CNALUnit nalUnit(&m_nalVec[1], m_nalVec.size() - 1);
 		}
 		
 	} while (ret);

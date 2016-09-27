@@ -39,6 +39,9 @@
     <ClInclude Include="Configuration.h">
       <Filter>1.Application</Filter>
     </ClInclude>
+    <ClInclude Include="SeqParamSet.h">
+      <Filter>3.NAL Unit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleH264Analyzer.cpp">
@@ -55,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="Configuration.cpp">
       <Filter>1.Application</Filter>
+    </ClCompile>
+    <ClCompile Include="SeqParamSet.cpp">
+      <Filter>3.NAL Unit</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
