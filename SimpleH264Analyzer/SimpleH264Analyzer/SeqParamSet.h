@@ -7,6 +7,17 @@ public:
 	CSeqParamSet();
 	~CSeqParamSet();
 
+	//Open API..
+	void  Set_profile_level_idc(UINT8 profile, UINT8 level);
+	void  Set_sps_id(UINT8 spsID);
+	void  Set_max_frame_num(UINT32 maxFrameNum);
+	void  Set_poc_type(UINT8 pocType);
+	void  Set_max_poc_cnt(UINT32 maxPocCnt);
+	void  Set_max_num_ref_frames(UINT32 maxRefFrames);
+	void  Set_sps_multiple_flags(UINT32 flags);
+	void  Set_pic_reslution_in_mbs(UINT16 widthInMBs, UINT16 heightInMapUnits);
+	void  Set_frame_crop_offset(UINT32 offsets[4]);
+
 private:
 	UINT8  m_profile_idc;
 	UINT8  m_level_idc;
@@ -33,8 +44,10 @@ private:
 	bool   m_mb_adaptive_frame_field_flag;
 	bool   m_direct_8x8_inference_flag;
 	bool   m_frame_cropping_flag;
-	UINT32 m_frame_crop_offset;
+	UINT32 m_frame_crop_offset[4];
 	bool   m_vui_parameters_present_flag;
+
+	UINT32 m_reserved;
 };
 
 #endif

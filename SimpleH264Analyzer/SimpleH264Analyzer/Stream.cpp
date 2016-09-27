@@ -94,6 +94,7 @@ int CStreamFile::Parse_h264_bitstream()
 					delete m_sps;// new SPS detected, delete old one..
 				}
 				m_sps = new CSeqParamSet;
+				break;
 			default:
 				break;
 			}
