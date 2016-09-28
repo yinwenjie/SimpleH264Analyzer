@@ -8,8 +8,13 @@ public:
 	~CSeqParamSet();
 
 	//Open API..
+	void  Dump_sps_info();
+
 	void  Set_profile_level_idc(UINT8 profile, UINT8 level);
 	void  Set_sps_id(UINT8 spsID);
+	void  Set_chroma_format_idc(UINT8 chromaFormatIdc);
+	void  Set_bit_depth(UINT8 bit_depth_luma, UINT8 bit_depth_chroma);
+
 	void  Set_max_frame_num(UINT32 maxFrameNum);
 	void  Set_poc_type(UINT8 pocType);
 	void  Set_max_poc_cnt(UINT32 maxPocCnt);

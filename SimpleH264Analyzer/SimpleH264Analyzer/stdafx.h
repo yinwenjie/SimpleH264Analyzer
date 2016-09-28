@@ -14,6 +14,9 @@
 
 // TODO:  在此处引用程序需要的其他头文件
 #include <string>
+#include <assert.h>
 
 #include "Configuration.h"
 #include "Global.h"
+#include "Utils.h"
+#include "ErrorInfo.h"

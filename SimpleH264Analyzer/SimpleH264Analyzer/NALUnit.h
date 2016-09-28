@@ -1,9 +1,14 @@
-#pragma once
+#ifndef _NAL_UNIT_H_
+#define _NAL_UNIT_H_
+
+class CSeqParamSet;
 class CNALUnit
 {
 public:
 	CNALUnit(UINT8	*pSODB, UINT32	SODBLength, UINT8 nalType);
 	~CNALUnit();
+
+	int Parse_as_seq_param_set(CSeqParamSet *sps);
 
 private:
 	UINT8	*m_pSODB;
@@ -12,3 +17,4 @@ private:
 	UINT8	m_nalType;
 };
 
+#endif
