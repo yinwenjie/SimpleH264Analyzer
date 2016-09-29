@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Utils.h"
 
+//********************Parsing Bitstream**********************
+// Get bool value from bit position..
 int Get_bit_at_position(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 {
 	UINT8 mask = 0, val = 0;
@@ -16,6 +18,7 @@ int Get_bit_at_position(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 	return val;
 }
 
+// Parse bit stream using Expo-Columb coding
 int Get_uev_code_num(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 {
 	assert(bitPosition < 8);
@@ -45,3 +48,28 @@ int Get_uev_code_num(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 
 	return prefix;
 }
+//***********************************************************
+
+
+int Extract_single_nal_unit(const char* fileName, UINT8 *nalBuf, UINT32 nalLen)
+{
+	if (!fileName)
+	{
+		return -1;
+	}
+
+	std::ofstream nal;
+	nal.open(fileName, std::ios_base::binary);
+	if (!nal.is_open())
+	{
+		return -3;
+	}
+
+	const char nalStartCode[4] = { 0,0,0,1 };
+	nal.write(nalStartCode, 4);
+	nal.write(reinterpret_cast<const char* >(nalBuf), nalLen);
+
+	nal.close();
+	return 0;
+}
+

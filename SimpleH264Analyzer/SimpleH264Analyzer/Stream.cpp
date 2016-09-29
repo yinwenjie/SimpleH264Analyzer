@@ -96,6 +96,7 @@ int CStreamFile::Parse_h264_bitstream()
 				m_sps = new CSeqParamSet;
 				nalUnit.Parse_as_seq_param_set(m_sps);
 				m_sps->Dump_sps_info();
+//				Extract_single_nal_unit("SPS_NAL.bin", &m_nalVec[0], m_nalVec.size());
 				break;
 			default:
 				break;
