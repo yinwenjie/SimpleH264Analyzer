@@ -3,6 +3,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)bin\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>output_modified.h264</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>output_high.264</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

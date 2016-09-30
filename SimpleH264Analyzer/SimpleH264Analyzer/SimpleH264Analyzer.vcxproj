@@ -84,6 +84,7 @@
     <ClInclude Include="ErrorInfo.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="NALUnit.h" />
+    <ClInclude Include="PicParamSet.h" />
     <ClInclude Include="SeqParamSet.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Stream.h" />
@@ -93,6 +94,7 @@
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="NALUnit.cpp" />
+    <ClCompile Include="PicParamSet.cpp" />
     <ClCompile Include="SeqParamSet.cpp" />
     <ClCompile Include="SimpleH264Analyzer.cpp" />
     <ClCompile Include="stdafx.cpp">

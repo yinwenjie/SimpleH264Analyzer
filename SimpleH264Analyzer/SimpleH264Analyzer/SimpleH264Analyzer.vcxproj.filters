@@ -48,6 +48,9 @@
     <ClInclude Include="ErrorInfo.h">
       <Filter>1.Application</Filter>
     </ClInclude>
+    <ClInclude Include="PicParamSet.h">
+      <Filter>3.NAL Unit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleH264Analyzer.cpp">
@@ -70,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>0.Global</Filter>
+    </ClCompile>
+    <ClCompile Include="PicParamSet.cpp">
+      <Filter>3.NAL Unit</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -89,6 +89,7 @@ int CStreamFile::Parse_h264_bitstream()
 			switch (nalType)
 			{
 			case 7:
+				// Parse SPS NAL...
 				if (m_sps)
 				{
 					delete m_sps;// new SPS detected, delete old one..
@@ -97,6 +98,9 @@ int CStreamFile::Parse_h264_bitstream()
 				nalUnit.Parse_as_seq_param_set(m_sps);
 				m_sps->Dump_sps_info();
 //				Extract_single_nal_unit("SPS_NAL.bin", &m_nalVec[0], m_nalVec.size());
+				break;
+			case 8:
+				// Parse PPS NAL...
 				break;
 			default:
 				break;
