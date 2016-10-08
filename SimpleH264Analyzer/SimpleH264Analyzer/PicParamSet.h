@@ -7,6 +7,16 @@ public:
 	CPicParamSet();
 	~CPicParamSet();
 
+	void Set_pps_id(UINT8 ppsID);
+	void Set_sps_id(UINT8 spsID);
+	void Set_num_slice_groups(UINT8 num_slice_grops);
+	void Set_num_ref_idx(UINT8 l0, UINT8 l1);
+	void Set_weighted_bipred_idc(UINT8 weighted_bipred_idc);
+	void Set_pic_init_qp(UINT8 pic_init_qp);
+	void Set_pic_init_qs(UINT8 pic_init_qs);
+	void Set_chroma_qp_index_offset(UINT8 chroma_qp_index_offset);
+	void Set_multiple_flags(UINT16 flags);
+
 private:
 	UINT8  m_pps_id;
 	UINT8  m_sps_id;
