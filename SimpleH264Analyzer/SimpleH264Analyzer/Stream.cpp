@@ -41,6 +41,7 @@ CStreamFile::~CStreamFile()
 	if (NULL != m_sps)
 	{
 		delete m_sps;
+		m_sps = NULL;
 	}
 
 #if TRACE_CONFIG_LOGOUT
