@@ -2,6 +2,7 @@
 #define _NAL_UNIT_H_
 
 class CSeqParamSet;
+class CPicParamSet;
 class CNALUnit
 {
 public:
@@ -9,6 +10,7 @@ public:
 	~CNALUnit();
 
 	int Parse_as_seq_param_set(CSeqParamSet *sps);
+	int Parse_as_pic_param_set(CPicParamSet *pps);
 
 private:
 	UINT8	*m_pSODB;

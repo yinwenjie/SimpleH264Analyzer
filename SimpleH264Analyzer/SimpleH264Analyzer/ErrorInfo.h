@@ -1,8 +1,10 @@
 #ifndef _ERROR_INFO_H_
 #define _ERROR_INFO_H_
 
-const int kPARSING_SPS_ERROR_NO_ERROR = 0;
+const int kPARSING_ERROR_NO_ERROR = 0;
+
 const int kPARSING_SPS_ERROR_SCALING_MATRIX = -1;
 const int kPARSING_SPS_ERROR_UNSUPPORTED_POC_TYPE = -2;
+
 
 #endif

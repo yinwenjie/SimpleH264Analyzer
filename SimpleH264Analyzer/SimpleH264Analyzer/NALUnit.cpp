@@ -126,5 +126,26 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 		sps->Set_frame_crop_offset(frame_crop_offset);
 	}
 
-	return kPARSING_SPS_ERROR_NO_ERROR;
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
+{
+	UINT8  pps_id;
+	UINT8  sps_id;
+	bool   entropy_coding_flag;
+	bool   bottom_field_pic_order_in_frame_present_flag;
+	UINT8  num_slice_groups;
+	UINT8  num_ref_idx_l0_default_active;
+	UINT8  num_ref_idx_l1_default_active;
+	bool   weighted_pred_flag;
+	UINT8  weighted_bipred_idc;
+	UINT8  pic_init_qp;
+	UINT8  pic_init_qs;
+	UINT16 chroma_qp_index_offset;
+	bool   deblocking_filter_control_present_flag;
+	bool   constrained_intra_pred_flag;
+	bool   redundant_pic_cnt_present_flag;
+
+	return kPARSING_ERROR_NO_ERROR;
 }

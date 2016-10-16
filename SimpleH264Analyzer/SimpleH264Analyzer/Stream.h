@@ -4,6 +4,7 @@
 #include <vector>
 
 class CSeqParamSet;
+class CPicParamSet;
 
 class CStreamFile
 {
@@ -26,6 +27,7 @@ private:
 	void	ebsp_to_sodb();
 
 	CSeqParamSet *m_sps;
+	CPicParamSet *m_pps;
 };
 
 

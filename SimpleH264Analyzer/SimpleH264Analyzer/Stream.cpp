@@ -2,6 +2,7 @@
 #include "Stream.h"
 #include "NALUnit.h"
 #include "SeqParamSet.h"
+#include "PicParamSet.h"
 
 #include <iostream>
 
@@ -12,6 +13,7 @@ CStreamFile::CStreamFile(TCHAR *fileName)
 {
 	m_fileName = fileName;
 	m_sps = NULL;
+	m_pps = NULL;
 
 	file_info();
 	_tfopen_s(&m_inputFile, m_fileName, _T("rb"));
@@ -42,6 +44,12 @@ CStreamFile::~CStreamFile()
 	{
 		delete m_sps;
 		m_sps = NULL;
+	}
+
+	if (NULL != m_pps)
+	{
+		delete m_pps;
+		m_pps = NULL;
 	}
 
 #if TRACE_CONFIG_LOGOUT
@@ -94,6 +102,7 @@ int CStreamFile::Parse_h264_bitstream()
 				if (m_sps)
 				{
 					delete m_sps;// new SPS detected, delete old one..
+					m_sps = NULL;
 				}
 				m_sps = new CSeqParamSet;
 				nalUnit.Parse_as_seq_param_set(m_sps);
@@ -102,6 +111,13 @@ int CStreamFile::Parse_h264_bitstream()
 				break;
 			case 8:
 				// Parse PPS NAL...
+				if (m_pps)
+				{
+					delete m_pps;
+					m_pps = NULL;
+				}
+				m_pps = new CPicParamSet;
+				
 				break;
 			default:
 				break;
