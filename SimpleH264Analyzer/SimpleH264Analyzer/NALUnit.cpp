@@ -131,21 +131,37 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 
 int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
 {
-	UINT8  pps_id;
-	UINT8  sps_id;
-	bool   entropy_coding_flag;
-	bool   bottom_field_pic_order_in_frame_present_flag;
-	UINT8  num_slice_groups;
-	UINT8  num_ref_idx_l0_default_active;
-	UINT8  num_ref_idx_l1_default_active;
-	bool   weighted_pred_flag;
-	UINT8  weighted_bipred_idc;
-	UINT8  pic_init_qp;
-	UINT8  pic_init_qs;
-	UINT16 chroma_qp_index_offset;
-	bool   deblocking_filter_control_present_flag;
-	bool   constrained_intra_pred_flag;
-	bool   redundant_pic_cnt_present_flag;
+	UINT8  pps_id = 0;
+	UINT8  sps_id = 0;
+	bool   entropy_coding_flag = 0;
+	bool   bottom_field_pic_order_in_frame_present_flag = 0;
+	UINT8  num_slice_groups = 0;
+	UINT8  num_ref_idx_l0_default_active = 0;
+	UINT8  num_ref_idx_l1_default_active = 0;
+	bool   weighted_pred_flag = 0;
+	UINT8  weighted_bipred_idc = 0;
+	UINT8  pic_init_qp = 0;
+	UINT8  pic_init_qs = 0;
+	UINT16 chroma_qp_index_offset = 0;
+	bool   deblocking_filter_control_present_flag = 0;
+	bool   constrained_intra_pred_flag = 0;
+	bool   redundant_pic_cnt_present_flag = 0;
+
+	UINT8 bypePosition = 0, bitPosition = 0;
+
+	pps_id = Get_uev_code_num(m_pSODB, bypePosition, bitPosition);
+	sps_id = Get_uev_code_num(m_pSODB, bypePosition, bitPosition);
+
+	entropy_coding_flag = Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
+	bottom_field_pic_order_in_frame_present_flag = Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
+
+	num_slice_groups = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 1;
+	num_ref_idx_l0_default_active = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 1;
+	num_ref_idx_l1_default_active = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 1;
+
+	weighted_pred_flag = Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
+	weighted_bipred_idc = Get_bit_at_position(m_pSODB, bypePosition, bitPosition) << 1 + Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
+
 
 	return kPARSING_ERROR_NO_ERROR;
 }
