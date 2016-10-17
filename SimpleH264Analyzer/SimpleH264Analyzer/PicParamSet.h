@@ -17,6 +17,8 @@ public:
 	void Set_chroma_qp_index_offset(int chroma_qp_index_offset);
 	void Set_multiple_flags(UINT16 flags);
 
+	void Dump_pps_info();
+
 private:
 	UINT8  m_pps_id;
 	UINT8  m_sps_id;

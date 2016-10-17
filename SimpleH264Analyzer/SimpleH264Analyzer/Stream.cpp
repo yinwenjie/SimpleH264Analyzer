@@ -118,6 +118,7 @@ int CStreamFile::Parse_h264_bitstream()
 				}
 				m_pps = new CPicParamSet;
 				nalUnit.Parse_as_pic_param_set(m_pps);
+				m_pps->Dump_pps_info();
 				break;
 			default:
 				break;

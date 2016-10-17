@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PicParamSet.h"
 
+using namespace std;
 
 CPicParamSet::CPicParamSet()
 {
@@ -61,4 +62,35 @@ void CPicParamSet::Set_multiple_flags(UINT16 flags)
 	m_deblocking_filter_control_present_flag = flags & (1 << 3);
 	m_constrained_intra_pred_flag = flags & (1 << 4);
 	m_redundant_pic_cnt_present_flag = flags & (1 << 5);
+}
+
+void CPicParamSet::Dump_pps_info()
+{
+#if TRACE_CONFIG_PIC_PARAM_SET
+
+#if TRACE_CONFIG_LOGOUT
+	g_traceFile << "==========Picture Paramater Set==========" << endl;
+	g_traceFile << "pic_parameter_set_id: " << to_string(m_pps_id) << endl;
+	g_traceFile << "seq_parameter_set_id: " << to_string(m_sps_id) << endl;
+	g_traceFile << "entropy_coding_mode_flag: " << to_string(m_entropy_coding_flag) << endl;
+	g_traceFile << "bottom_field_pic_order_in_frame_present_flag: " << to_string(m_bottom_field_pic_order_in_frame_present_flag) << endl;
+	g_traceFile << "num_slice_groups: " << to_string(m_num_slice_groups) << endl;
+	if (m_num_slice_groups == 1)
+	{
+		g_traceFile << "num_ref_idx_l0_default_active: " << to_string(m_num_ref_idx_l0_default_active) << endl;
+		g_traceFile << "num_ref_idx_l1_default_active: " << to_string(m_num_ref_idx_l1_default_active) << endl;
+		g_traceFile << "weighted_pred_flag: " << to_string(m_weighted_pred_flag) << endl;
+		g_traceFile << "weighted_bipred_idc: " << to_string(m_weighted_bipred_idc) <<endl;
+		g_traceFile << "pic_init_qp: " << to_string(m_pic_init_qp) << endl;
+		g_traceFile << "pic_init_qs: " << to_string(m_pic_init_qs) << endl;
+		g_traceFile << "chroma_qp_index_offset :" << to_string(m_chroma_qp_index_offset) << endl;
+		g_traceFile << "deblocking_filter_control_present_flag: " << to_string(m_deblocking_filter_control_present_flag) << endl;
+		g_traceFile << "constrained_intra_pred_flag: " << to_string(m_constrained_intra_pred_flag) << endl;
+		g_traceFile << "redundant_pic_cnt_present_flag: " << to_string(m_redundant_pic_cnt_present_flag) << endl;
+	}
+	g_traceFile << "==========================================" << endl;
+	g_traceFile.flush();
+#endif
+
+#endif
 }
