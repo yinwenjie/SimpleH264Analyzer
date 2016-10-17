@@ -3,15 +3,15 @@
 
 //********************Parsing Bitstream**********************
 // Get bool value from bit position..
-int Get_bit_at_position(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
+int Get_bit_at_position(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
 {
 	UINT8 mask = 0, val = 0;
 
 	mask = 1 << (7 - bitPosition);
-	val = ((buf[bytePotion] & mask) != 0);
+	val = ((buf[bytePosition] & mask) != 0);
 	if (++bitPosition > 7)
 	{
-		bytePotion++;
+		bytePosition++;
 		bitPosition = 0;
 	}
 
@@ -19,7 +19,7 @@ int Get_bit_at_position(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 }
 
 // Parse bit stream using Expo-Columb coding
-int Get_uev_code_num(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
+int Get_uev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
 {
 	assert(bitPosition < 8);
 	UINT8 val = 0, prefixZeroCount = 0;
@@ -27,7 +27,7 @@ int Get_uev_code_num(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 
 	while (true)
 	{
-		val = Get_bit_at_position(buf, bytePotion, bitPosition);
+		val = Get_bit_at_position(buf, bytePosition, bitPosition);
 		if (val == 0)
 		{
 			prefixZeroCount++;
@@ -40,13 +40,23 @@ int Get_uev_code_num(UINT8 *buf, UINT8 &bytePotion, UINT8 &bitPosition)
 	prefix = (1 << prefixZeroCount) - 1;
 	for (size_t i = 0; i < prefixZeroCount; i++)
 	{
-		val = Get_bit_at_position(buf, bytePotion, bitPosition);
+		val = Get_bit_at_position(buf, bytePosition, bitPosition);
 		surfix += val * (1 << (prefixZeroCount - i - 1));
 	}
 
 	prefix += surfix;
 
 	return prefix;
+}
+
+// Parse bit stream using signed-Expo-Columb coding
+int Get_sev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
+{
+	int uev = Get_uev_code_num(buf, bytePosition, bitPosition);
+	int sign = (uev % 2) ? 1 : -1;
+	int sev = sign * ((uev + 1) >> 1);
+	
+	return sev;
 }
 //***********************************************************
 
@@ -72,4 +82,3 @@ int Extract_single_nal_unit(const char* fileName, UINT8 *nalBuf, UINT32 nalLen)
 	nal.close();
 	return 0;
 }
-

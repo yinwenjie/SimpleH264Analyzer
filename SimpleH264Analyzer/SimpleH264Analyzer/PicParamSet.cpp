@@ -38,17 +38,17 @@ void CPicParamSet::Set_weighted_bipred_idc(UINT8 weighted_bipred_idc)
 	m_weighted_bipred_idc = weighted_bipred_idc;
 }
 
-void CPicParamSet::Set_pic_init_qp(UINT8 pic_init_qp)
+void CPicParamSet::Set_pic_init_qp(int pic_init_qp)
 {
 	m_pic_init_qp = pic_init_qp;
 }
 
-void CPicParamSet::Set_pic_init_qs(UINT8 pic_init_qs)
+void CPicParamSet::Set_pic_init_qs(int  pic_init_qs)
 {
 	m_pic_init_qs = pic_init_qs;
 }
 
-void CPicParamSet::Set_chroma_qp_index_offset(UINT8 chroma_qp_index_offset)
+void CPicParamSet::Set_chroma_qp_index_offset(int chroma_qp_index_offset)
 {
 	m_chroma_qp_index_offset = chroma_qp_index_offset;
 }
