@@ -159,6 +159,12 @@ int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
 	flags |= bottom_field_pic_order_in_frame_present_flag << 1;
 
 	num_slice_groups = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 1;
+
+	if (num_slice_groups > 1)
+	{
+		return kPARSING_PPS_ERROR_UNSUPPORTED_NUM_SLICE_GROUP;
+	}
+
 	num_ref_idx_l0_default_active = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 1;
 	num_ref_idx_l1_default_active = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 1;
 

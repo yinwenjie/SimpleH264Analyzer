@@ -16,6 +16,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="4.Slice">
+      <UniqueIdentifier>{b9fab6b4-cb29-4708-b8b6-946aa7d596d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -51,6 +54,12 @@
     <ClInclude Include="PicParamSet.h">
       <Filter>3.NAL Unit</Filter>
     </ClInclude>
+    <ClInclude Include="I_Slice.h">
+      <Filter>4.Slice</Filter>
+    </ClInclude>
+    <ClInclude Include="SliceHeader.h">
+      <Filter>4.Slice</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleH264Analyzer.cpp">
@@ -76,6 +85,12 @@
     </ClCompile>
     <ClCompile Include="PicParamSet.cpp">
       <Filter>3.NAL Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="I_Slice.cpp">
+      <Filter>4.Slice</Filter>
+    </ClCompile>
+    <ClCompile Include="SliceHeader.cpp">
+      <Filter>4.Slice</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -20,7 +20,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -84,9 +84,11 @@
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="ErrorInfo.h" />
     <ClInclude Include="Global.h" />
+    <ClInclude Include="I_Slice.h" />
     <ClInclude Include="NALUnit.h" />
     <ClInclude Include="PicParamSet.h" />
     <ClInclude Include="SeqParamSet.h" />
+    <ClInclude Include="SliceHeader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Stream.h" />
     <ClInclude Include="targetver.h" />
@@ -94,10 +96,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
+    <ClCompile Include="I_Slice.cpp" />
     <ClCompile Include="NALUnit.cpp" />
     <ClCompile Include="PicParamSet.cpp" />
     <ClCompile Include="SeqParamSet.cpp" />
     <ClCompile Include="SimpleH264Analyzer.cpp" />
+    <ClCompile Include="SliceHeader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
