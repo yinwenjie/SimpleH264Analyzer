@@ -23,6 +23,8 @@ public:
 	void  Set_pic_reslution_in_mbs(UINT16 widthInMBs, UINT16 heightInMapUnits);
 	void  Set_frame_crop_offset(UINT32 offsets[4]);
 
+	bool  Get_separate_colour_plane_flag();
+
 private:
 	UINT8  m_profile_idc;
 	UINT8  m_level_idc;

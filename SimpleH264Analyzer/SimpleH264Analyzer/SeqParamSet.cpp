@@ -138,3 +138,8 @@ void CSeqParamSet::Set_frame_crop_offset(UINT32 offsets[4])
 		m_frame_crop_offset[idx] = offsets[idx];
 	}
 }
+
+bool CSeqParamSet::Get_separate_colour_plane_flag()
+{
+	return m_separate_colour_plane_flag;
+}
