@@ -15,15 +15,17 @@ public:
 	void  Set_chroma_format_idc(UINT8 chromaFormatIdc);
 	void  Set_bit_depth(UINT8 bit_depth_luma, UINT8 bit_depth_chroma);
 
-	void  Set_max_frame_num(UINT32 maxFrameNum);
+	void  Set_log2_max_frame_num(UINT32 log2maxFrameNum);
 	void  Set_poc_type(UINT8 pocType);
-	void  Set_max_poc_cnt(UINT32 maxPocCnt);
+	void  Set_log2_max_poc_cnt(UINT32 log2maxPocCnt);
 	void  Set_max_num_ref_frames(UINT32 maxRefFrames);
 	void  Set_sps_multiple_flags(UINT32 flags);
 	void  Set_pic_reslution_in_mbs(UINT16 widthInMBs, UINT16 heightInMapUnits);
 	void  Set_frame_crop_offset(UINT32 offsets[4]);
 
 	bool  Get_separate_colour_plane_flag();
+	UINT32 Get_log2_max_frame_num();
+	UINT32 Get_log2_max_poc_cnt();
 
 private:
 	UINT8  m_profile_idc;
@@ -41,8 +43,8 @@ private:
 
 	UINT32 m_max_frame_num;
 	UINT8  m_poc_type;
-	UINT32 m_max_poc_cnt;
-	UINT32 m_max_num_ref_frames;
+	UINT32 m_log2_max_poc_cnt;
+	UINT32 m_log2_max_num_ref_frames;
 	bool   m_gaps_in_frame_num_value_allowed_flag;
 	UINT16 m_pic_width_in_mbs;
 	UINT16 m_pic_height_in_map_units;

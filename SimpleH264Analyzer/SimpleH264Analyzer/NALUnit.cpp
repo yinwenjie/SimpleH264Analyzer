@@ -29,9 +29,9 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 	bool   qpprime_y_zero_transform_bypass_flag = 0;
 	bool   seq_scaling_matrix_present_flag = 0;
 
-	UINT32 max_frame_num = 0;
+	UINT32 log2_max_frame_num = 0;
 	UINT8  poc_type = 0;
-	UINT32 max_poc_cnt = 0;
+	UINT32 log2_max_poc_cnt = 0;
 	UINT32 max_num_ref_frames = 0;
 	bool   gaps_in_frame_num_value_allowed_flag = 0;
 	UINT16 pic_width_in_mbs = 0;
@@ -72,11 +72,11 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 			return kPARSING_SPS_ERROR_SCALING_MATRIX;
 		}
 	}
-	max_frame_num = 1 << (Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 4);
+	log2_max_frame_num = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 4;
 	poc_type = Get_uev_code_num(m_pSODB, bypePosition, bitPosition);
 	if (0 == poc_type)
 	{
-		max_poc_cnt = 1 << (Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 4);
+		log2_max_poc_cnt = Get_uev_code_num(m_pSODB, bypePosition, bitPosition) + 4;
 	} 
 	else
 	{
@@ -115,9 +115,9 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 	sps->Set_sps_id(sps_id);
 	sps->Set_chroma_format_idc(chroma_format_idc);
 	sps->Set_bit_depth(bit_depth_luma, bit_depth_chroma);
-	sps->Set_max_frame_num(max_frame_num);
+	sps->Set_log2_max_poc_cnt(log2_max_frame_num);
 	sps->Set_poc_type(poc_type);
-	sps->Set_max_poc_cnt(max_poc_cnt);
+	sps->Set_log2_max_poc_cnt(log2_max_poc_cnt);
 	sps->Set_max_num_ref_frames(max_num_ref_frames);
 	sps->Set_sps_multiple_flags(flags);
 	sps->Set_pic_reslution_in_mbs(pic_width_in_mbs, pic_height_in_map_units);
@@ -170,7 +170,8 @@ int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
 
 	weighted_pred_flag = Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
 	flags |= weighted_pred_flag << 2;
-	weighted_bipred_idc = Get_bit_at_position(m_pSODB, bypePosition, bitPosition) << 1 + Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
+	weighted_bipred_idc = Get_uint_code_num(m_pSODB, bypePosition, bitPosition, 2);
+//	weighted_bipred_idc = Get_bit_at_position(m_pSODB, bypePosition, bitPosition) << 1 + Get_bit_at_position(m_pSODB, bypePosition, bitPosition);
 	
 	pic_init_qp = Get_sev_code_num(m_pSODB, bypePosition, bitPosition) + 26;
 	pic_init_qs = Get_sev_code_num(m_pSODB, bypePosition, bitPosition) + 26;

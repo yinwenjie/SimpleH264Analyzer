@@ -39,9 +39,9 @@ void CSeqParamSet::Dump_sps_info()
 	g_traceFile << "pic_order_cnt_type: " << to_string(m_poc_type) << endl;
 	if (m_poc_type == 0)
 	{
-		g_traceFile << "max_poc_cnt: " << to_string(m_max_poc_cnt) << endl;
+		g_traceFile << "max_poc_cnt: " << to_string(m_log2_max_poc_cnt) << endl;
 	}
-	g_traceFile << "max_num_ref_frames: " << to_string(m_max_num_ref_frames) << endl;
+	g_traceFile << "max_num_ref_frames: " << to_string(m_log2_max_num_ref_frames) << endl;
 	g_traceFile << "gaps_in_frame_num_value_allowed_flag: " << to_string(m_gaps_in_frame_num_value_allowed_flag) << endl;
 	g_traceFile << "pic_width_in_mbs_minus1: " << to_string(m_pic_width_in_mbs) << endl;
 	g_traceFile << "pic_height_in_map_units_minus1: " << to_string(m_pic_height_in_map_units) << endl;
@@ -90,9 +90,9 @@ void CSeqParamSet::Set_bit_depth(UINT8 bit_depth_luma, UINT8 bit_depth_chroma)
 	m_bit_depth_chroma = bit_depth_chroma;
 }
 
-void CSeqParamSet::Set_max_frame_num(UINT32 maxFrameNum)
+void CSeqParamSet::Set_log2_max_frame_num(UINT32 log2maxFrameNum)
 {
-	m_max_frame_num = maxFrameNum;
+	m_log2_max_poc_cnt = log2maxFrameNum;
 }
 
 void CSeqParamSet::Set_poc_type(UINT8 pocType)
@@ -100,14 +100,14 @@ void CSeqParamSet::Set_poc_type(UINT8 pocType)
 	m_poc_type = pocType;
 }
 
-void CSeqParamSet::Set_max_poc_cnt(UINT32 maxPocCnt)
+void CSeqParamSet::Set_log2_max_poc_cnt(UINT32 log2maxPocCnt)
 {
-	m_max_poc_cnt = maxPocCnt;
+	m_log2_max_num_ref_frames = log2maxPocCnt;
 }
 
 void CSeqParamSet::Set_max_num_ref_frames(UINT32 maxRefFrames)
 {
-	m_max_num_ref_frames = maxRefFrames;
+	m_log2_max_num_ref_frames = maxRefFrames;
 }
 
 void CSeqParamSet::Set_sps_multiple_flags(UINT32 flags)
@@ -142,4 +142,14 @@ void CSeqParamSet::Set_frame_crop_offset(UINT32 offsets[4])
 bool CSeqParamSet::Get_separate_colour_plane_flag()
 {
 	return m_separate_colour_plane_flag;
+}
+
+UINT32 CSeqParamSet::Get_log2_max_frame_num()
+{
+	return m_log2_max_num_ref_frames;
+}
+
+UINT32 CSeqParamSet::Get_log2_max_poc_cnt()
+{
+	return m_log2_max_poc_cnt;
 }

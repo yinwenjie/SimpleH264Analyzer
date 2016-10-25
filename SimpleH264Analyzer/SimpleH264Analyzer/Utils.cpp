@@ -58,6 +58,19 @@ int Get_sev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
 	
 	return sev;
 }
+
+// Parse bit stream as unsigned int bits
+int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 length)
+{
+	UINT32 uVal = 0;
+
+	for (int idx = 0; idx < length; idx++)
+	{
+		uVal += Get_bit_at_position(buf, bytePosition, bitPosition) << idx;
+	}
+
+	return uVal;
+}
 //***********************************************************
 
 
