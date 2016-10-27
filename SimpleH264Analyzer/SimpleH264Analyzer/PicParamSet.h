@@ -17,6 +17,8 @@ public:
 	void Set_chroma_qp_index_offset(int chroma_qp_index_offset);
 	void Set_multiple_flags(UINT16 flags);
 
+	bool Get_bottom_field_pic_order_in_frame_present_flag();
+
 	void Dump_pps_info();
 
 private:

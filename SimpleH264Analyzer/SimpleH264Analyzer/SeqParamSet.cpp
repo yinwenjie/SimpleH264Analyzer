@@ -153,3 +153,13 @@ UINT32 CSeqParamSet::Get_log2_max_poc_cnt()
 {
 	return m_log2_max_poc_cnt;
 }
+
+bool CSeqParamSet::Get_frame_mbs_only_flag()
+{
+	return m_frame_mbs_only_flag;
+}
+
+UINT8 CSeqParamSet::Get_poc_type()
+{
+	return m_poc_type;
+}

@@ -26,6 +26,8 @@ public:
 	bool  Get_separate_colour_plane_flag();
 	UINT32 Get_log2_max_frame_num();
 	UINT32 Get_log2_max_poc_cnt();
+	bool Get_frame_mbs_only_flag();
+	UINT8 Get_poc_type();
 
 private:
 	UINT8  m_profile_idc;

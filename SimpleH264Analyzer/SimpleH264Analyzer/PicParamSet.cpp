@@ -94,3 +94,8 @@ void CPicParamSet::Dump_pps_info()
 
 #endif
 }
+
+bool CPicParamSet::Get_bottom_field_pic_order_in_frame_present_flag()
+{
+	return m_bottom_field_pic_order_in_frame_present_flag;
+}
