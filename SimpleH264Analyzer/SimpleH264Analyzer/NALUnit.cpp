@@ -115,7 +115,7 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 	sps->Set_sps_id(sps_id);
 	sps->Set_chroma_format_idc(chroma_format_idc);
 	sps->Set_bit_depth(bit_depth_luma, bit_depth_chroma);
-	sps->Set_log2_max_poc_cnt(log2_max_frame_num);
+	sps->Set_log2_max_frame_num(log2_max_frame_num);
 	sps->Set_poc_type(poc_type);
 	sps->Set_log2_max_poc_cnt(log2_max_poc_cnt);
 	sps->Set_max_num_ref_frames(max_num_ref_frames);
@@ -195,4 +195,9 @@ int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
 	pps->Set_multiple_flags(flags);
 
 	return kPARSING_ERROR_NO_ERROR;
+}
+
+UINT8* CNALUnit::Get_SODB()
+{
+	return m_pSODB;
 }

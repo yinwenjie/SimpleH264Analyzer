@@ -5,6 +5,7 @@
 
 class CSeqParamSet;
 class CPicParamSet;
+class I_Slice;
 
 class CStreamFile
 {
@@ -20,6 +21,7 @@ private:
 	FILE	*m_inputFile;
 	TCHAR	*m_fileName;
 	std::vector<UINT8> m_nalVec;
+	std::vector<I_Slice> m_IDRVec;
 	
 	void	file_info();
 	void	file_error(int idx);
@@ -28,6 +30,7 @@ private:
 
 	CSeqParamSet *m_sps;
 	CPicParamSet *m_pps;
+	I_Slice *m_IDRSlice;
 };
 
 

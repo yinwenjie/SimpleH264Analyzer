@@ -32,7 +32,7 @@ UINT32 CSliceHeader::Parse_slice_header()
 
 	m_frame_num = Get_uint_code_num(m_pSODB, bytePosition, bitPosition, m_sps_active->Get_log2_max_frame_num());
 
-	if (m_sps_active->Get_frame_mbs_only_flag())
+	if (!m_sps_active->Get_frame_mbs_only_flag())
 	{
 		m_field_pic_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);
 		if (m_field_pic_flag)
