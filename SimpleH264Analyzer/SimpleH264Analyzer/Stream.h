@@ -21,6 +21,7 @@ private:
 	FILE	*m_inputFile;
 	TCHAR	*m_fileName;
 	std::vector<UINT8> m_nalVec;
+	std::vector<I_Slice> m_IDRVec;
 	
 	void	file_info();
 	void	file_error(int idx);

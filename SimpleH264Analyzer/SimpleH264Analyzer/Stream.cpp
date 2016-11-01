@@ -35,22 +35,28 @@ CStreamFile::CStreamFile(TCHAR *fileName)
 //Îö¹¹º¯Êý
 CStreamFile::~CStreamFile()
 {
-	if (NULL != m_inputFile)
+	if (m_inputFile)
 	{
 		fclose(m_inputFile);
 		m_inputFile = NULL;
 	}
 
-	if (NULL != m_sps)
+	if (m_sps)
 	{
 		delete m_sps;
 		m_sps = NULL;
 	}
 
-	if (NULL != m_pps)
+	if (m_pps)
 	{
 		delete m_pps;
 		m_pps = NULL;
+	}
+
+	if (m_IDRSlice)
+	{
+		delete m_IDRSlice;
+		m_IDRSlice = NULL;
 	}
 
 #if TRACE_CONFIG_LOGOUT
@@ -99,14 +105,15 @@ int CStreamFile::Parse_h264_bitstream()
 			switch (nalType)
 			{
 			case 5:
-				// Parse IDR slice...
+				// Parse IDR NAL...
 				if (m_IDRSlice)
 				{
 					delete m_IDRSlice;
 					m_IDRSlice = NULL;
 				}
-				m_IDRSlice = new I_Slice(&nalUnit, m_sps, m_pps);
+				m_IDRSlice = new I_Slice(nalUnit.Get_SODB(), m_sps, m_pps, nalType);
 				m_IDRSlice->Parse();
+				m_IDRVec.push_back(*m_IDRSlice);
 				break;
 			case 7:
 				// Parse SPS NAL...

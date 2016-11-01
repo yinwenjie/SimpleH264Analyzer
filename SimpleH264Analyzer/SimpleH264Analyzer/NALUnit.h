@@ -12,7 +12,7 @@ public:
 	int Parse_as_seq_param_set(CSeqParamSet *sps);
 	int Parse_as_pic_param_set(CPicParamSet *pps);
 
-	UINT8* Get_slice_data_buffer();
+	UINT8* Get_SODB();
 
 private:
 	UINT8	*m_pSODB;

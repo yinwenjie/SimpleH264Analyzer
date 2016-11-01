@@ -1,24 +1,25 @@
 #ifndef _I_SLICE_H_
 #define _I_SLICE_H_
 
-class CNALUnit;
 class CSeqParamSet;
 class CPicParamSet;
 class CSliceHeader;
+
 class I_Slice
 {
 public:
-	I_Slice(CNALUnit *pNALU, CSeqParamSet *sps, CPicParamSet *pps);
+	I_Slice(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType);
 	~I_Slice();
 
 	int Parse();
 
 private:
-	CSliceHeader *m_sliceHeader;
-	CSeqParamSet *m_sps;
-	CPicParamSet *m_pps;
+	CSeqParamSet *m_sps_active;
+	CPicParamSet *m_pps_active;
+	UINT8	*m_pSODB;
+	UINT8   m_nalType;
 
-	UINT8 *m_sliceBuffer;
+	CSliceHeader *m_sliceHeader;	
 };
 
 

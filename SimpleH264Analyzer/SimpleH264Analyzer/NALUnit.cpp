@@ -197,7 +197,7 @@ int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-UINT8* CNALUnit::Get_slice_data_buffer()
+UINT8* CNALUnit::Get_SODB()
 {
 	return m_pSODB;
 }
