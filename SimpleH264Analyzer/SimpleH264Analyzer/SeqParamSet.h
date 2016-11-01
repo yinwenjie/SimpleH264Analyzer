@@ -43,7 +43,7 @@ private:
 	bool   m_seq_scaling_matrix_present_flag;
 	// ...for uncommon profile
 
-	UINT32 m_max_frame_num;
+	UINT32 m_log2_max_frame_num;
 	UINT8  m_poc_type;
 	UINT32 m_log2_max_poc_cnt;
 	UINT32 m_log2_max_num_ref_frames;

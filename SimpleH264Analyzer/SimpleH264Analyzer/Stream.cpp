@@ -3,6 +3,7 @@
 #include "NALUnit.h"
 #include "SeqParamSet.h"
 #include "PicParamSet.h"
+#include "I_Slice.h"
 
 #include <iostream>
 
@@ -97,6 +98,16 @@ int CStreamFile::Parse_h264_bitstream()
 			CNALUnit nalUnit(&m_nalVec[1], m_nalVec.size() - 1, nalType);
 			switch (nalType)
 			{
+			case 5:
+				// Parse IDR slice...
+				if (m_IDRSlice)
+				{
+					delete m_IDRSlice;
+					m_IDRSlice = NULL;
+				}
+				m_IDRSlice = new I_Slice(&nalUnit, m_sps, m_pps);
+				m_IDRSlice->Parse();
+				break;
 			case 7:
 				// Parse SPS NAL...
 				if (m_sps)

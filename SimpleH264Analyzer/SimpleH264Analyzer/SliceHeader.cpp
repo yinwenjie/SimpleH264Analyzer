@@ -32,7 +32,7 @@ UINT32 CSliceHeader::Parse_slice_header()
 
 	m_frame_num = Get_uint_code_num(m_pSODB, bytePosition, bitPosition, m_sps_active->Get_log2_max_frame_num());
 
-	if (m_sps_active->Get_frame_mbs_only_flag())
+	if (!m_sps_active->Get_frame_mbs_only_flag())
 	{
 		m_field_pic_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);
 		if (m_field_pic_flag)
@@ -55,5 +55,15 @@ UINT32 CSliceHeader::Parse_slice_header()
 		}
 	}
 	
+	if (m_nalType == 5)
+	{
+		dec_ref_pic_marking.no_output_of_prior_pics_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);
+		dec_ref_pic_marking.long_term_reference_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);		
+	}
+
+	m_slice_qp_delta = Get_sev_code_num(m_pSODB, bytePosition, bitPosition);
+
+	sliceHeaderLengthInBits = 8 * bytePosition + bitPosition;
+
 	return sliceHeaderLengthInBits;
 }

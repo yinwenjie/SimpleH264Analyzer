@@ -35,13 +35,13 @@ void CSeqParamSet::Dump_sps_info()
 		g_traceFile << "qpprime_y_zero_transform_bypass_flag: " << to_string(m_qpprime_y_zero_transform_bypass_flag) << endl;
 		g_traceFile << "seq_scaling_matrix_present_flag: " << to_string(m_seq_scaling_matrix_present_flag) << endl;
 	}
-	g_traceFile << "max_frame_num: " << to_string(m_max_frame_num) << endl;
+	g_traceFile << "log2_max_frame_num: " << to_string(m_log2_max_frame_num) << endl;
 	g_traceFile << "pic_order_cnt_type: " << to_string(m_poc_type) << endl;
 	if (m_poc_type == 0)
 	{
-		g_traceFile << "max_poc_cnt: " << to_string(m_log2_max_poc_cnt) << endl;
+		g_traceFile << "log2_max_poc_cnt: " << to_string(m_log2_max_poc_cnt) << endl;
 	}
-	g_traceFile << "max_num_ref_frames: " << to_string(m_log2_max_num_ref_frames) << endl;
+	g_traceFile << "log2_max_num_ref_frames: " << to_string(m_log2_max_num_ref_frames) << endl;
 	g_traceFile << "gaps_in_frame_num_value_allowed_flag: " << to_string(m_gaps_in_frame_num_value_allowed_flag) << endl;
 	g_traceFile << "pic_width_in_mbs_minus1: " << to_string(m_pic_width_in_mbs) << endl;
 	g_traceFile << "pic_height_in_map_units_minus1: " << to_string(m_pic_height_in_map_units) << endl;
@@ -92,7 +92,7 @@ void CSeqParamSet::Set_bit_depth(UINT8 bit_depth_luma, UINT8 bit_depth_chroma)
 
 void CSeqParamSet::Set_log2_max_frame_num(UINT32 log2maxFrameNum)
 {
-	m_log2_max_poc_cnt = log2maxFrameNum;
+	m_log2_max_frame_num = log2maxFrameNum;
 }
 
 void CSeqParamSet::Set_poc_type(UINT8 pocType)
@@ -102,7 +102,7 @@ void CSeqParamSet::Set_poc_type(UINT8 pocType)
 
 void CSeqParamSet::Set_log2_max_poc_cnt(UINT32 log2maxPocCnt)
 {
-	m_log2_max_num_ref_frames = log2maxPocCnt;
+	m_log2_max_poc_cnt = log2maxPocCnt;
 }
 
 void CSeqParamSet::Set_max_num_ref_frames(UINT32 maxRefFrames)
@@ -146,7 +146,7 @@ bool CSeqParamSet::Get_separate_colour_plane_flag()
 
 UINT32 CSeqParamSet::Get_log2_max_frame_num()
 {
-	return m_log2_max_num_ref_frames;
+	return m_log2_max_frame_num;
 }
 
 UINT32 CSeqParamSet::Get_log2_max_poc_cnt()

@@ -4,6 +4,12 @@
 class CSeqParamSet;
 class CPicParamSet;
 
+typedef struct DecRefPicMarking
+{
+	bool no_output_of_prior_pics_flag;
+	bool long_term_reference_flag;
+} DecRefPicMarking;
+
 class CSliceHeader
 {
 public:
@@ -28,6 +34,8 @@ private:
 	UINT16 m_idr_pic_id;
 	UINT32 m_poc;
 	int	   m_delta_poc_bottom;
+	DecRefPicMarking dec_ref_pic_marking;
+	int	   m_slice_qp_delta;
 };
 
 #endif

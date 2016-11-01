@@ -5,6 +5,7 @@
 
 class CSeqParamSet;
 class CPicParamSet;
+class I_Slice;
 
 class CStreamFile
 {
@@ -28,6 +29,7 @@ private:
 
 	CSeqParamSet *m_sps;
 	CPicParamSet *m_pps;
+	I_Slice *m_IDRSlice;
 };
 
 
