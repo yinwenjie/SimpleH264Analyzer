@@ -163,3 +163,13 @@ UINT8 CSeqParamSet::Get_poc_type()
 {
 	return m_poc_type;
 }
+
+UINT16 CSeqParamSet::Get_pic_width_in_mbs()
+{
+	return m_pic_width_in_mbs;
+}
+
+UINT16 CSeqParamSet::Get_pic_height_in_mbs()
+{
+	return m_pic_height_in_mbs;
+}

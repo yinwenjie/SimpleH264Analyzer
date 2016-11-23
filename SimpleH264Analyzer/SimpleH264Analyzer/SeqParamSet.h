@@ -28,6 +28,8 @@ public:
 	UINT32 Get_log2_max_poc_cnt();
 	bool Get_frame_mbs_only_flag();
 	UINT8 Get_poc_type();
+	UINT16 Get_pic_width_in_mbs();
+	UINT16 Get_pic_height_in_mbs();
 
 private:
 	UINT8  m_profile_idc;

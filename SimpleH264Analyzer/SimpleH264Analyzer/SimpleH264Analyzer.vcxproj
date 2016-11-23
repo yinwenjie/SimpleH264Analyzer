@@ -85,6 +85,7 @@
     <ClInclude Include="ErrorInfo.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="I_Slice.h" />
+    <ClInclude Include="Macroblock.h" />
     <ClInclude Include="NALUnit.h" />
     <ClInclude Include="PicParamSet.h" />
     <ClInclude Include="SeqParamSet.h" />
@@ -97,6 +98,7 @@
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="I_Slice.cpp" />
+    <ClCompile Include="Macroblock.cpp" />
     <ClCompile Include="NALUnit.cpp" />
     <ClCompile Include="PicParamSet.cpp" />
     <ClCompile Include="SeqParamSet.cpp" />
