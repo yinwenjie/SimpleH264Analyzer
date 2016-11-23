@@ -34,7 +34,7 @@ private:
 	UINT16 m_idr_pic_id;
 	UINT32 m_poc;
 	int	   m_delta_poc_bottom;
-	DecRefPicMarking dec_ref_pic_marking;
+	DecRefPicMarking m_dec_ref_pic_marking;
 	int	   m_slice_qp_delta;
 };
 

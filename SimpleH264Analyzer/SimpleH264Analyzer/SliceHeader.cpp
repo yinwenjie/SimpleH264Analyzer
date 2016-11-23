@@ -57,8 +57,8 @@ UINT32 CSliceHeader::Parse_slice_header()
 	
 	if (m_nalType == 5)
 	{
-		dec_ref_pic_marking.no_output_of_prior_pics_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);
-		dec_ref_pic_marking.long_term_reference_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);		
+		m_dec_ref_pic_marking.no_output_of_prior_pics_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);
+		m_dec_ref_pic_marking.long_term_reference_flag = Get_bit_at_position(m_pSODB, bytePosition, bitPosition);
 	}
 
 	m_slice_qp_delta = Get_sev_code_num(m_pSODB, bytePosition, bitPosition);
