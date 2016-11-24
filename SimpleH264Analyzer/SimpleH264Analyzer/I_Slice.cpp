@@ -14,7 +14,7 @@ I_Slice::I_Slice(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalTy
 	m_nalType = nalType;
 
 	m_max_mb_number = m_sps_active->Get_pic_width_in_mbs() * m_sps_active->Get_pic_height_in_mbs();
-	m_macroblocks = new CMacroBlock *[m_max_mb_number];
+	m_macroblocks = new CMacroblock *[m_max_mb_number];
 	memset(m_macroblocks, NULL, m_max_mb_number * sizeof(CMacroblock *));
 }
 
@@ -44,8 +44,15 @@ I_Slice::~I_Slice()
 
 int I_Slice::Parse()
 {
+	UINT32 sliceHeaderLength = 0, macroblockOffset = 0;
 	m_sliceHeader = new CSliceHeader(m_pSODB, m_sps_active, m_pps_active, m_nalType);
-	m_sliceHeader->Parse_slice_header();
+	macroblockOffset = sliceHeaderLength = m_sliceHeader->Parse_slice_header();
+
+	for (int idx = 0; idx < m_max_mb_number; idx++)
+	{
+		m_macroblocks[idx] = new CMacroblock(m_pSODB, macroblockOffset);
+		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
+	}
 	
 	return kPARSING_ERROR_NO_ERROR;
 }

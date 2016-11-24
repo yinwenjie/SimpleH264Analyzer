@@ -4,7 +4,7 @@
 class CSeqParamSet;
 class CPicParamSet;
 class CSliceHeader;
-class CMacroBlock;
+class CMacroblock;
 
 class I_Slice
 {
@@ -23,7 +23,7 @@ private:
 	CSliceHeader *m_sliceHeader;	
 
 	UINT16 m_max_mb_number;
-	CMacroBlock **m_macroblocks;
+	CMacroblock **m_macroblocks;
 };
 
 
