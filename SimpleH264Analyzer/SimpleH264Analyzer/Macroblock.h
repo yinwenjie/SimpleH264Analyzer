@@ -8,6 +8,11 @@ public:
 	virtual ~CMacroblock();
 
 	UINT32 Parse_macroblock();
+
+private:
+	UINT8  *m_pSODB;
+
+	UINT8  m_mb_type;
 };
 
 #endif
