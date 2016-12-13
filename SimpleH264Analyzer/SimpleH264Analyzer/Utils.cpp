@@ -66,7 +66,7 @@ int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8
 
 	for (int idx = 0; idx < length; idx++)
 	{
-		uVal += Get_bit_at_position(buf, bytePosition, bitPosition) << idx;
+		uVal += Get_bit_at_position(buf, bytePosition, bitPosition) << (length - idx - 1);
 	}
 
 	return uVal;

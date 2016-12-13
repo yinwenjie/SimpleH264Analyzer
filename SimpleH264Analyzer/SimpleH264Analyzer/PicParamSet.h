@@ -18,6 +18,7 @@ public:
 	void Set_multiple_flags(UINT16 flags);
 
 	bool Get_bottom_field_pic_order_in_frame_present_flag();
+	bool Get_transform_8x8_mode_flag();
 
 	void Dump_pps_info();
 
@@ -37,6 +38,7 @@ private:
 	bool   m_deblocking_filter_control_present_flag;
 	bool   m_constrained_intra_pred_flag;
 	bool   m_redundant_pic_cnt_present_flag;
+	bool   m_transform_8x8_mode_flag;
 };
 
 #endif

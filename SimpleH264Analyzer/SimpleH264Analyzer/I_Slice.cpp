@@ -51,6 +51,7 @@ int I_Slice::Parse()
 	for (int idx = 0; idx < m_max_mb_number; idx++)
 	{
 		m_macroblocks[idx] = new CMacroblock(m_pSODB, macroblockOffset);
+		m_macroblocks[idx]->Set_paramaters(m_pps_active);
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
 	}
 	

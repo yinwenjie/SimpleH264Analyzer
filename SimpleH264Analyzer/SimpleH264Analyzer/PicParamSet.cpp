@@ -99,3 +99,8 @@ bool CPicParamSet::Get_bottom_field_pic_order_in_frame_present_flag()
 {
 	return m_bottom_field_pic_order_in_frame_present_flag;
 }
+
+bool CPicParamSet::Get_transform_8x8_mode_flag()
+{
+	return m_transform_8x8_mode_flag;
+}
