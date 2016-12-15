@@ -6,6 +6,7 @@ using namespace std;
 CSeqParamSet::CSeqParamSet()
 {
 	memset(this, 0, sizeof(CSeqParamSet));
+	m_chroma_format_idc = 1;
 }
 
 

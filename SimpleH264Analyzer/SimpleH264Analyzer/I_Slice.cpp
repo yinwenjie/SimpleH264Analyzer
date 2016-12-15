@@ -53,6 +53,7 @@ int I_Slice::Parse()
 		m_macroblocks[idx] = new CMacroblock(m_pSODB, macroblockOffset);
 		m_macroblocks[idx]->Set_paramaters(m_pps_active);
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
+		break; //to be deleted
 	}
 	
 	return kPARSING_ERROR_NO_ERROR;

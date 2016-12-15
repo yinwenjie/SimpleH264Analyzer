@@ -11,6 +11,8 @@ int Get_uev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition);
 int Get_sev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition);
 // Parse bit stream as unsigned int bits
 int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 length);
+// Parse bit stream as me(coded_block_pattern)
+int Get_me_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 mode);
 //***********************************************************
 
 int Extract_single_nal_unit(const char* fileName, UINT8 *nalBuf, UINT32 nalLen);

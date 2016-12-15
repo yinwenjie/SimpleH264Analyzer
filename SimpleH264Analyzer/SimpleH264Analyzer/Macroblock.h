@@ -37,6 +37,10 @@ private:
 	bool   m_transform_size_8x8_flag;
 
 	IntraPredStruct *m_pred_struct;
+	UINT8  m_intra_chroma_pred_mode;
+
+	UINT8  m_coded_block_pattern;
+	UINT8  m_mb_qp_delta;
 };
 
 #endif

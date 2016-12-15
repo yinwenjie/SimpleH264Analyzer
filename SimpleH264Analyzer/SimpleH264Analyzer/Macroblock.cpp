@@ -75,12 +75,20 @@ UINT32 CMacroblock::Parse_macroblock()
 			}
 		}
 
-		// To do: intra_chroma_pred_mode
+		// intra_chroma_pred_mode
+		m_intra_chroma_pred_mode = Get_uev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 	}
 	else
 	{
 		// To do: Intra_16x16 mode
 	}
+
+	if (m_mb_type == 0 || m_mb_type == 25)
+	{
+		m_coded_block_pattern = Get_me_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 1);
+	}
+
+	m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 
 	return macroblockLength;
 }

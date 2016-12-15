@@ -71,6 +71,14 @@ int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8
 
 	return uVal;
 }
+
+// Parse bit stream as me(coded_block_pattern)
+int Get_me_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 mode)
+{
+	int intra_cbp[31] = { 47, 31, 15, 0, 23, 27, 29, 30, 7, 11, 13, 14, 39, 43, 45, 46, 16, 3, 5, 10, 12, 19, 21, 26, 28, 35, 37, 42, 44, 1, 2 };
+	int uev = Get_uev_code_num(buf, bytePosition, bitPosition);
+	return intra_cbp[uev];
+}
 //***********************************************************
 
 
