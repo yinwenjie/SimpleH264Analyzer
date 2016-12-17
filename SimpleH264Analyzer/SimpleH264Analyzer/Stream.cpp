@@ -113,7 +113,6 @@ int CStreamFile::Parse_h264_bitstream()
 				}
 				m_IDRSlice = new I_Slice(nalUnit.Get_SODB(), m_sps, m_pps, nalType);
 				m_IDRSlice->Parse();
-				m_IDRVec.push_back(*m_IDRSlice);
 				break;
 			case 7:
 				// Parse SPS NAL...

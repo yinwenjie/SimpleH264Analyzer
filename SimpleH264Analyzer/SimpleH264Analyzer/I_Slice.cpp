@@ -5,13 +5,18 @@
 #include "SliceHeader.h"
 #include "Macroblock.h"
 
+#include <iostream>
+using namespace std;
+
 I_Slice::I_Slice(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType)
-{
-	memset(this, 0, sizeof(I_Slice));
+{	
+
 	m_pSODB = pSODB;
 	m_sps_active = sps;
 	m_pps_active = pps;
 	m_nalType = nalType;
+
+	m_sliceHeader = NULL;
 
 	m_max_mb_number = m_sps_active->Get_pic_width_in_mbs() * m_sps_active->Get_pic_height_in_mbs();
 	m_macroblocks = new CMacroblock *[m_max_mb_number];
@@ -40,6 +45,7 @@ I_Slice::~I_Slice()
 		delete m_macroblocks;
 		m_macroblocks = NULL;
 	}
+	wcout << L"I slice deleted" << endl;
 }
 
 int I_Slice::Parse()

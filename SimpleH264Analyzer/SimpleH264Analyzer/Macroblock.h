@@ -41,6 +41,9 @@ private:
 
 	UINT8  m_coded_block_pattern;
 	UINT8  m_mb_qp_delta;
+
+	UINT8  m_cbp_luma;
+	UINT8  m_cbp_chroma;
 };
 
 #endif

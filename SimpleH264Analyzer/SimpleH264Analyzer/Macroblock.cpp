@@ -5,8 +5,6 @@
 
 CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset)
 {
-	memset(this, 0, sizeof(CMacroblock));
-
 	m_pSODB = pSODB;
 	m_bypeOffset = offset / 8;
 	m_bitOffset = offset % 8;
@@ -86,9 +84,14 @@ UINT32 CMacroblock::Parse_macroblock()
 	if (m_mb_type == 0 || m_mb_type == 25)
 	{
 		m_coded_block_pattern = Get_me_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 1);
+		m_cbp_luma = m_coded_block_pattern % 16;
+		m_cbp_chroma = m_coded_block_pattern / 16;
 	}
 
-	m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
+	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
+	{
+		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
+	}
 
 	return macroblockLength;
 }

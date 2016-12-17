@@ -5,11 +5,23 @@
 
 CSliceHeader::CSliceHeader(UINT8 *pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8 nalType)
 {
-	memset(this, 0, sizeof(CSliceHeader));
 	m_pSODB = pSODB;
 	m_sps_active = sps;
 	m_pps_active = pps;
 	m_nalType = nalType;
+
+	m_first_mb_in_slice = 0;
+	m_slice_type = 0;
+	m_pps_id = 0;
+	m_colour_plane_id = 0;
+	m_frame_num = 0;
+	m_field_pic_flag = 0;
+	m_bottom_field_flag = 0;
+	m_idr_pic_id = 0;
+	m_poc = 0;
+	m_delta_poc_bottom = 0;
+	m_dec_ref_pic_marking = { 0, 0 };
+	m_slice_qp_delta = 0;
 }
 
 CSliceHeader::~CSliceHeader()
