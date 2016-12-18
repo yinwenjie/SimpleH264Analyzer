@@ -45,7 +45,6 @@ I_Slice::~I_Slice()
 		delete m_macroblocks;
 		m_macroblocks = NULL;
 	}
-	wcout << L"I slice deleted" << endl;
 }
 
 int I_Slice::Parse()
@@ -53,6 +52,7 @@ int I_Slice::Parse()
 	UINT32 sliceHeaderLength = 0, macroblockOffset = 0;
 	m_sliceHeader = new CSliceHeader(m_pSODB, m_sps_active, m_pps_active, m_nalType);
 	macroblockOffset = sliceHeaderLength = m_sliceHeader->Parse_slice_header();
+	m_sliceHeader->Dump_slice_header_info();
 
 	for (int idx = 0; idx < m_max_mb_number; idx++)
 	{

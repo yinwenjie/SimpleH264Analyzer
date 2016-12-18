@@ -17,7 +17,7 @@ public:
 	~CSliceHeader();
 
 	UINT32 Parse_slice_header();
-
+	void  Dump_slice_header_info();
 private:
 	CSeqParamSet *m_sps_active;
 	CPicParamSet *m_pps_active;
@@ -36,6 +36,8 @@ private:
 	int	   m_delta_poc_bottom;
 	DecRefPicMarking m_dec_ref_pic_marking;
 	int	   m_slice_qp_delta;
+
+
 };
 
 #endif
