@@ -20,18 +20,22 @@ typedef struct IntraPredStruct
 class CMacroblock
 {
 public:
-	CMacroblock(UINT8 *pSODB, UINT32 offset);
+	CMacroblock(UINT8 *pSODB, UINT32 offset, int idx);
 	virtual ~CMacroblock();
 
 	void Set_paramaters(CPicParamSet *pps);
 	UINT32 Parse_macroblock();
+	void Dump_macroblock_info();
 
 private:
 	UINT8  *m_pSODB;
+	UINT32 m_mbDataSize;
 	UINT8  m_bypeOffset;
 	UINT8  m_bitOffset;
 
 	CPicParamSet *m_pps_active;
+
+	int    m_mb_idx;
 
 	UINT8  m_mb_type;
 	bool   m_transform_size_8x8_flag;
