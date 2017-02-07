@@ -2,6 +2,9 @@
 #include "Macroblock.h"
 #include "PicParamSet.h"
 
+#include "CAVLC_Defines.h"
+#include "Macroblock_Defines.h"
+
 using namespace std;
 
 CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
@@ -11,6 +14,8 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 	m_bitOffset = offset % 8;
 	m_mbDataSize = offset;
 	m_mb_idx = idx;
+
+	m_coeffArray = NULL;
 }
 
 
@@ -20,6 +25,12 @@ CMacroblock::~CMacroblock()
 	{
 		delete[] m_pred_struct;
 		m_pred_struct = NULL;
+	}
+
+	if (m_coeffArray)
+	{
+		delete m_coeffArray;
+		m_coeffArray = NULL;
 	}
 }
 
@@ -94,6 +105,10 @@ UINT32 CMacroblock::Parse_macroblock()
 		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 	}
 
+	// parse coefficients...
+	m_coeffArray = new MacroBlockCoeffArray;
+	get_luma_coeffs();
+
 	m_mbDataSize = m_bypeOffset * 8 + m_bitOffset - m_mbDataSize;
 	return m_mbDataSize;
 }
@@ -131,4 +146,52 @@ void CMacroblock::Dump_macroblock_info()
 #endif
 
 #endif
+}
+
+int CMacroblock::get_luma_coeffs()
+{
+	int b8 = 0;
+	for (int block_y = 0; block_y < 4; block_y += 2)
+	{
+		for (int block_x = 0; block_x < 4; block_x += 2)
+		{
+			// 16x16 -> 4 * 8x8
+			
+			// CAVLC
+			if (m_pps_active->Get_entropy_coding_flag() == 0)
+			{				
+				for (int block_sub_idc_y = block_y; block_sub_idc_y < block_y + 2; block_sub_idc_y++)
+				{
+					for (int block_sub_idc_x = block_x; block_sub_idc_x < block_x + 2; block_sub_idc_x++)
+					{
+						// 8x8 -> 4 * 4x4
+						b8 = 2 * (block_y / 2) + block_x / 2;
+						if ( m_coded_block_pattern & (1 << b8))
+						{
+							get_4x4_coeffs();
+						} 
+						else
+						{
+							// empty block...
+						}
+					}
+				}
+			} 
+			// CABAC
+			else
+			{
+				
+			}
+		}
+	}
+
+	return 0;
+}
+
+int CMacroblock::get_4x4_coeffs()
+{
+	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
+	int max_coeff_num = 0;
+
+	return 0;
 }

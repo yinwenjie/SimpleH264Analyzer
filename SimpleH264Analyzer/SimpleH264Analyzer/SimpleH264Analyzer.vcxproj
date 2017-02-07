@@ -81,11 +81,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CAVLC_Defines.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="ErrorInfo.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="I_Slice.h" />
     <ClInclude Include="Macroblock.h" />
+    <ClInclude Include="Macroblock_Defines.h" />
     <ClInclude Include="NALUnit.h" />
     <ClInclude Include="PicParamSet.h" />
     <ClInclude Include="SeqParamSet.h" />

@@ -104,3 +104,8 @@ bool CPicParamSet::Get_transform_8x8_mode_flag()
 {
 	return m_transform_8x8_mode_flag;
 }
+
+bool CPicParamSet::Get_entropy_coding_flag()
+{
+	return m_entropy_coding_flag;
+}

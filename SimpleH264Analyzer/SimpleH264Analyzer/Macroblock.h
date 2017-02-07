@@ -3,6 +3,7 @@
 
 class CPicParamSet;
 
+// 预测模式结构
 typedef struct IntraPredStruct
 {
 	UINT8 block_mode;	//block_mode : 0 - 4x4 mode; 1 - 8x8 mode;
@@ -17,15 +18,30 @@ typedef struct IntraPredStruct
 	}
 } IntraPredStruct;
 
+// 变换系数矩阵
+typedef struct MacroBlockCoeffArray
+{
+	int luma_coeff[4][4][16];
+	MacroBlockCoeffArray()
+	{
+		memset(luma_coeff, 0, 256 * sizeof(int));
+	}
+} MacroBlockCoeffArray;
+
+// 宏块类
 class CMacroblock
 {
 public:
 	CMacroblock(UINT8 *pSODB, UINT32 offset, int idx);
 	virtual ~CMacroblock();
 
+	MacroBlockCoeffArray *m_coeffArray;
+
 	void Set_paramaters(CPicParamSet *pps);
 	UINT32 Parse_macroblock();
 	void Dump_macroblock_info();
+
+	UINT8  m_mb_type;
 
 private:
 	UINT8  *m_pSODB;
@@ -36,8 +52,6 @@ private:
 	CPicParamSet *m_pps_active;
 
 	int    m_mb_idx;
-
-	UINT8  m_mb_type;
 	bool   m_transform_size_8x8_flag;
 
 	IntraPredStruct *m_pred_struct;
@@ -48,6 +62,9 @@ private:
 
 	UINT8  m_cbp_luma;
 	UINT8  m_cbp_chroma;
+
+	int get_luma_coeffs();
+	int get_4x4_coeffs();
 };
 
 #endif

@@ -22,6 +22,9 @@
     <Filter Include="5.Macroblock">
       <UniqueIdentifier>{aa761d47-bb4f-4cf4-a2a4-2d5f9975b58d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="6.CAVLC">
+      <UniqueIdentifier>{b5dc91ee-f134-4270-a0d7-a802fb3662c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -64,6 +67,12 @@
       <Filter>4.Slice</Filter>
     </ClInclude>
     <ClInclude Include="Macroblock.h">
+      <Filter>5.Macroblock</Filter>
+    </ClInclude>
+    <ClInclude Include="CAVLC_Defines.h">
+      <Filter>6.CAVLC</Filter>
+    </ClInclude>
+    <ClInclude Include="Macroblock_Defines.h">
       <Filter>5.Macroblock</Filter>
     </ClInclude>
   </ItemGroup>
