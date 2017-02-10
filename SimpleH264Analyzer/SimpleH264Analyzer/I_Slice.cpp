@@ -57,7 +57,10 @@ int I_Slice::Parse()
 	for (int idx = 0; idx < m_max_mb_number; idx++)
 	{
 		m_macroblocks[idx] = new CMacroblock(m_pSODB, macroblockOffset, idx);
+
 		m_macroblocks[idx]->Set_paramaters(m_pps_active);
+		m_macroblocks[idx]->Set_slice_header(m_sliceHeader);
+
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
 		m_macroblocks[idx]->Dump_macroblock_info();
 		break; //to be deleted

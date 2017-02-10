@@ -4,6 +4,15 @@
 class CSeqParamSet;
 class CPicParamSet;
 
+typedef enum 
+{
+	SLICE_TYPE_P = 0,
+	SLICE_TYPE_B,
+	SLICE_TYPE_I,
+	SLICE_TYPE_SP,
+	SLICE_TYPE_SI
+} SliceType;
+
 typedef struct DecRefPicMarking
 {
 	bool no_output_of_prior_pics_flag;
@@ -18,6 +27,8 @@ public:
 
 	UINT32 Parse_slice_header();
 	void  Dump_slice_header_info();
+
+	UINT8 Get_slice_type();
 private:
 	CSeqParamSet *m_sps_active;
 	CPicParamSet *m_pps_active;

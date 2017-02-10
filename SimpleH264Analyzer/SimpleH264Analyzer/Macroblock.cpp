@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Macroblock.h"
 #include "PicParamSet.h"
+#include "SliceHeader.h"
 
 #include "CAVLC_Defines.h"
 #include "Macroblock_Defines.h"
@@ -14,6 +15,9 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 	m_bitOffset = offset % 8;
 	m_mbDataSize = offset;
 	m_mb_idx = idx;
+
+	m_pps_active = NULL;
+	m_slice_header = NULL;
 
 	m_coeffArray = NULL;
 }
@@ -37,6 +41,11 @@ CMacroblock::~CMacroblock()
 void CMacroblock::Set_paramaters(CPicParamSet *pps)
 {
 	m_pps_active = pps;
+}
+
+void CMacroblock::Set_slice_header(CSliceHeader *sliceHeader)
+{
+	m_slice_header = sliceHeader;
 }
 
 UINT32 CMacroblock::Parse_macroblock()
@@ -105,6 +114,8 @@ UINT32 CMacroblock::Parse_macroblock()
 		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 	}
 
+	interpret_mb_mode();
+
 	// parse coefficients...
 	m_coeffArray = new MacroBlockCoeffArray;
 	get_luma_coeffs();
@@ -148,6 +159,30 @@ void CMacroblock::Dump_macroblock_info()
 #endif
 }
 
+void CMacroblock::interpret_mb_mode()
+{
+	UINT8 slice_type = m_slice_header->Get_slice_type();
+	switch (slice_type)
+	{
+	case SLICE_TYPE_I:
+		if (m_mb_type == 0)
+		{
+			m_mb_type = I4MB;
+		}
+		else if (m_mb_type == 25)
+		{
+			m_mb_type = IPCM;
+		}
+		else
+		{
+			m_mb_type = I16MB;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 int CMacroblock::get_luma_coeffs()
 {
 	int b8 = 0;
@@ -159,7 +194,7 @@ int CMacroblock::get_luma_coeffs()
 			
 			// CAVLC
 			if (m_pps_active->Get_entropy_coding_flag() == 0)
-			{				
+			{
 				for (int block_sub_idc_y = block_y; block_sub_idc_y < block_y + 2; block_sub_idc_y++)
 				{
 					for (int block_sub_idc_x = block_x; block_sub_idc_x < block_x + 2; block_sub_idc_x++)
@@ -168,7 +203,7 @@ int CMacroblock::get_luma_coeffs()
 						b8 = 2 * (block_y / 2) + block_x / 2;
 						if ( m_coded_block_pattern & (1 << b8))
 						{
-							get_4x4_coeffs();
+							get_luma4x4_coeffs(block_sub_idc_x, block_sub_idc_y);
 						} 
 						else
 						{
@@ -188,10 +223,25 @@ int CMacroblock::get_luma_coeffs()
 	return 0;
 }
 
-int CMacroblock::get_4x4_coeffs()
+int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 {
 	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
 	int max_coeff_num = 0;
+
+	switch (block_type)
+	{
+	case LUMA:
+		max_coeff_num = 16;
+		break;
+	case LUMA_INTRA16x16DC:
+		max_coeff_num = 15;
+		break;
+	case LUMA_INTRA16x16AC:
+		max_coeff_num = 15;
+		break;
+	default:
+		break;
+	}
 
 	return 0;
 }

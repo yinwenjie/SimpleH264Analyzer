@@ -2,6 +2,19 @@
 #define _MACROBLOCK_H_
 
 class CPicParamSet;
+class CSliceHeader;
+
+// 宏块类型
+typedef enum
+{
+	P8x8 = 8,
+	I4MB,
+	I16MB,
+	IBLOCK,
+	SI4MB,
+	MAXMODE,
+	IPCM
+} MacroblockType;
 
 // 预测模式结构
 typedef struct IntraPredStruct
@@ -38,6 +51,7 @@ public:
 	MacroBlockCoeffArray *m_coeffArray;
 
 	void Set_paramaters(CPicParamSet *pps);
+	void Set_slice_header(CSliceHeader *sliceHeader);
 	UINT32 Parse_macroblock();
 	void Dump_macroblock_info();
 
@@ -50,6 +64,7 @@ private:
 	UINT8  m_bitOffset;
 
 	CPicParamSet *m_pps_active;
+	CSliceHeader *m_slice_header;
 
 	int    m_mb_idx;
 	bool   m_transform_size_8x8_flag;
@@ -63,8 +78,10 @@ private:
 	UINT8  m_cbp_luma;
 	UINT8  m_cbp_chroma;
 
+	void interpret_mb_mode();
+
 	int get_luma_coeffs();
-	int get_4x4_coeffs();
+	int get_luma4x4_coeffs(int block_idc_x, int block_idc_y);
 };
 
 #endif

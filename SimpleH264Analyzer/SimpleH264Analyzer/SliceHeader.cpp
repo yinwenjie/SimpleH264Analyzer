@@ -37,6 +37,7 @@ UINT32 CSliceHeader::Parse_slice_header()
 
 	m_first_mb_in_slice = Get_uev_code_num(m_pSODB, bytePosition, bitPosition);
 	m_slice_type = Get_uev_code_num(m_pSODB, bytePosition, bitPosition);
+	m_slice_type %= 5;
 	m_pps_id = Get_uev_code_num(m_pSODB, bytePosition, bitPosition);
 
 	if (m_sps_active->Get_separate_colour_plane_flag())
@@ -130,4 +131,9 @@ void CSliceHeader::Dump_slice_header_info()
 #endif
 
 #endif
+}
+
+UINT8 CSliceHeader::Get_slice_type()
+{
+	return m_slice_type;
 }
