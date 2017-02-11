@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\SimpleH264Analyzer\stdafx.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\targetver.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Utils.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Global.h">
+      <Filter>0.Global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Configuration.h">
+      <Filter>1.Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\ErrorInfo.h">
+      <Filter>1.Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Stream.h">
+      <Filter>2.Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\NALUnit.h">
+      <Filter>3.NAL Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\PicParamSet.h">
+      <Filter>3.NAL Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\SeqParamSet.h">
+      <Filter>3.NAL Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\I_Slice.h">
+      <Filter>4.Slice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\SliceHeader.h">
+      <Filter>4.Slice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Macroblock.h">
+      <Filter>5.Macroblock</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Macroblock_Defines.h">
+      <Filter>5.Macroblock</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\CAVLC_Defines.h">
+      <Filter>6.CAVLC</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\SimpleH264Analyzer\stdafx.cpp">
+      <Filter>0.Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\Utils.cpp">
+      <Filter>0.Global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\Configuration.cpp">
+      <Filter>1.Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\SimpleH264Analyzer.cpp">
+      <Filter>1.Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\Stream.cpp">
+      <Filter>2.Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\NALUnit.cpp">
+      <Filter>3.NAL Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\PicParamSet.cpp">
+      <Filter>3.NAL Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\SeqParamSet.cpp">
+      <Filter>3.NAL Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\I_Slice.cpp">
+      <Filter>4.Slice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\SliceHeader.cpp">
+      <Filter>4.Slice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\Macroblock.cpp">
+      <Filter>5.Macroblock</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\SimpleH264Analyzer\ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="0.Global">
+      <UniqueIdentifier>{0a71efa1-8263-45c2-adcd-d8576c3cce53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Application">
+      <UniqueIdentifier>{f5260d5d-7562-4d26-9b27-00830ba7fbcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.Stream">
+      <UniqueIdentifier>{1f2a80db-3b67-4c7a-a7a5-c4e60c21f9a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3.NAL Unit">
+      <UniqueIdentifier>{f86084e4-a804-4540-8a00-e692c0bcec96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4.Slice">
+      <UniqueIdentifier>{b79a2ba6-8146-4101-928e-499da5c6a588}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5.Macroblock">
+      <UniqueIdentifier>{7f9e39f2-4c6b-4f4a-95e8-90e5c4cde3e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="6.CAVLC">
+      <UniqueIdentifier>{6d5545ce-09b2-45ea-8f0c-8c064d390fba}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
