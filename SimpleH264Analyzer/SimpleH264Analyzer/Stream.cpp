@@ -3,7 +3,7 @@
 #include "NALUnit.h"
 #include "SeqParamSet.h"
 #include "PicParamSet.h"
-#include "I_Slice.h"
+#include "SliceStruct.h"
 
 #include <iostream>
 
@@ -15,6 +15,7 @@ CStreamFile::CStreamFile(TCHAR *fileName)
 	m_fileName = fileName;
 	m_sps = NULL;
 	m_pps = NULL;
+	m_IDRSlice = NULL;
 
 	file_info();
 	_tfopen_s(&m_inputFile, m_fileName, _T("rb"));
@@ -111,7 +112,7 @@ int CStreamFile::Parse_h264_bitstream()
 					delete m_IDRSlice;
 					m_IDRSlice = NULL;
 				}
-				m_IDRSlice = new I_Slice(nalUnit.Get_SODB(), m_sps, m_pps, nalType);
+				m_IDRSlice = new CSliceStruct(nalUnit.Get_SODB(), m_sps, m_pps, nalType);
 				m_IDRSlice->Parse();
 				break;
 			case 7:

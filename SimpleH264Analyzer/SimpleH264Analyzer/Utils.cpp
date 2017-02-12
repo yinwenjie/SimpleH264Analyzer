@@ -71,6 +71,18 @@ int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8
 
 	return uVal;
 }
+int Peek_uint_code_num(UINT8 *buf, UINT8 bytePosition, UINT8 bitPosition, UINT8 length)
+{
+	UINT32 uVal = 0;
+
+	for (int idx = 0; idx < length; idx++)
+	{
+		uVal += Get_bit_at_position(buf, bytePosition, bitPosition) << (length - idx - 1);
+	}
+
+	return uVal;
+}
+
 
 // Parse bit stream as me(coded_block_pattern)
 int Get_me_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 mode)

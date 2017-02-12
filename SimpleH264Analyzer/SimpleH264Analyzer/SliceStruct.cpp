@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "SeqParamSet.h"
 #include "PicParamSet.h"
-#include "I_Slice.h"
+#include "SliceStruct.h"
 #include "SliceHeader.h"
 #include "Macroblock.h"
 
 #include <iostream>
 using namespace std;
 
-I_Slice::I_Slice(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType)
+CSliceStruct::CSliceStruct(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType)
 {	
 
 	m_pSODB = pSODB;
@@ -23,7 +23,7 @@ I_Slice::I_Slice(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalTy
 	memset(m_macroblocks, NULL, m_max_mb_number * sizeof(CMacroblock *));
 }
 
-I_Slice::~I_Slice()
+CSliceStruct::~CSliceStruct()
 {
 	if (m_sliceHeader)
 	{
@@ -47,7 +47,7 @@ I_Slice::~I_Slice()
 	}
 }
 
-int I_Slice::Parse()
+int CSliceStruct::Parse()
 {
 	UINT32 sliceHeaderLength = 0, macroblockOffset = 0;
 	m_sliceHeader = new CSliceHeader(m_pSODB, m_sps_active, m_pps_active, m_nalType);
@@ -59,7 +59,7 @@ int I_Slice::Parse()
 		m_macroblocks[idx] = new CMacroblock(m_pSODB, macroblockOffset, idx);
 
 		m_macroblocks[idx]->Set_paramaters(m_pps_active);
-		m_macroblocks[idx]->Set_slice_header(m_sliceHeader);
+		m_macroblocks[idx]->Set_slice_struct(this);
 
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
 		m_macroblocks[idx]->Dump_macroblock_info();

@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "Macroblock.h"
+#include "SeqParamSet.h"
 #include "PicParamSet.h"
 #include "SliceHeader.h"
+#include "SliceStruct.h"
 
 #include "CAVLC_Defines.h"
 #include "Macroblock_Defines.h"
@@ -15,9 +17,10 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 	m_bitOffset = offset % 8;
 	m_mbDataSize = offset;
 	m_mb_idx = idx;
+	m_transform_size_8x8_flag = false;
 
 	m_pps_active = NULL;
-	m_slice_header = NULL;
+	m_slice = NULL;
 
 	m_coeffArray = NULL;
 }
@@ -43,9 +46,9 @@ void CMacroblock::Set_paramaters(CPicParamSet *pps)
 	m_pps_active = pps;
 }
 
-void CMacroblock::Set_slice_header(CSliceHeader *sliceHeader)
+void CMacroblock::Set_slice_struct(CSliceStruct *sliceStruct)
 {
-	m_slice_header = sliceHeader;
+	m_slice = sliceStruct;
 }
 
 UINT32 CMacroblock::Parse_macroblock()
@@ -161,7 +164,7 @@ void CMacroblock::Dump_macroblock_info()
 
 void CMacroblock::interpret_mb_mode()
 {
-	UINT8 slice_type = m_slice_header->Get_slice_type();
+	UINT8 slice_type = m_slice->m_sliceHeader->Get_slice_type();
 	switch (slice_type)
 	{
 	case SLICE_TYPE_I:
@@ -226,7 +229,9 @@ int CMacroblock::get_luma_coeffs()
 int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 {
 	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
-	int max_coeff_num = 0;
+	int max_coeff_num = 0, numCoeff_vlcIdx = 0;
+
+	int numCoeff = 0, trailingOnes = 0;
 
 	switch (block_type)
 	{
@@ -243,5 +248,129 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 		break;
 	}
 
-	return 0;
+	int numberCurrent = get_number_current(block_idc_x, block_idc_y, 1);
+	if (numberCurrent < 2)
+	{
+		numCoeff_vlcIdx = 0;
+	}
+
+	get_numCoeff_and_trailingOnes(numCoeff, trailingOnes, numCoeff_vlcIdx);
+	
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOnes, int numCoeff_vlcIdx)
+{
+	int err = 0;
+	int *lengthTable = NULL, *codeTable = NULL;
+
+	if (numCoeff_vlcIdx < 3)
+	{
+		lengthTable = &coeffTokenTable_Length[numCoeff_vlcIdx][0][0];
+		codeTable = &coeffTokenTable_Code[numCoeff_vlcIdx][0][0];
+		err = search_for_value_in_2D_table(totalCoeff, trailingOnes, lengthTable, codeTable, 17, 4);
+		if (err < 0)
+		{
+			return err;
+		}
+	} 
+	else
+	{
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_number_current(int block_idc_x, int block_idc_y, int luma)
+{
+	int nC = 0;
+	bool available_top = false, available_left = false;
+
+	get_neighbor_available(available_top, available_left, block_idc_x, block_idc_y, luma);
+	
+	if (!available_left && !available_top)
+	{
+		nC = 0;
+	}
+	// Todo: other condition
+
+	return nC;
+}
+
+void CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int block_idc_x, int block_idc_y, int luma)
+{
+	int mb_idx = m_mb_idx;
+	int maxWH = (luma ? 16 : 8);
+	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
+	int height_in_mb = m_slice->m_sps_active->Get_pic_height_in_mbs();
+
+	bool left_edge_mb = (mb_idx % width_in_mb == 0);
+	bool top_edge_mb = (mb_idx < width_in_mb);
+	if (!top_edge_mb)
+	{
+		available_top = true;
+	}
+	else //ÉÏ±ßÑØºê¿é
+	{
+		if (block_idc_y == 0)
+		{
+			available_top = false;
+		} 
+		else
+		{
+			available_top = true;
+		}
+	}
+
+	if (!left_edge_mb)
+	{
+		available_left = true;
+	}
+	else //×ó±ßÑØºê¿é
+	{
+		if (block_idc_x == 0)
+		{
+			available_left = false;
+		} 
+		else
+		{
+			available_left = true;
+		}
+	}
+	
+	return;
+}
+
+int CMacroblock::search_for_value_in_2D_table(int &value1, int &value2, int *lengthTable, int *codeTable, int tableWidth, int tableHeight)
+{
+	int err = 0;
+	int codeLen = 0, code = 0;
+	for (int yIdx = 0; yIdx < tableHeight; yIdx++)
+	{
+		for (int xIdx = 0; xIdx < tableWidth; xIdx++)
+		{
+			codeLen = lengthTable[xIdx];
+			if (codeLen == 0)
+			{
+				continue;
+			}
+			code = codeTable[xIdx];
+			if (Peek_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, codeLen) == code)
+			{
+				value1 = xIdx;
+				value2 = yIdx;
+				m_bitOffset += codeLen;
+				m_bypeOffset += (m_bitOffset / 8);
+				m_bitOffset %= 8;
+				err = 0;
+				goto found;
+			}
+		}
+		lengthTable += tableWidth;
+		codeTable += tableWidth;
+	}
+	err = kPARSING_CAVLC_CODE_NOT_FOUND;
+
+found:
+	return err;
 }
