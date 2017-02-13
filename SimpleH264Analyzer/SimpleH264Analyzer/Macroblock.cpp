@@ -223,15 +223,16 @@ int CMacroblock::get_luma_coeffs()
 		}
 	}
 
-	return 0;
+	return kPARSING_ERROR_NO_ERROR;
 }
 
 int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 {
+	int err = 0;
 	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
 	int max_coeff_num = 0, numCoeff_vlcIdx = 0;
 
-	int numCoeff = 0, trailingOnes = 0;
+	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 };
 
 	switch (block_type)
 	{
@@ -254,8 +255,37 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 		numCoeff_vlcIdx = 0;
 	}
 
-	get_numCoeff_and_trailingOnes(numCoeff, trailingOnes, numCoeff_vlcIdx);
+	// NumCoeff & TrailingOnes...
+	err = get_numCoeff_and_trailingOnes(numCoeff, trailingOnes, numCoeff_vlcIdx);
+	if (err < 0)
+	{
+		return err;
+	}
 	
+	if (numCoeff) //包含非0系数
+	{
+		if (trailingOnes) //拖尾系数
+		{
+			//读取拖尾系数符号
+			int signValue = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, trailingOnes);
+			int trailingCnt = trailingOnes;
+			for (int coeffIdx = numCoeff - 1; coeffIdx > numCoeff - 1 - trailingOnes; coeffIdx--)
+			{
+				trailingCnt--;
+				if ((signValue >> trailingCnt) & 1)
+				{
+					levelArr[coeffIdx] = -1;
+				} 
+				else
+				{
+					levelArr[coeffIdx] = 1;
+				}
+			}
+		}
+
+
+	}
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 
