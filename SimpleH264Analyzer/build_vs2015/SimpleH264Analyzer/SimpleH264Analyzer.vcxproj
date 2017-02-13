@@ -147,13 +147,13 @@
     <ClInclude Include="..\..\SimpleH264Analyzer\Configuration.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\ErrorInfo.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Global.h" />
-    <ClInclude Include="..\..\SimpleH264Analyzer\I_Slice.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Macroblock.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Macroblock_Defines.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\NALUnit.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\PicParamSet.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\SeqParamSet.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\SliceHeader.h" />
+    <ClInclude Include="..\..\SimpleH264Analyzer\SliceStruct.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\stdafx.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Stream.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\targetver.h" />
@@ -161,13 +161,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\SimpleH264Analyzer\Configuration.cpp" />
-    <ClCompile Include="..\..\SimpleH264Analyzer\I_Slice.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\Macroblock.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\NALUnit.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\PicParamSet.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\SeqParamSet.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\SimpleH264Analyzer.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\SliceHeader.cpp" />
+    <ClCompile Include="..\..\SimpleH264Analyzer\SliceStruct.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\stdafx.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\Stream.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\Utils.cpp" />
