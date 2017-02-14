@@ -232,7 +232,7 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
 	int max_coeff_num = 0;
 	int numCoeff_vlcIdx = 0, prefixLength = 0, suffixLength = 0, level_prefix = 0, level_suffix = 0;
-	int levelSuffixSize = 0, levelCode = 0;
+	int levelSuffixSize = 0, levelCode = 0, i = 0;
 
 	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 }, level = 0;
 
@@ -282,6 +282,7 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 				{
 					levelArr[coeffIdx] = 1;
 				}
+				i++;
 			}
 		}
 
@@ -331,7 +332,7 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			{
 				levelCode += (1 << (level_prefix - 3)) - 4096;
 			}
-			if (k == trailingOnes && trailingOnes < 3)
+			if (i == trailingOnes && trailingOnes < 3)
 			{
 				levelCode += 2;
 			}
