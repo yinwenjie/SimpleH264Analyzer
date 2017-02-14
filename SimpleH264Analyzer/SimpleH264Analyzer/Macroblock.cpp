@@ -230,9 +230,11 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 {
 	int err = 0;
 	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
-	int max_coeff_num = 0, numCoeff_vlcIdx = 0;
+	int max_coeff_num = 0;
+	int numCoeff_vlcIdx = 0, prefixLength = 0, suffixLength = 0, level_prefix = 0, level_suffix = 0;
+	int levelSuffixSize = 0, levelCode = 0;
 
-	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 };
+	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 }, level = 0;
 
 	switch (block_type)
 	{
@@ -283,6 +285,66 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			}
 		}
 
+		//读取解析level值
+		for (int k = numCoeff - 1 - trailingOnes; k >= 0; k--)
+		{
+			if (numCoeff > 10 && trailingOnes < 3)
+			{
+				//根据上下文初始化suffixLength
+				suffixLength = 1;
+			}
+
+			while (!Get_bit_at_position(m_pSODB, m_bypeOffset, m_bitOffset))
+			{
+				level_prefix++;
+			}
+			prefixLength = level_prefix + 1;
+
+			if (level_prefix == 14 && suffixLength == 0)
+			{
+				levelSuffixSize = 4;
+			}
+			else if (level_prefix == 15)
+			{
+				levelSuffixSize = level_prefix - 3;
+			}
+			else
+			{
+				levelSuffixSize = suffixLength;
+			}
+
+			if (levelSuffixSize > 0)
+			{
+				level_suffix = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, levelSuffixSize);
+			} 
+			else
+			{
+				level_suffix = 0;
+			}
+
+			levelCode = (min(15, level_prefix) << suffixLength) + level_suffix;
+			if (level_prefix >= 15 && suffixLength == 0)
+			{
+				levelCode += 15;
+			} 
+			if (level_prefix >= 16)
+			{
+				levelCode += (1 << (level_prefix - 3)) - 4096;
+			}
+			if (k == trailingOnes && trailingOnes < 3)
+			{
+				levelCode += 2;
+			}
+
+			if (levelCode % 2 == 0)
+			{
+				level = (levelCode + 2) >> 1;
+			} 
+			else
+			{
+				level = (-levelCode - 1) >> 1;
+			}
+		}
 
 	}
 
