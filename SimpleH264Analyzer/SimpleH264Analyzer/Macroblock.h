@@ -83,11 +83,12 @@ private:
 	int get_luma_coeffs();
 	int get_luma4x4_coeffs(int block_idc_x, int block_idc_y);
 	int get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOnes, int numCoeff_vlcIdx);
+	int get_total_zeros(int &totalZeros, int numCoeff_vlcIdx);
 
 	int get_number_current(int block_idc_x, int block_idc_y, int luma);
 	void get_neighbor_available(bool &available_top, bool &available_left, int block_idc_x, int block_idc_y, int luma);
 
-	int search_for_value_in_2D_table(int &value1, int &value2, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
+	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 };
 
 #endif

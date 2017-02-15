@@ -345,8 +345,35 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			{
 				level = (-levelCode - 1) >> 1;
 			}
+
+			if (suffixLength == 0)
+			{
+				suffixLength = 1;
+			}
+			else
+			{
+				if (abs(level) > (3 << (suffixLength - 1)))
+				{
+					suffixLength++;
+				}
+			}
 		}
 
+		// ¶ÁÈ¡½âÎörun
+		i = 0;
+		int zerosLeft = 0, totalZeros = 0;
+		if (numCoeff < max_coeff_num)
+		{
+			err = get_total_zeros(totalZeros, numCoeff - 1);
+			if (err < 0)
+			{
+				return err;
+			}
+		} 
+		else
+		{
+			totalZeros = 0;
+		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -354,14 +381,14 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 
 int CMacroblock::get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOnes, int numCoeff_vlcIdx)
 {
-	int err = 0;
+	int err = 0, code = 0;
 	int *lengthTable = NULL, *codeTable = NULL;
 
 	if (numCoeff_vlcIdx < 3)
 	{
 		lengthTable = &coeffTokenTable_Length[numCoeff_vlcIdx][0][0];
 		codeTable = &coeffTokenTable_Code[numCoeff_vlcIdx][0][0];
-		err = search_for_value_in_2D_table(totalCoeff, trailingOnes, lengthTable, codeTable, 17, 4);
+		err = search_for_value_in_2D_table(totalCoeff, trailingOnes, code, lengthTable, codeTable, 17, 4);
 		if (err < 0)
 		{
 			return err;
@@ -369,6 +396,20 @@ int CMacroblock::get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOne
 	} 
 	else
 	{
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_total_zeros(int &totalZeros, int numCoeff_vlcIdx)
+{
+	int err = 0, idx1 = 0, idx2 = 0;
+	int *lengthTable = &totalZerosTable_Length[numCoeff_vlcIdx][0];
+	int *codeTable = &totalZerosTable_Code[numCoeff_vlcIdx][0];
+	err = search_for_value_in_2D_table(totalZeros, idx1, idx2, lengthTable, codeTable, 16, 1);
+	if (err < 0)
+	{
+		return err;
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -434,10 +475,10 @@ void CMacroblock::get_neighbor_available(bool &available_top, bool &available_le
 	return;
 }
 
-int CMacroblock::search_for_value_in_2D_table(int &value1, int &value2, int *lengthTable, int *codeTable, int tableWidth, int tableHeight)
+int CMacroblock::search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight)
 {
 	int err = 0;
-	int codeLen = 0, code = 0;
+	int codeLen = 0;
 	for (int yIdx = 0; yIdx < tableHeight; yIdx++)
 	{
 		for (int xIdx = 0; xIdx < tableWidth; xIdx++)
