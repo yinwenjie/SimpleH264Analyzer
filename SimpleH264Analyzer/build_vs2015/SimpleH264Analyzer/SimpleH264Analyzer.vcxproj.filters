@@ -41,10 +41,13 @@
       <Filter>5.Macroblock</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SimpleH264Analyzer\CAVLC_Defines.h">
-      <Filter>6.CAVLC</Filter>
+      <Filter>7.CAVLC</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SimpleH264Analyzer\SliceStruct.h">
       <Filter>4.Slice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Residual.h">
+      <Filter>6.Residual</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +84,9 @@
     <ClCompile Include="..\..\SimpleH264Analyzer\SliceStruct.cpp">
       <Filter>4.Slice</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\Residual.cpp">
+      <Filter>6.Residual</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\SimpleH264Analyzer\ReadMe.txt" />
@@ -104,8 +110,11 @@
     <Filter Include="5.Macroblock">
       <UniqueIdentifier>{ace3c375-cfd2-4743-8504-aeda99b7c7ee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="6.CAVLC">
+    <Filter Include="7.CAVLC">
       <UniqueIdentifier>{6de0009c-bd9a-482e-bb4c-91fe72330089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="6.Residual">
+      <UniqueIdentifier>{f641e8ff-c60a-466c-902c-d5211cf9f831}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

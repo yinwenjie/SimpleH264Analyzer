@@ -3,6 +3,7 @@
 
 class CPicParamSet;
 class CSliceStruct;
+class CResidual;
 
 // ∫ÍøÈ¿‡–Õ
 typedef enum
@@ -77,6 +78,8 @@ private:
 
 	UINT8  m_cbp_luma;
 	UINT8  m_cbp_chroma;
+
+	CResidual *m_residual;
 
 	void interpret_mb_mode();
 

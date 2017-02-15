@@ -5,6 +5,7 @@
 #include "SliceHeader.h"
 #include "SliceStruct.h"
 
+#include "Residual.h"
 #include "CAVLC_Defines.h"
 #include "Macroblock_Defines.h"
 
@@ -22,6 +23,8 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 	m_pps_active = NULL;
 	m_slice = NULL;
 
+	m_residual = NULL;
+
 	m_coeffArray = NULL;
 }
 
@@ -38,6 +41,12 @@ CMacroblock::~CMacroblock()
 	{
 		delete m_coeffArray;
 		m_coeffArray = NULL;
+	}
+
+	if (m_residual)
+	{
+		delete m_residual;
+		m_residual = NULL;
 	}
 }
 
@@ -118,6 +127,9 @@ UINT32 CMacroblock::Parse_macroblock()
 	}
 
 	interpret_mb_mode();
+
+	m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
+	m_residual->Parse_macroblock_residual();
 
 	// parse coefficients...
 	m_coeffArray = new MacroBlockCoeffArray;

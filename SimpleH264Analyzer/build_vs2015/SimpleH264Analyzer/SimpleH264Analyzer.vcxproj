@@ -151,6 +151,7 @@
     <ClInclude Include="..\..\SimpleH264Analyzer\Macroblock_Defines.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\NALUnit.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\PicParamSet.h" />
+    <ClInclude Include="..\..\SimpleH264Analyzer\Residual.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\SeqParamSet.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\SliceHeader.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\SliceStruct.h" />
@@ -164,6 +165,7 @@
     <ClCompile Include="..\..\SimpleH264Analyzer\Macroblock.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\NALUnit.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\PicParamSet.cpp" />
+    <ClCompile Include="..\..\SimpleH264Analyzer\Residual.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\SeqParamSet.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\SimpleH264Analyzer.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\SliceHeader.cpp" />
