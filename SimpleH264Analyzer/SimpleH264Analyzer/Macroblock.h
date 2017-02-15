@@ -57,6 +57,8 @@ public:
 	void Dump_macroblock_info();
 
 	UINT8  m_mb_type;
+	UINT8  m_cbp_luma;
+	UINT8  m_cbp_chroma;
 
 private:
 	UINT8  *m_pSODB;
@@ -75,9 +77,6 @@ private:
 
 	UINT8  m_coded_block_pattern;
 	UINT8  m_mb_qp_delta;
-
-	UINT8  m_cbp_luma;
-	UINT8  m_cbp_chroma;
 
 	CResidual *m_residual;
 

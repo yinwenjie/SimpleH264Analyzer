@@ -16,5 +16,10 @@ CResidual::~CResidual()
 
 int CResidual::Parse_macroblock_residual()
 {
+	UINT8 cbp_luma = m_macroblock_belongs->m_cbp_luma;
+	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
+
+
+
 	return kPARSING_ERROR_NO_ERROR;
 }
