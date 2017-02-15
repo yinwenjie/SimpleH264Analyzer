@@ -234,7 +234,7 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 	int numCoeff_vlcIdx = 0, prefixLength = 0, suffixLength = 0, level_prefix = 0, level_suffix = 0;
 	int levelSuffixSize = 0, levelCode = 0, i = 0;
 
-	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 }, level = 0;
+	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 }, level = 0, run = 0;
 
 	switch (block_type)
 	{
@@ -360,7 +360,6 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 		}
 
 		// 读取解析run
-		i = 0;
 		int zerosLeft = 0, totalZeros = 0;
 		if (numCoeff < max_coeff_num)
 		{
@@ -373,6 +372,29 @@ int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 		else
 		{
 			totalZeros = 0;
+		}
+
+		//读取解析run_before
+		int runBefore_vlcIdx = 0;
+		i = numCoeff - 1;
+		zerosLeft = totalZeros;
+		if (zerosLeft > 0 && i > 0)
+		{
+			do 
+			{
+				runBefore_vlcIdx = (zerosLeft - 1 < 6 ? zerosLeft - 1 : 6);
+				err = get_run_before(run, runBefore_vlcIdx);
+				if (err < 0)
+				{
+					return err;
+				}
+				zerosLeft -= run;
+				i--;
+			} while (zerosLeft != 0 && i != 0);
+		}
+		else
+		{
+			run = 0;
 		}
 	}
 
@@ -401,12 +423,26 @@ int CMacroblock::get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOne
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::get_total_zeros(int &totalZeros, int numCoeff_vlcIdx)
+int CMacroblock::get_total_zeros(int &totalZeros, int totalZeros_vlcIdx)
 {
 	int err = 0, idx1 = 0, idx2 = 0;
-	int *lengthTable = &totalZerosTable_Length[numCoeff_vlcIdx][0];
-	int *codeTable = &totalZerosTable_Code[numCoeff_vlcIdx][0];
+	int *lengthTable = &totalZerosTable_Length[totalZeros_vlcIdx][0];
+	int *codeTable = &totalZerosTable_Code[totalZeros_vlcIdx][0];
 	err = search_for_value_in_2D_table(totalZeros, idx1, idx2, lengthTable, codeTable, 16, 1);
+	if (err < 0)
+	{
+		return err;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_run_before(int &runBefore, int runBefore_vlcIdx)
+{
+	int err = 0, idx1 = 0, idx2 = 0;
+	int *lengthTable = &runBeforeTable_Length[runBefore_vlcIdx][0];
+	int *codeTable = &runBeforeTable_Code[runBefore_vlcIdx][0];
+	err = search_for_value_in_2D_table(runBefore, idx1, idx2, lengthTable, codeTable, 16, 1);
 	if (err < 0)
 	{
 		return err;

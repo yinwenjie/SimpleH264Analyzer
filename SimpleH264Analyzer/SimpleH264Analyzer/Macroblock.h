@@ -83,7 +83,8 @@ private:
 	int get_luma_coeffs();
 	int get_luma4x4_coeffs(int block_idc_x, int block_idc_y);
 	int get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOnes, int numCoeff_vlcIdx);
-	int get_total_zeros(int &totalZeros, int numCoeff_vlcIdx);
+	int get_total_zeros(int &totalZeros, int totalZeros_vlcIdx);
+	int get_run_before(int &runBefore, int runBefore_vlcIdx);
 
 	int get_number_current(int block_idc_x, int block_idc_y, int luma);
 	void get_neighbor_available(bool &available_top, bool &available_left, int block_idc_x, int block_idc_y, int luma);
