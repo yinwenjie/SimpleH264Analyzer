@@ -6,7 +6,6 @@
 #include "SliceStruct.h"
 
 #include "Residual.h"
-#include "CAVLC_Defines.h"
 #include "Macroblock_Defines.h"
 
 using namespace std;
@@ -123,17 +122,12 @@ UINT32 CMacroblock::Parse_macroblock()
 
 	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
 	{
+		interpret_mb_mode();
 		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
+
+		m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
+		m_residual->Parse_macroblock_residual();
 	}
-
-	interpret_mb_mode();
-
-	m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
-	m_residual->Parse_macroblock_residual();
-
-	// parse coefficients...
-	m_coeffArray = new MacroBlockCoeffArray;
-	get_luma_coeffs();
 
 	m_mbDataSize = m_bypeOffset * 8 + m_bitOffset - m_mbDataSize;
 	return m_mbDataSize;
@@ -174,6 +168,11 @@ void CMacroblock::Dump_macroblock_info()
 #endif
 }
 
+CPicParamSet * CMacroblock::Get_pps_active()
+{
+	return m_pps_active;
+}
+
 void CMacroblock::interpret_mb_mode()
 {
 	UINT8 slice_type = m_slice->m_sliceHeader->Get_slice_type();
@@ -198,272 +197,7 @@ void CMacroblock::interpret_mb_mode()
 	}
 }
 
-int CMacroblock::get_luma_coeffs()
-{
-	int b8 = 0;
-	for (int block_y = 0; block_y < 4; block_y += 2)
-	{
-		for (int block_x = 0; block_x < 4; block_x += 2)
-		{
-			// 16x16 -> 4 * 8x8
-			
-			// CAVLC
-			if (m_pps_active->Get_entropy_coding_flag() == 0)
-			{
-				for (int block_sub_idc_y = block_y; block_sub_idc_y < block_y + 2; block_sub_idc_y++)
-				{
-					for (int block_sub_idc_x = block_x; block_sub_idc_x < block_x + 2; block_sub_idc_x++)
-					{
-						// 8x8 -> 4 * 4x4
-						b8 = 2 * (block_y / 2) + block_x / 2;
-						if ( m_coded_block_pattern & (1 << b8))
-						{
-							get_luma4x4_coeffs(block_sub_idc_x, block_sub_idc_y);
-						} 
-						else
-						{
-							// empty block...
-						}
-					}
-				}
-			} 
-			// CABAC
-			else
-			{
-				
-			}
-		}
-	}
-
-	return kPARSING_ERROR_NO_ERROR;
-}
-
-int CMacroblock::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
-{
-	int err = 0;
-	int block_type = (m_mb_type == I16MB || m_mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
-	int max_coeff_num = 0;
-	int numCoeff_vlcIdx = 0, prefixLength = 0, suffixLength = 0, level_prefix = 0, level_suffix = 0;
-	int levelSuffixSize = 0, levelCode = 0, i = 0;
-
-	int numCoeff = 0, trailingOnes = 0, levelArr[16] = { 0 }, runArr[16] = { 0 }, level = 0, run = 0;
-
-	switch (block_type)
-	{
-	case LUMA:
-		max_coeff_num = 16;
-		break;
-	case LUMA_INTRA16x16DC:
-		max_coeff_num = 15;
-		break;
-	case LUMA_INTRA16x16AC:
-		max_coeff_num = 15;
-		break;
-	default:
-		break;
-	}
-
-	int numberCurrent = get_number_current(block_idc_x, block_idc_y, 1);
-	if (numberCurrent < 2)
-	{
-		numCoeff_vlcIdx = 0;
-	}
-
-	// NumCoeff & TrailingOnes...
-	err = get_numCoeff_and_trailingOnes(numCoeff, trailingOnes, numCoeff_vlcIdx);
-	if (err < 0)
-	{
-		return err;
-	}
-	
-	if (numCoeff) //包含非0系数
-	{
-		if (trailingOnes) //拖尾系数
-		{
-			//读取拖尾系数符号
-			int signValue = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, trailingOnes);
-			int trailingCnt = trailingOnes;
-			for (int coeffIdx = numCoeff - 1; coeffIdx > numCoeff - 1 - trailingOnes; coeffIdx--)
-			{
-				trailingCnt--;
-				if ((signValue >> trailingCnt) & 1)
-				{
-					levelArr[coeffIdx] = -1;
-				} 
-				else
-				{
-					levelArr[coeffIdx] = 1;
-				}
-				i++;
-			}
-		}
-
-		//读取解析level值
-		for (int k = numCoeff - 1 - trailingOnes; k >= 0; k--)
-		{
-			if (numCoeff > 10 && trailingOnes < 3)
-			{
-				//根据上下文初始化suffixLength
-				suffixLength = 1;
-			}
-
-			while (!Get_bit_at_position(m_pSODB, m_bypeOffset, m_bitOffset))
-			{
-				level_prefix++;
-			}
-			prefixLength = level_prefix + 1;
-
-			if (level_prefix == 14 && suffixLength == 0)
-			{
-				levelSuffixSize = 4;
-			}
-			else if (level_prefix == 15)
-			{
-				levelSuffixSize = level_prefix - 3;
-			}
-			else
-			{
-				levelSuffixSize = suffixLength;
-			}
-
-			if (levelSuffixSize > 0)
-			{
-				level_suffix = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, levelSuffixSize);
-			} 
-			else
-			{
-				level_suffix = 0;
-			}
-
-			levelCode = (min(15, level_prefix) << suffixLength) + level_suffix;
-			if (level_prefix >= 15 && suffixLength == 0)
-			{
-				levelCode += 15;
-			} 
-			if (level_prefix >= 16)
-			{
-				levelCode += (1 << (level_prefix - 3)) - 4096;
-			}
-			if (i == trailingOnes && trailingOnes < 3)
-			{
-				levelCode += 2;
-			}
-
-			if (levelCode % 2 == 0)
-			{
-				level = (levelCode + 2) >> 1;
-			} 
-			else
-			{
-				level = (-levelCode - 1) >> 1;
-			}
-
-			if (suffixLength == 0)
-			{
-				suffixLength = 1;
-			}
-			else
-			{
-				if (abs(level) > (3 << (suffixLength - 1)))
-				{
-					suffixLength++;
-				}
-			}
-		}
-
-		// 读取解析run
-		int zerosLeft = 0, totalZeros = 0;
-		if (numCoeff < max_coeff_num)
-		{
-			err = get_total_zeros(totalZeros, numCoeff - 1);
-			if (err < 0)
-			{
-				return err;
-			}
-		} 
-		else
-		{
-			totalZeros = 0;
-		}
-
-		//读取解析run_before
-		int runBefore_vlcIdx = 0;
-		i = numCoeff - 1;
-		zerosLeft = totalZeros;
-		if (zerosLeft > 0 && i > 0)
-		{
-			do 
-			{
-				runBefore_vlcIdx = (zerosLeft - 1 < 6 ? zerosLeft - 1 : 6);
-				err = get_run_before(run, runBefore_vlcIdx);
-				if (err < 0)
-				{
-					return err;
-				}
-				zerosLeft -= run;
-				i--;
-			} while (zerosLeft != 0 && i != 0);
-		}
-		else
-		{
-			run = 0;
-		}
-	}
-
-	return kPARSING_ERROR_NO_ERROR;
-}
-
-int CMacroblock::get_numCoeff_and_trailingOnes(int &totalCoeff, int &trailingOnes, int numCoeff_vlcIdx)
-{
-	int err = 0, code = 0;
-	int *lengthTable = NULL, *codeTable = NULL;
-
-	if (numCoeff_vlcIdx < 3)
-	{
-		lengthTable = &coeffTokenTable_Length[numCoeff_vlcIdx][0][0];
-		codeTable = &coeffTokenTable_Code[numCoeff_vlcIdx][0][0];
-		err = search_for_value_in_2D_table(totalCoeff, trailingOnes, code, lengthTable, codeTable, 17, 4);
-		if (err < 0)
-		{
-			return err;
-		}
-	} 
-	else
-	{
-	}
-
-	return kPARSING_ERROR_NO_ERROR;
-}
-
-int CMacroblock::get_total_zeros(int &totalZeros, int totalZeros_vlcIdx)
-{
-	int err = 0, idx1 = 0, idx2 = 0;
-	int *lengthTable = &totalZerosTable_Length[totalZeros_vlcIdx][0];
-	int *codeTable = &totalZerosTable_Code[totalZeros_vlcIdx][0];
-	err = search_for_value_in_2D_table(totalZeros, idx1, idx2, lengthTable, codeTable, 16, 1);
-	if (err < 0)
-	{
-		return err;
-	}
-
-	return kPARSING_ERROR_NO_ERROR;
-}
-
-int CMacroblock::get_run_before(int &runBefore, int runBefore_vlcIdx)
-{
-	int err = 0, idx1 = 0, idx2 = 0;
-	int *lengthTable = &runBeforeTable_Length[runBefore_vlcIdx][0];
-	int *codeTable = &runBeforeTable_Code[runBefore_vlcIdx][0];
-	err = search_for_value_in_2D_table(runBefore, idx1, idx2, lengthTable, codeTable, 16, 1);
-	if (err < 0)
-	{
-		return err;
-	}
-
-	return kPARSING_ERROR_NO_ERROR;
-}
-
-int CMacroblock::get_number_current(int block_idc_x, int block_idc_y, int luma)
+int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y, int luma)
 {
 	int nC = 0;
 	bool available_top = false, available_left = false;
