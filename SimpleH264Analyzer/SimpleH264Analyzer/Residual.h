@@ -34,6 +34,7 @@ public:
 
 	// ½âÎöºê¿éµÄÔ¤²â²Ð²î
 	int Parse_macroblock_residual();
+	UINT8 Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y);
 
 private:
 	CMacroblock *m_macroblock_belongs;
@@ -46,7 +47,7 @@ private:
 	int get_luma4x4_coeffs(int block_idc_x, int block_idc_y);
 
 	int get_numCoeff_and_trailingOnes(UINT8 &totalCoeff, UINT8 &trailingOnes, int &token, int numCoeff_vlcIdx);
-	int get_coeff_level(int &level, UINT8 trailingOnes, int suffixLength);
+	int get_coeff_level(int &level, int levelIdx, UINT8 trailingOnes, int suffixLength);
 	int get_total_zeros(UINT8 &totalZeros, int totalZeros_vlcIdx);
 	int get_run_before(UINT8 &runBefore, int runBefore_vlcIdx);
 

@@ -86,7 +86,9 @@ private:
 
 	void interpret_mb_mode();
 
-	void get_neighbor_available(bool &available_top, bool &available_left, int block_idc_x, int block_idc_y, int luma);
+	int get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_x, int block_idc_y, int luma);
+	int get_top_neighbor_coeff_numbers(int &topIdx, int block_idc_x, int block_idc_y);
+	int get_left_neighbor_coeff_numbers(int &leftIdx, int block_idc_x, int block_idc_y);
 
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 };

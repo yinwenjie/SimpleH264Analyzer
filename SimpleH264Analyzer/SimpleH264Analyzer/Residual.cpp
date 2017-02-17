@@ -32,6 +32,11 @@ int CResidual::Parse_macroblock_residual()
 	return kPARSING_ERROR_NO_ERROR;
 }
 
+UINT8 CResidual::Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y)
+{
+	return luma_residual[block_idc_y][block_idc_x].numCoeff;
+}
+
 int CResidual::parse_luma_residual(UINT8 cbp_luma)
 {
 	int err = 0;
@@ -45,9 +50,9 @@ int CResidual::parse_luma_residual(UINT8 cbp_luma)
 			if (m_macroblock_belongs->Get_pps_active()->Get_transform_8x8_mode_flag() == false)
 			{
 				// CAVLC
-				for (; block_sub_idc_y < block_y + 2; block_sub_idc_y++)
+				for (block_sub_idc_y = block_y; block_sub_idc_y < block_y + 2; block_sub_idc_y++)
 				{
-					for (; block_sub_idc_x < block_x + 2; block_sub_idc_x++)
+					for (block_sub_idc_x = block_x; block_sub_idc_x < block_x + 2; block_sub_idc_x++)
 					{
 						// 8x8 -> 4 * 4x4
 						idx8x8 = 2 * (block_y / 2) + block_x / 2;
@@ -106,6 +111,18 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 	{
 		numCoeff_vlcIdx = 0;
 	}
+	else if (numberCurrent < 4)
+	{
+		numCoeff_vlcIdx = 1;
+	}
+	else if (numCoeff_vlcIdx < 8)
+	{
+		numCoeff_vlcIdx = 2;
+	}
+	else
+	{
+		numCoeff_vlcIdx = 3;
+	}
 
 	// NumCoeff & TrailingOnes...
 	UINT8 numCoeff = 0, trailingOnes = 0;
@@ -149,9 +166,9 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			//根据上下文初始化suffixLength
 			suffixLength = 1;
 		}
-		for (int k = numCoeff - 1 - trailingOnes; k >= 0; k--)
+		for (int k = 0; k <= numCoeff - 1 - trailingOnes; k++)
 		{
-			err = get_coeff_level(level, trailingOnes, suffixLength);
+			err = get_coeff_level(level, k, trailingOnes, suffixLength);
 			if (err < 0)
 			{
 				return err;
@@ -240,7 +257,7 @@ int CResidual::get_numCoeff_and_trailingOnes(UINT8 &totalCoeff, UINT8 &trailingO
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CResidual::get_coeff_level(int &level, UINT8 trailingOnes, int suffixLength)
+int CResidual::get_coeff_level(int &level, int levelIdx, UINT8 trailingOnes, int suffixLength)
 {
 	int prefixLength = 0, level_prefix = 0, level_suffix = 0;
 	int levelSuffixSize = 0, levelCode = 0, i = 0;
@@ -279,7 +296,7 @@ int CResidual::get_coeff_level(int &level, UINT8 trailingOnes, int suffixLength)
 	{
 		levelCode += (1 << (level_prefix - 3)) - 4096;
 	}
-	if (trailingOnes < 3)
+	if (levelIdx == 0 && trailingOnes < 3)
 	{
 		levelCode += 2;
 	}

@@ -199,21 +199,38 @@ void CMacroblock::interpret_mb_mode()
 
 int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y, int luma)
 {
-	int nC = 0;
+	int nC = 0, topIdx = 0, leftIdx = 0, leftNum = 0, topNum = 0;
 	bool available_top = false, available_left = false;
 
-	get_neighbor_available(available_top, available_left, block_idc_x, block_idc_y, luma);
+	get_neighbor_available(available_top, available_left, topIdx, leftIdx, block_idc_x, block_idc_y, luma);
 	
 	if (!available_left && !available_top)
 	{
 		nC = 0;
 	}
-	// Todo: other condition
+	else
+	{
+		if (available_left)
+		{
+			leftNum = get_left_neighbor_coeff_numbers(leftIdx, block_idc_x, block_idc_y);
+		}
+		if (available_top)
+		{
+			topNum = get_top_neighbor_coeff_numbers(topIdx, block_idc_x, block_idc_y);
+		}
+		
+		nC = leftNum + topNum;
+		if (available_left && available_top)
+		{
+			nC++;
+			nC >>= 1;
+		}
+	}
 
 	return nC;
 }
 
-void CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int block_idc_x, int block_idc_y, int luma)
+int CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_x, int block_idc_y, int luma)
 {
 	int mb_idx = m_mb_idx;
 	int maxWH = (luma ? 16 : 8);
@@ -225,6 +242,7 @@ void CMacroblock::get_neighbor_available(bool &available_top, bool &available_le
 	if (!top_edge_mb)
 	{
 		available_top = true;
+		topIdx = mb_idx - width_in_mb;
 	}
 	else //ÉÏ±ßÑØºê¿é
 	{
@@ -235,12 +253,14 @@ void CMacroblock::get_neighbor_available(bool &available_top, bool &available_le
 		else
 		{
 			available_top = true;
+			topIdx = mb_idx;
 		}
 	}
 
 	if (!left_edge_mb)
 	{
 		available_left = true;
+		leftIdx = mb_idx - 1;
 	}
 	else //×ó±ßÑØºê¿é
 	{
@@ -251,10 +271,36 @@ void CMacroblock::get_neighbor_available(bool &available_top, bool &available_le
 		else
 		{
 			available_left = true;
+			leftIdx = mb_idx;
 		}
 	}
 	
-	return;
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_top_neighbor_coeff_numbers(int &topIdx, int block_idc_x, int block_idc_y)
+{
+	int nzCoeff = 0, target_idx_y = 0;
+
+	if (topIdx == m_mb_idx)
+	{
+		target_idx_y = block_idc_y - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs(block_idc_x, target_idx_y);
+	}
+
+	return nzCoeff;
+}
+
+int CMacroblock::get_left_neighbor_coeff_numbers(int &leftIdx, int block_idc_x, int block_idc_y)
+{
+	int nzCoeff = 0, target_idx_x = 0;
+	if (leftIdx == m_mb_idx)
+	{
+		target_idx_x = block_idc_x - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs(target_idx_x, block_idc_y);
+	}
+
+	return nzCoeff;
 }
 
 int CMacroblock::search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight)
