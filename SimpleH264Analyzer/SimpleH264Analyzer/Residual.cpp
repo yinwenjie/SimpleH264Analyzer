@@ -29,11 +29,16 @@ int CResidual::Parse_macroblock_residual()
 		parse_luma_residual(cbp_luma);
 	}
 
+	if (cbp_chroma)
+	{
+		parse_chroma_residual(cbp_chroma);
+	}
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 
 UINT8 CResidual::Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y)
-{
+{	
 	return luma_residual[block_idc_y][block_idc_x].numCoeff;
 }
 
@@ -42,9 +47,9 @@ int CResidual::parse_luma_residual(UINT8 cbp_luma)
 	int err = 0;
 	int idx8x8 = 0, block_x = 0, block_y = 0, block_sub_idc_x = 0, block_sub_idc_y = 0;
 
-	for (; block_y < 4; block_y += 2)
+	for (block_y = 0; block_y < 4; block_y += 2)
 	{
-		for (; block_x < 4; block_x += 2)
+		for (block_x = 0; block_x < 4; block_x += 2)
 		{
 			// 16x16 -> 4 * 8x8						
 			if (m_macroblock_belongs->Get_pps_active()->Get_transform_8x8_mode_flag() == false)
@@ -146,8 +151,9 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			//读取拖尾系数符号
 			int signValue = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, trailingOnes);
 			int trailingCnt = trailingOnes;
-			for (int coeffIdx = 0; coeffIdx < trailingCnt; coeffIdx++)
+			for (int coeffIdx = 0; coeffIdx < trailingOnes; coeffIdx++)
 			{
+				trailingCnt--;
 				if ((signValue >> trailingCnt) & 1)
 				{
 					luma_residual[block_idc_y][block_idc_x].trailingSign[coeffIdx] = -1;
@@ -229,6 +235,97 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			run = 0;
 		}
 		luma_residual[block_idc_y][block_idc_x].runBefore[i] = zerosLeft;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CResidual::parse_chroma_residual(UINT8 cbp_chroma)
+{
+	int err = 0;
+	// chroma DC
+	for (int idx = 0; idx < 2; idx++)
+	{
+		if (m_macroblock_belongs->Get_pps_active()->Get_transform_8x8_mode_flag() == false)
+		{
+			// CAVLC
+			err = get_chroma_DC_coeffs(idx);
+			if (err < 0)
+			{
+				return err;
+			}
+		}
+		else
+		{
+			// CABAC
+		}
+	}
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CResidual::get_chroma_DC_coeffs(int chroma_idx)
+{
+	int err = 0;
+	int max_coeff_num = 4, token = 0;
+	int suffixLength = 0;
+	
+	UINT8 numCoeff = 0, trailingOnes = 0;
+	err = get_numCoeff_and_trailingOnes_chromaDC(numCoeff, trailingOnes, token);
+	if (err < 0)
+	{
+		return err;
+	}
+
+	if (numCoeff) //包含非0系数
+	{
+		if (trailingOnes) //拖尾系数
+		{
+			//读取拖尾系数符号
+			int signValue = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, trailingOnes);
+			int trailingCnt = trailingOnes;
+			for (int coeffIdx = 0; coeffIdx < trailingOnes; coeffIdx++)
+			{
+				trailingCnt--;
+				if ((signValue >> trailingCnt) & 1)
+				{
+					chroma_DC_residual[chroma_idx].trailingSign[coeffIdx] = -1;
+				}
+				else
+				{
+					chroma_DC_residual[chroma_idx].trailingSign[coeffIdx] = 1;
+				}
+			}
+		}
+
+		//读取解析level值
+		int level = 0;
+		if (numCoeff > 10 && trailingOnes < 3)
+		{
+			//根据上下文初始化suffixLength
+			suffixLength = 1;
+		}
+		for (int k = 0; k <= numCoeff - 1 - trailingOnes; k++)
+		{
+			err = get_coeff_level(level, k, trailingOnes, suffixLength);
+			if (err < 0)
+			{
+				return err;
+			}
+
+			if (suffixLength == 0)
+			{
+				suffixLength = 1;
+			}
+			else
+			{
+				if (abs(level) > (3 << (suffixLength - 1)))
+				{
+					suffixLength++;
+				}
+			}
+
+			chroma_DC_residual[chroma_idx].levels[k] = level;
+		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -335,6 +432,20 @@ int CResidual::get_run_before(UINT8 &runBefore, int runBefore_vlcIdx)
 	int *lengthTable = &runBeforeTable_Length[runBefore_vlcIdx][0];
 	int *codeTable = &runBeforeTable_Code[runBefore_vlcIdx][0];
 	err = search_for_value_in_2D_table(runBefore, idx1, idx2, lengthTable, codeTable, 16, 1);
+	if (err < 0)
+	{
+		return err;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CResidual::get_numCoeff_and_trailingOnes_chromaDC(UINT8 &totalCoeff, UINT8 &trailingOnes, int &token)
+{
+	int err = 0;
+	int *lengthTable = &coeffTokenTableChromaDC_Length[0][0], *codeTable = &coeffTokenTableChromaDC_Code[0][0];
+
+	err = search_for_value_in_2D_table(totalCoeff, trailingOnes, token, lengthTable, codeTable, 5, 4);
 	if (err < 0)
 	{
 		return err;
