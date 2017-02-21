@@ -7,7 +7,7 @@ typedef struct Coeff4x4Block
 	UINT16 coeffToken;
 	UINT8  numCoeff;
 	UINT8  trailingOnes;
-	UINT8  trailingSign[3];
+	int  trailingSign[3];
 	int    levels[16];
 	UINT8  totalZeros;
 	UINT8  runBefore[16];
@@ -19,9 +19,9 @@ typedef struct Coeff4x4Block
 		numCoeff = 0;
 		trailingOnes = 0;
 		totalZeros = 0;
-		memset(trailingSign, 0, 3 * sizeof(UINT8));
+		memset(trailingSign, 0, 3 * sizeof(int));
 		memset(levels, 0, 16 * sizeof(int));
-		memset(runBefore, 0, 16 * sizeof(int));
+		memset(runBefore, 0, 16 * sizeof(UINT8));
 	}
 } Coeff4x4Block;
 
