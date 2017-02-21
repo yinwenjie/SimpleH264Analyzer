@@ -326,6 +326,48 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 
 			chroma_DC_residual[chroma_idx].levels[k] = level;
 		}
+
+
+		// 读取解析run
+		UINT8 zerosLeft = 0, totalZeros = 0, run = 0;
+		if (numCoeff < max_coeff_num)
+		{
+			err = get_total_zeros(totalZeros, numCoeff - 1);
+			if (err < 0)
+			{
+				return err;
+			}
+		}
+		else
+		{
+			totalZeros = 0;
+		}
+		chroma_DC_residual[chroma_idx].totalZeros = totalZeros;
+
+		//读取解析run_before
+		int runBefore_vlcIdx = 0;
+		int i = numCoeff - 1;
+		zerosLeft = totalZeros;
+		if (zerosLeft > 0 && i > 0)
+		{
+			do
+			{
+				runBefore_vlcIdx = (zerosLeft - 1 < 6 ? zerosLeft - 1 : 6);
+				err = get_run_before(run, runBefore_vlcIdx);
+				if (err < 0)
+				{
+					return err;
+				}
+				chroma_DC_residual[chroma_idx].runBefore[i] = run;
+				zerosLeft -= run;
+				i--;
+			} while (zerosLeft != 0 && i != 0);
+		}
+		else
+		{
+			run = 0;
+		}
+		chroma_DC_residual[chroma_idx].runBefore[i] = zerosLeft;
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
