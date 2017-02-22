@@ -51,6 +51,7 @@ private:
 
 	int parse_chroma_residual(UINT8 cbp_chroma);
 	int get_chroma_DC_coeffs(int chroma_idx);
+	int get_chroma_AC_coeffs(int chroma_idx, int block_idx_x, int block_idx_y);
 
 	int get_numCoeff_and_trailingOnes(UINT8 &totalCoeff, UINT8 &trailingOnes, int &token, int numCoeff_vlcIdx);
 	int get_coeff_level(int &level, int levelIdx, UINT8 trailingOnes, int suffixLength);
@@ -58,6 +59,7 @@ private:
 	int get_run_before(UINT8 &runBefore, int runBefore_vlcIdx);
 
 	int get_numCoeff_and_trailingOnes_chromaDC(UINT8 &totalCoeff, UINT8 &trailingOnes, int &token);
+	int get_total_zeros_chromaDC(UINT8 &totalZeros, int totalZeros_vlcIdx);
 
 	int search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 };

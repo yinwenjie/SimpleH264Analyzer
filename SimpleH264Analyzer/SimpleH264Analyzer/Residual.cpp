@@ -260,6 +260,26 @@ int CResidual::parse_chroma_residual(UINT8 cbp_chroma)
 			// CABAC
 		}
 	}
+
+	if (cbp_chroma & 2)
+	{
+		int err = 0;
+		for (int component = 0; component < 2; component++)
+		{
+			for (int block_idx_y = 0; block_idx_y  < 2; block_idx_y++)
+			{
+				for (int block_idx_x = 0; block_idx_x < 2; block_idx_x++)
+				{
+					err = get_chroma_AC_coeffs(component, block_idx_x, block_idx_y);
+					if (err < 0)
+					{
+						return err;
+					}
+				}
+			}
+		}
+	}
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 
@@ -332,7 +352,7 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 		UINT8 zerosLeft = 0, totalZeros = 0, run = 0;
 		if (numCoeff < max_coeff_num)
 		{
-			err = get_total_zeros(totalZeros, numCoeff - 1);
+			err = get_total_zeros_chromaDC(totalZeros, numCoeff - 1);
 			if (err < 0)
 			{
 				return err;
@@ -370,6 +390,11 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 		chroma_DC_residual[chroma_idx].runBefore[i] = zerosLeft;
 	}
 
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idx_x, int block_idx_y)
+{
 	return kPARSING_ERROR_NO_ERROR;
 }
 
@@ -488,6 +513,21 @@ int CResidual::get_numCoeff_and_trailingOnes_chromaDC(UINT8 &totalCoeff, UINT8 &
 	int *lengthTable = &coeffTokenTableChromaDC_Length[0][0], *codeTable = &coeffTokenTableChromaDC_Code[0][0];
 
 	err = search_for_value_in_2D_table(totalCoeff, trailingOnes, token, lengthTable, codeTable, 5, 4);
+	if (err < 0)
+	{
+		return err;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CResidual::get_total_zeros_chromaDC(UINT8 &totalZeros, int totalZeros_vlcIdx)
+{
+	int err = 0, idx2 = 0;
+	UINT8 idx1 = 0;
+	int *lengthTable = &totalZerosTableChromaDC_Length[totalZeros_vlcIdx][0];
+	int *codeTable = &totalZerosTableChromaDC_Code[totalZeros_vlcIdx][0];
+	err = search_for_value_in_2D_table(totalZeros, idx1, idx2, lengthTable, codeTable, 16, 1);
 	if (err < 0)
 	{
 		return err;
