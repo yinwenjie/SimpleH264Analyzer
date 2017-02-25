@@ -197,13 +197,47 @@ void CMacroblock::interpret_mb_mode()
 	}
 }
 
-int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y, int luma)
+int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y)
 {
 	int nC = 0, topIdx = 0, leftIdx = 0, leftNum = 0, topNum = 0;
 	bool available_top = false, available_left = false;
 
-	get_neighbor_available(available_top, available_left, topIdx, leftIdx, block_idc_x, block_idc_y, luma);
+	get_neighbor_available(available_top, available_left, topIdx, leftIdx, block_idc_x, block_idc_y);
+
+	if (!available_left && !available_top)
+	{
+		nC = 0;
+	}
+	else
+	{
+		if (available_left)
+		{			
+			leftNum = get_left_neighbor_coeff_numbers(leftIdx, block_idc_x, block_idc_y);			
+		}
+		if (available_top)
+		{		
+			topNum = get_top_neighbor_coeff_numbers(topIdx, block_idc_x, block_idc_y);			
+		}
+
+		nC = leftNum + topNum;
+		if (available_left && available_top)
+		{
+			nC++;
+			nC >>= 1;
+		}
+	}
 	
+	
+	return nC;
+}
+
+int CMacroblock::Get_number_current_chroma(int component, int block_idc_x, int block_idc_y)
+{
+	int nC = 0, topIdx = 0, leftIdx = 0, leftNum = 0, topNum = 0;
+	bool available_top = false, available_left = false;
+
+	get_neighbor_available(available_top, available_left, topIdx, leftIdx, block_idc_x, block_idc_y);
+
 	if (!available_left && !available_top)
 	{
 		nC = 0;
@@ -212,13 +246,13 @@ int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y, int luma)
 	{
 		if (available_left)
 		{
-			leftNum = get_left_neighbor_coeff_numbers(leftIdx, block_idc_x, block_idc_y);
+			leftNum = get_left_neighbor_coeff_numbers_chroma(leftIdx, component, block_idc_x, block_idc_y);
 		}
 		if (available_top)
 		{
-			topNum = get_top_neighbor_coeff_numbers(topIdx, block_idc_x, block_idc_y);
+			topNum = get_top_neighbor_coeff_numbers_chroma(topIdx, component, block_idc_x, block_idc_y);
 		}
-		
+
 		nC = leftNum + topNum;
 		if (available_left && available_top)
 		{
@@ -230,10 +264,9 @@ int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y, int luma)
 	return nC;
 }
 
-int CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_x, int block_idc_y, int luma)
+int CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_x, int block_idc_y)
 {
 	int mb_idx = m_mb_idx;
-	int maxWH = (luma ? 16 : 8);
 	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
 	int height_in_mb = m_slice->m_sps_active->Get_pic_height_in_mbs();
 
@@ -300,6 +333,28 @@ int CMacroblock::get_left_neighbor_coeff_numbers(int &leftIdx, int block_idc_x, 
 		nzCoeff = m_residual->Get_sub_block_number_coeffs(target_idx_x, block_idc_y);
 	}
 
+	return nzCoeff;
+}
+
+int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int &topIdx, int component, int block_idc_x, int block_idc_y)
+{
+	int nzCoeff = 0, target_idx_y = 0;
+	if (topIdx == m_mb_idx)
+	{
+		target_idx_y = block_idc_y - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, target_idx_y);
+	}
+	return nzCoeff;
+}
+
+int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int &leftIdx, int component, int block_idc_x, int block_idc_y)
+{
+	int nzCoeff = 0, target_idx_x = 0;
+	if (leftIdx == m_mb_idx)
+	{
+		target_idx_x = block_idc_x - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, target_idx_x, block_idc_y);
+	}
 	return nzCoeff;
 }
 

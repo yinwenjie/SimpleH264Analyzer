@@ -42,6 +42,11 @@ UINT8 CResidual::Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y)
 	return luma_residual[block_idc_y][block_idc_x].numCoeff;
 }
 
+UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y)
+{
+	return chroma_AC_residual[component][block_idc_y][block_idc_x].numCoeff;
+}
+
 int CResidual::parse_luma_residual(UINT8 cbp_luma)
 {
 	int err = 0;
@@ -111,7 +116,7 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 		break;
 	}
 
-	int numberCurrent = m_macroblock_belongs->Get_number_current(block_idc_x, block_idc_y, 1);
+	int numberCurrent = m_macroblock_belongs->Get_number_current(block_idc_x, block_idc_y);
 	if (numberCurrent < 2)
 	{
 		numCoeff_vlcIdx = 0;
@@ -393,8 +398,13 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idx_x, int block_idx_y)
+int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idc_x, int block_idc_y)
 {
+	int err = 0;
+	int max_coeff_num = 15;
+
+	int numberCurrent = m_macroblock_belongs->Get_number_current_chroma(chroma_idx, block_idc_x, block_idc_y);
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 

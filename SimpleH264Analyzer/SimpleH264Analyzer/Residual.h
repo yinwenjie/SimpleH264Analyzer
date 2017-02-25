@@ -35,6 +35,7 @@ public:
 	// ½âÎöºê¿éµÄÔ¤²â²Ð²î
 	int Parse_macroblock_residual();
 	UINT8 Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y);
+	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y);
 
 private:
 	CMacroblock *m_macroblock_belongs;
@@ -51,7 +52,7 @@ private:
 
 	int parse_chroma_residual(UINT8 cbp_chroma);
 	int get_chroma_DC_coeffs(int chroma_idx);
-	int get_chroma_AC_coeffs(int chroma_idx, int block_idx_x, int block_idx_y);
+	int get_chroma_AC_coeffs(int chroma_idx, int block_idc_x, int block_idc_y);
 
 	int get_numCoeff_and_trailingOnes(UINT8 &totalCoeff, UINT8 &trailingOnes, int &token, int numCoeff_vlcIdx);
 	int get_coeff_level(int &level, int levelIdx, UINT8 trailingOnes, int suffixLength);
