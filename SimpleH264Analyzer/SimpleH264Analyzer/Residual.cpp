@@ -402,8 +402,40 @@ int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idc_x, int block_i
 {
 	int err = 0;
 	int max_coeff_num = 15;
+	int numCoeff_vlcIdx = 0;
 
 	int numberCurrent = m_macroblock_belongs->Get_number_current_chroma(chroma_idx, block_idc_x, block_idc_y);
+	if (numberCurrent < 2)
+	{
+		numCoeff_vlcIdx = 0;
+	}
+	else if (numberCurrent < 4)
+	{
+		numCoeff_vlcIdx = 1;
+	}
+	else if (numCoeff_vlcIdx < 8)
+	{
+		numCoeff_vlcIdx = 2;
+	}
+	else
+	{
+		numCoeff_vlcIdx = 3;
+	}
+
+	// NumCoeff & TrailingOnes...
+	UINT8 numCoeff = 0, trailingOnes = 0;
+	int token = 0;
+	err = get_numCoeff_and_trailingOnes(numCoeff, trailingOnes, token, numCoeff_vlcIdx);
+	if (err < 0)
+	{
+		return err;
+	}
+	else
+	{
+		chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].coeffToken = token;
+		chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].numCoeff = numCoeff;
+		chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].trailingOnes = trailingOnes;
+	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }
