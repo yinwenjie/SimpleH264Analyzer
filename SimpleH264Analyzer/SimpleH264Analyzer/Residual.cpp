@@ -189,12 +189,10 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			{
 				suffixLength = 1;
 			}
-			else
+
+			if ((abs(level) >(3 << (suffixLength - 1))) && (suffixLength < 6))
 			{
-				if (abs(level) > (3 << (suffixLength - 1)))
-				{
-					suffixLength++;
-				}
+				suffixLength++;
 			}
 
 			luma_residual[block_idc_y][block_idc_x].levels[k] = level;
@@ -341,12 +339,10 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 			{
 				suffixLength = 1;
 			}
-			else
+
+			if ((abs(level) >(3 << (suffixLength - 1))) && (suffixLength < 6))
 			{
-				if (abs(level) > (3 << (suffixLength - 1)))
-				{
-					suffixLength++;
-				}
+				suffixLength++;
 			}
 
 			chroma_DC_residual[chroma_idx].levels[k] = level;
@@ -401,8 +397,8 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idc_x, int block_idc_y)
 {
 	int err = 0;
-	int max_coeff_num = 15;
-	int numCoeff_vlcIdx = 0;
+	int max_coeff_num = 15,i = 0;
+	int numCoeff_vlcIdx = 0, prefixLength = 0, suffixLength = 0, level_prefix = 0, level_suffix = 0;
 
 	int numberCurrent = m_macroblock_belongs->Get_number_current_chroma(chroma_idx, block_idc_x, block_idc_y);
 	if (numberCurrent < 2)
@@ -437,6 +433,96 @@ int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idc_x, int block_i
 		chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].trailingOnes = trailingOnes;
 	}
 
+	if (numCoeff) //包含非0系数
+	{
+		if (trailingOnes) //拖尾系数
+		{
+			//读取拖尾系数符号
+			int signValue = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, trailingOnes);
+			int trailingCnt = trailingOnes;
+			for (int coeffIdx = 0; coeffIdx < trailingOnes; coeffIdx++)
+			{
+				trailingCnt--;
+				if ((signValue >> trailingCnt) & 1)
+				{
+					chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].trailingSign[coeffIdx] = -1;
+				}
+				else
+				{
+					chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].trailingSign[coeffIdx] = 1;
+				}
+			}
+		}
+
+		//读取解析level值
+		int level = 0;
+		if (numCoeff > 10 && trailingOnes < 3)
+		{
+			//根据上下文初始化suffixLength
+			suffixLength = 1;
+		}
+		for (int k = 0; k <= numCoeff - 1 - trailingOnes; k++)
+		{
+			err = get_coeff_level(level, k, trailingOnes, suffixLength);
+			if (err < 0)
+			{
+				return err;
+			}
+
+			if (suffixLength == 0)
+			{
+				suffixLength = 1;
+			}
+						
+			if ((abs(level) > (3 << (suffixLength - 1))) && (suffixLength < 6))
+			{
+				suffixLength++;
+			}			
+
+			chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].levels[k] = level;
+		}
+
+		// 读取解析run
+		UINT8 zerosLeft = 0, totalZeros = 0, run = 0;
+		if (numCoeff < max_coeff_num)
+		{
+			err = get_total_zeros(totalZeros, numCoeff - 1);
+			if (err < 0)
+			{
+				return err;
+			}
+		}
+		else
+		{
+			totalZeros = 0;
+		}
+		chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].totalZeros = totalZeros;
+
+		//读取解析run_before
+		int runBefore_vlcIdx = 0;
+		i = numCoeff - 1;
+		zerosLeft = totalZeros;
+		if (zerosLeft > 0 && i > 0)
+		{
+			do
+			{
+				runBefore_vlcIdx = (zerosLeft - 1 < 6 ? zerosLeft - 1 : 6);
+				err = get_run_before(run, runBefore_vlcIdx);
+				if (err < 0)
+				{
+					return err;
+				}
+				chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].runBefore[i] = run;
+				zerosLeft -= run;
+				i--;
+			} while (zerosLeft != 0 && i != 0);
+		}
+		else
+		{
+			run = 0;
+		}
+		chroma_AC_residual[chroma_idx][block_idc_y][block_idc_x].runBefore[i] = zerosLeft;
+	}
 	return kPARSING_ERROR_NO_ERROR;
 }
 
