@@ -47,6 +47,57 @@ UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc
 	return chroma_AC_residual[component][block_idc_y][block_idc_x].numCoeff;
 }
 
+void CResidual::Dump_residual_info_4x4()
+{
+#if TRACE_CONFIG_LOGOUT
+
+#if TRACE_CONFIG_MACROBLOCK_RESIDUAL
+
+	g_traceFile << "Luma Residual 4x4:" << endl;
+	for (int row = 0; row < 4; row++)
+	{
+		for (int column = 0; column < 4; column++)
+		{
+			g_traceFile << "Luma[" << row << "][" << column << "]: ";
+			if (luma_residual[row][column].emptyBlock)
+			{
+				g_traceFile << "Empty." << endl;
+			} 
+			else
+			{
+				g_traceFile << "numCoeff: "<< to_string(luma_residual[row][column].numCoeff) << "\ttrailingOnes: "<< to_string(luma_residual[row][column].trailingOnes) << endl;
+				if (luma_residual[row][column].numCoeff)
+				{
+					if (luma_residual[row][column].trailingOnes)
+					{
+						g_traceFile << "\ttrailingSign: ";
+						for (int idx = 0; idx < luma_residual[row][column].trailingOnes; idx++)
+						{
+							g_traceFile << to_string(luma_residual[row][column].trailingSign[idx]) << " ";
+						}
+						g_traceFile << endl;
+					}
+
+					int levelCnt = luma_residual[row][column].numCoeff - luma_residual[row][column].trailingOnes;
+					if (levelCnt)
+					{
+						g_traceFile << "\tlevels: ";
+						for (int idx = 0; idx < levelCnt; idx++)
+						{
+							g_traceFile << to_string(luma_residual[row][column].levels[idx]) << " ";
+						}
+						g_traceFile << endl;
+					}
+				}
+			}
+		}
+	}
+
+#endif
+
+#endif
+}
+
 int CResidual::parse_luma_residual(UINT8 cbp_luma)
 {
 	int err = 0;

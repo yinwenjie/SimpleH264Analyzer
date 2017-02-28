@@ -129,6 +129,14 @@ UINT32 CMacroblock::Parse_macroblock()
 		m_residual->Parse_macroblock_residual();
 	}
 
+	// Êä³ömb headerÐÅÏ¢
+	Dump_macroblock_info();
+
+	if (m_mb_type == I4MB)
+	{
+		m_residual->Dump_residual_info_4x4();
+	}
+
 	m_mbDataSize = m_bypeOffset * 8 + m_bitOffset - m_mbDataSize;
 	return m_mbDataSize;
 }
@@ -162,7 +170,7 @@ void CMacroblock::Dump_macroblock_info()
 	{
 		g_traceFile << "mb_qp_delta: " << to_string(m_mb_qp_delta) << endl;
 	}
-	g_traceFile << "***************" << endl;
+//	g_traceFile << "***************" << endl;
 #endif
 
 #endif
