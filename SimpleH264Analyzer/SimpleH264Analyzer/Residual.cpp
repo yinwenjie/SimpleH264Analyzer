@@ -543,7 +543,16 @@ int CResidual::get_numCoeff_and_trailingOnes(UINT8 &totalCoeff, UINT8 &trailingO
 	}
 	else
 	{
-
+		totalCoeff = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 4);
+		trailingOnes = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 4);
+		if (!totalCoeff && trailingOnes == 3)
+		{
+			trailingOnes = 0;
+		} 
+		else
+		{
+			totalCoeff++;
+		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
