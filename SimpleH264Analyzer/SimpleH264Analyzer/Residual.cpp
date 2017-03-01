@@ -108,7 +108,7 @@ int CResidual::parse_luma_residual(UINT8 cbp_luma)
 		for (block_x = 0; block_x < 4; block_x += 2)
 		{
 			// 16x16 -> 4 * 8x8						
-			if (m_macroblock_belongs->Get_pps_active()->Get_transform_8x8_mode_flag() == false)
+			if (m_macroblock_belongs->Get_pps_active()->Get_entropy_coding_flag() == false)
 			{
 				// CAVLC
 				for (block_sub_idc_y = block_y; block_sub_idc_y < block_y + 2; block_sub_idc_y++)

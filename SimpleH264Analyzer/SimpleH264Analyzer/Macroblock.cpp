@@ -319,7 +319,7 @@ int CMacroblock::get_neighbor_available(bool &available_top, bool &available_lef
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::get_top_neighbor_coeff_numbers(int &topIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_top_neighbor_coeff_numbers(int topIdx, int block_idc_x, int block_idc_y)
 {
 	int nzCoeff = 0, target_idx_y = 0;
 
@@ -332,7 +332,7 @@ int CMacroblock::get_top_neighbor_coeff_numbers(int &topIdx, int block_idc_x, in
 	return nzCoeff;
 }
 
-int CMacroblock::get_left_neighbor_coeff_numbers(int &leftIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_x, int block_idc_y)
 {
 	int nzCoeff = 0, target_idx_x = 0;
 	if (leftIdx == m_mb_idx)
@@ -344,7 +344,7 @@ int CMacroblock::get_left_neighbor_coeff_numbers(int &leftIdx, int block_idc_x, 
 	return nzCoeff;
 }
 
-int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int &topIdx, int component, int block_idc_x, int block_idc_y)
+int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component, int block_idc_x, int block_idc_y)
 {
 	int nzCoeff = 0, target_idx_y = 0;
 	if (topIdx == m_mb_idx)
@@ -355,7 +355,7 @@ int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int &topIdx, int componen
 	return nzCoeff;
 }
 
-int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int &leftIdx, int component, int block_idc_x, int block_idc_y)
+int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int leftIdx, int component, int block_idc_x, int block_idc_y)
 {
 	int nzCoeff = 0, target_idx_x = 0;
 	if (leftIdx == m_mb_idx)
