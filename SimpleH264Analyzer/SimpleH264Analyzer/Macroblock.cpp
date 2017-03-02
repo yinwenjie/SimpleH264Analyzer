@@ -61,6 +61,7 @@ void CMacroblock::Set_slice_struct(CSliceStruct *sliceStruct)
 
 UINT32 CMacroblock::Parse_macroblock()
 {
+	UINT32 residualLength = 0;
 	m_mb_type = Get_uev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 
 	if (m_mb_type == 25)
@@ -125,19 +126,14 @@ UINT32 CMacroblock::Parse_macroblock()
 		interpret_mb_mode();
 		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 
+		// 输出mb header信息
+		Dump_macroblock_info();
+		
 		m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
-		m_residual->Parse_macroblock_residual();
+		m_residual->Parse_macroblock_residual(residualLength);
 	}
 
-	// 输出mb header信息
-	Dump_macroblock_info();
-
-	if (m_mb_type == I4MB)
-	{
-		m_residual->Dump_residual_info_4x4();
-	}
-
-	m_mbDataSize = m_bypeOffset * 8 + m_bitOffset - m_mbDataSize;
+	m_mbDataSize = m_bypeOffset * 8 + m_bitOffset - m_mbDataSize + residualLength;
 	return m_mbDataSize;
 }
 
@@ -328,6 +324,11 @@ int CMacroblock::get_top_neighbor_coeff_numbers(int topIdx, int block_idc_x, int
 		target_idx_y = block_idc_y - 1;
 		nzCoeff = m_residual->Get_sub_block_number_coeffs(block_idc_x, target_idx_y);
 	}
+	else
+	{
+		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
+		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(block_idc_x, 3);
+	}
 
 	return nzCoeff;
 }
@@ -339,6 +340,11 @@ int CMacroblock::get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_x, i
 	{
 		target_idx_x = block_idc_x - 1;
 		nzCoeff = m_residual->Get_sub_block_number_coeffs(target_idx_x, block_idc_y);
+	}
+	else
+	{
+		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
+		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(3, block_idc_y);
 	}
 
 	return nzCoeff;
@@ -352,6 +358,11 @@ int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component
 		target_idx_y = block_idc_y - 1;
 		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, target_idx_y);
 	}
+	else
+	{
+		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
+		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, 3);
+	}
 	return nzCoeff;
 }
 
@@ -363,6 +374,12 @@ int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int leftIdx, int compone
 		target_idx_x = block_idc_x - 1;
 		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, target_idx_x, block_idc_y);
 	}
+	else
+	{
+		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
+		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 3, block_idc_y);
+	}
+
 	return nzCoeff;
 }
 

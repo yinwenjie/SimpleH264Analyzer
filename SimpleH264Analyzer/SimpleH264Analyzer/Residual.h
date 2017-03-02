@@ -33,11 +33,12 @@ public:
 	~CResidual();
 
 	// ½âÎöºê¿éµÄÔ¤²â²Ð²î
-	int Parse_macroblock_residual();
+	int Parse_macroblock_residual(UINT32 &dataLength);
 	UINT8 Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y);
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y);
 
 	void  Dump_residual_info_4x4();
+	void  Dump_residual_chroma_DC();
 
 private:
 	CMacroblock *m_macroblock_belongs;

@@ -15,6 +15,7 @@ public:
 	CSliceHeader *m_sliceHeader;
 
 	int Parse();
+	CMacroblock *Get_macroblock_at_index(int mbIdx);
 
 	CSeqParamSet *m_sps_active;
 	CPicParamSet *m_pps_active;

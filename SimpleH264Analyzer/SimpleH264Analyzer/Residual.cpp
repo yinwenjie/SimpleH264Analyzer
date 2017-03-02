@@ -19,21 +19,29 @@ CResidual::~CResidual()
 {
 }
 
-int CResidual::Parse_macroblock_residual()
+int CResidual::Parse_macroblock_residual(UINT32 &dataLength)
 {
 	UINT8 cbp_luma = m_macroblock_belongs->m_cbp_luma;
 	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
+	UINT32 originOffset = 8 * m_bypeOffset + m_bitOffset;
 
 	if (cbp_luma)
 	{
 		parse_luma_residual(cbp_luma);
+
+		if (m_macroblock_belongs->m_mb_type == I4MB)
+		{
+			Dump_residual_info_4x4();
+		}
 	}
 
 	if (cbp_chroma)
 	{
 		parse_chroma_residual(cbp_chroma);
+		Dump_residual_chroma_DC();
 	}
 
+	dataLength = 8 * m_bypeOffset + m_bitOffset - originOffset;
 	return kPARSING_ERROR_NO_ERROR;
 }
 
@@ -54,45 +62,98 @@ void CResidual::Dump_residual_info_4x4()
 #if TRACE_CONFIG_MACROBLOCK_RESIDUAL
 
 	g_traceFile << "Luma Residual 4x4:" << endl;
-	for (int row = 0; row < 4; row++)
+	for (int outRow = 0; outRow < 4; outRow += 2)
 	{
-		for (int column = 0; column < 4; column++)
+		for (int outColumn = 0; outColumn < 4; outColumn += 2)
 		{
-			g_traceFile << "Luma[" << row << "][" << column << "]: ";
-			if (luma_residual[row][column].emptyBlock)
+			for (int row = outRow; row < outRow + 2; row++)
 			{
-				g_traceFile << "Empty." << endl;
-			} 
-			else
-			{
-				g_traceFile << "numCoeff: "<< to_string(luma_residual[row][column].numCoeff) << "\ttrailingOnes: "<< to_string(luma_residual[row][column].trailingOnes) << endl;
-				if (luma_residual[row][column].numCoeff)
+				for (int column = outColumn; column < outColumn + 2; column++)
 				{
-					if (luma_residual[row][column].trailingOnes)
+					g_traceFile << "Luma[" << row << "][" << column << "]: ";
+					if (luma_residual[row][column].emptyBlock)
 					{
-						g_traceFile << "\ttrailingSign: ";
-						for (int idx = 0; idx < luma_residual[row][column].trailingOnes; idx++)
-						{
-							g_traceFile << to_string(luma_residual[row][column].trailingSign[idx]) << " ";
-						}
-						g_traceFile << endl;
+						g_traceFile << "Empty." << endl;
 					}
+					else
+					{
+						g_traceFile << "numCoeff: " << to_string(luma_residual[row][column].numCoeff) << "\ttrailingOnes: " << to_string(luma_residual[row][column].trailingOnes) << endl;
+						if (luma_residual[row][column].numCoeff)
+						{
+							if (luma_residual[row][column].trailingOnes)
+							{
+								g_traceFile << "\ttrailingSign: ";
+								for (int idx = 0; idx < luma_residual[row][column].trailingOnes; idx++)
+								{
+									g_traceFile << to_string(luma_residual[row][column].trailingSign[idx]) << " ";
+								}
+								g_traceFile << endl;
+							}
 
-					int levelCnt = luma_residual[row][column].numCoeff - luma_residual[row][column].trailingOnes;
-					if (levelCnt)
-					{
-						g_traceFile << "\tlevels: ";
-						for (int idx = 0; idx < levelCnt; idx++)
-						{
-							g_traceFile << to_string(luma_residual[row][column].levels[idx]) << " ";
+							int levelCnt = luma_residual[row][column].numCoeff - luma_residual[row][column].trailingOnes;
+							if (levelCnt)
+							{
+								g_traceFile << "\tlevels: ";
+								for (int idx = 0; idx < levelCnt; idx++)
+								{
+									g_traceFile << to_string(luma_residual[row][column].levels[idx]) << " ";
+								}
+								g_traceFile << endl;
+							}
 						}
-						g_traceFile << endl;
 					}
+				}
+			}			
+		}
+	}
+
+#endif
+
+#endif
+}
+
+void CResidual::Dump_residual_chroma_DC()
+{
+#if TRACE_CONFIG_LOGOUT
+
+#if TRACE_CONFIG_MACROBLOCK_RESIDUAL
+
+	g_traceFile << "Chroma Residual DC:" << endl;
+	for (int chromaIdx = 0; chromaIdx < 2; chromaIdx++)
+	{
+		g_traceFile << "ChromaDC[" << chromaIdx << "]: ";
+		if (chroma_DC_residual[chromaIdx].emptyBlock)
+		{
+			g_traceFile << "Empty." << endl;
+		} 
+		else
+		{
+			g_traceFile << "numCoeff: " << to_string(chroma_DC_residual[chromaIdx].numCoeff) << "\ttrailingOnes: " << to_string(chroma_DC_residual[chromaIdx].trailingOnes) << endl;
+			if (chroma_DC_residual[chromaIdx].numCoeff)
+			{
+				if (chroma_DC_residual[chromaIdx].trailingOnes)
+				{
+					g_traceFile << "\ttrailingSign: ";
+					for (int idx = 0; idx < chroma_DC_residual[chromaIdx].trailingOnes; idx++)
+					{
+						g_traceFile << to_string(chroma_DC_residual[chromaIdx].trailingSign[idx]) << " ";
+					}
+					g_traceFile << endl;
+				}
+
+				int levelCnt = chroma_DC_residual[chromaIdx].numCoeff - chroma_DC_residual[chromaIdx].trailingOnes;
+				if (levelCnt)
+				{
+					g_traceFile << "\tlevels: ";
+					for (int idx = 0; idx < levelCnt; idx++)
+					{
+						g_traceFile << to_string(chroma_DC_residual[chromaIdx].levels[idx]) << " ";
+					}
+					g_traceFile << endl;
 				}
 			}
 		}
 	}
-
 #endif
 
 #endif
@@ -348,6 +409,12 @@ int CResidual::get_chroma_DC_coeffs(int chroma_idx)
 	if (err < 0)
 	{
 		return err;
+	}
+	else
+	{
+		chroma_DC_residual[chroma_idx].coeffToken = token;
+		chroma_DC_residual[chroma_idx].numCoeff = numCoeff;
+		chroma_DC_residual[chroma_idx].trailingOnes = trailingOnes;
 	}
 
 	if (numCoeff) //包含非0系数

@@ -61,9 +61,14 @@ int CSliceStruct::Parse()
 		m_macroblocks[idx]->Set_paramaters(m_pps_active);
 		m_macroblocks[idx]->Set_slice_struct(this);
 
-		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
-		break; //to be deleted
+		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();		
+		break;// to be deleted..
 	}
 	
 	return kPARSING_ERROR_NO_ERROR;
+}
+
+CMacroblock * CSliceStruct::Get_macroblock_at_index(int mbIdx)
+{
+	return m_macroblocks[mbIdx];
 }
