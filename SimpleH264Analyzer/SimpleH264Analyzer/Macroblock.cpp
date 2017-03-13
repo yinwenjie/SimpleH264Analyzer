@@ -120,15 +120,18 @@ UINT32 CMacroblock::Parse_macroblock()
 		m_cbp_luma = m_coded_block_pattern % 16;
 		m_cbp_chroma = m_coded_block_pattern / 16;
 	}
+	
+	if (m_mb_type == 0 || m_mb_type == 25)
+	{
+		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
+	}
 
+	// 输出mb header信息
+	Dump_macroblock_info();
+
+	interpret_mb_mode();
 	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
 	{
-		interpret_mb_mode();
-		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
-
-		// 输出mb header信息
-		Dump_macroblock_info();
-		
 		m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
 		m_residual->Parse_macroblock_residual(residualLength);
 	}
@@ -162,11 +165,7 @@ void CMacroblock::Dump_macroblock_info()
 	{
 		g_traceFile << "coded_block_pattern: " << to_string(m_coded_block_pattern) << endl;
 	}
-	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
-	{
-		g_traceFile << "mb_qp_delta: " << to_string(m_mb_qp_delta) << endl;
-	}
-//	g_traceFile << "***************" << endl;
+	g_traceFile << "mb_qp_delta: " << to_string(m_mb_qp_delta) << endl;
 #endif
 
 #endif

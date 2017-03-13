@@ -38,7 +38,9 @@ public:
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y);
 
 	void  Dump_residual_info_4x4();
+	void  Dump_residual_chroma(UINT8 cbp_chroma);
 	void  Dump_residual_chroma_DC();
+	void  Dump_residual_chroma_AC();
 
 private:
 	CMacroblock *m_macroblock_belongs;
