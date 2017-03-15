@@ -278,7 +278,7 @@ int CMacroblock::get_neighbor_available(bool &available_top, bool &available_lef
 	if (!top_edge_mb)
 	{
 		available_top = true;
-		topIdx = mb_idx - width_in_mb;
+		topIdx = block_idc_y == 0 ? (mb_idx - width_in_mb) : mb_idx;
 	}
 	else //ÉÏ±ßÑØºê¿é
 	{
@@ -296,7 +296,7 @@ int CMacroblock::get_neighbor_available(bool &available_top, bool &available_lef
 	if (!left_edge_mb)
 	{
 		available_left = true;
-		leftIdx = mb_idx - 1;
+		leftIdx = block_idc_x == 0 ? (mb_idx - 1) : mb_idx;
 	}
 	else //×ó±ßÑØºê¿é
 	{

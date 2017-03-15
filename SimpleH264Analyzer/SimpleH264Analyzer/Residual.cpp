@@ -195,7 +195,7 @@ void CResidual::Dump_residual_chroma_AC()
 						if (chroma_AC_residual[chromaIdx][block_idx_y][block_idx_x].trailingOnes != 0)
 						{
 							g_traceFile << "\ttrailingSign: ";
-							for (int idx = 0; idx < chroma_DC_residual[chromaIdx].trailingOnes; idx++)
+							for (int idx = 0; idx < chroma_AC_residual[chromaIdx][block_idx_y][block_idx_x].trailingOnes; idx++)
 							{
 								g_traceFile << to_string(chroma_AC_residual[chromaIdx][block_idx_y][block_idx_x].trailingSign[idx]) << " ";
 							}

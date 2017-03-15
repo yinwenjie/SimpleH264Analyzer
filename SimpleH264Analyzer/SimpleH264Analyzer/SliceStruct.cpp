@@ -62,7 +62,7 @@ int CSliceStruct::Parse()
 		m_macroblocks[idx]->Set_slice_struct(this);
 
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();	
-		if (idx == 1)
+		if (idx == 2)
 		break;// to be deleted..
 	}
 	
