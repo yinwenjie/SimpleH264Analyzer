@@ -52,7 +52,9 @@ private:
 	Coeff4x4Block chroma_DC_residual[2];
 	Coeff4x4Block chroma_AC_residual[2][2][2];
 
-	int parse_luma_residual(UINT8 cbp_luma);
+	Coeff4x4Block luma_residual16x16_DC;
+
+	int parse_luma_residual_4x4(UINT8 cbp_luma);
 	int get_luma4x4_coeffs(int block_idc_x, int block_idc_y);
 
 	int parse_chroma_residual(UINT8 cbp_chroma);

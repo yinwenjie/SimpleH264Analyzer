@@ -92,6 +92,7 @@ int CStreamFile::Parse_h264_bitstream()
 {
 	int ret = 0;
 	UINT8 nalType = 0;
+	UINT32 sliceIdx = 0;
 	do 
 	{
 		ret = find_nal_prefix();
@@ -112,7 +113,7 @@ int CStreamFile::Parse_h264_bitstream()
 					delete m_IDRSlice;
 					m_IDRSlice = NULL;
 				}
-				m_IDRSlice = new CSliceStruct(nalUnit.Get_SODB(), m_sps, m_pps, nalType);
+				m_IDRSlice = new CSliceStruct(nalUnit.Get_SODB(), m_sps, m_pps, nalType, sliceIdx++);
 				m_IDRSlice->Parse();
 				break;
 			case 7:

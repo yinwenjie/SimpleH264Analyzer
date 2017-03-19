@@ -8,7 +8,7 @@
 #include <iostream>
 using namespace std;
 
-CSliceStruct::CSliceStruct(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType)
+CSliceStruct::CSliceStruct(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType, UINT32 sliceIdx)
 {	
 
 	m_pSODB = pSODB;
@@ -17,6 +17,7 @@ CSliceStruct::CSliceStruct(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, U
 	m_nalType = nalType;
 
 	m_sliceHeader = NULL;
+	m_sliceIdx = sliceIdx;
 
 	m_max_mb_number = m_sps_active->Get_pic_width_in_mbs() * m_sps_active->Get_pic_height_in_mbs();
 	m_macroblocks = new CMacroblock *[m_max_mb_number];
@@ -54,6 +55,11 @@ int CSliceStruct::Parse()
 	macroblockOffset = sliceHeaderLength = m_sliceHeader->Parse_slice_header();
 	m_sliceHeader->Dump_slice_header_info();
 
+	if (m_sliceIdx != 0)
+	{
+		return kPARSING_ERROR_NO_ERROR;
+	}
+
 	for (int idx = 0; idx < m_max_mb_number; idx++)
 	{
 		m_macroblocks[idx] = new CMacroblock(m_pSODB, macroblockOffset, idx);
@@ -62,8 +68,8 @@ int CSliceStruct::Parse()
 		m_macroblocks[idx]->Set_slice_struct(this);
 
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();	
-		if (idx == 2)
-		break;// to be deleted..
+		if (idx == 4)
+			break;// to be deleted..
 	}
 	
 	return kPARSING_ERROR_NO_ERROR;

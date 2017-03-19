@@ -64,6 +64,7 @@ public:
 	UINT8  m_mb_type;
 	UINT8  m_cbp_luma;
 	UINT8  m_cbp_chroma;
+	int  m_intra16x16PredMode;
 
 private:
 	UINT8  *m_pSODB;

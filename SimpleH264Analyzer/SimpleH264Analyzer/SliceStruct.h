@@ -9,7 +9,7 @@ class CMacroblock;
 class CSliceStruct
 {
 public:
-	CSliceStruct(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType);
+	CSliceStruct(UINT8	*pSODB, CSeqParamSet *sps, CPicParamSet *pps, UINT8	nalType, UINT32 sliceIdx);
 	~CSliceStruct();
 
 	CSliceHeader *m_sliceHeader;
@@ -23,6 +23,7 @@ public:
 private:
 	UINT8	*m_pSODB;
 	UINT8   m_nalType;
+	UINT32  m_sliceIdx;
 
 	UINT16 m_max_mb_number;
 	CMacroblock **m_macroblocks;

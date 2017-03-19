@@ -19,6 +19,8 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 	m_mb_idx = idx;
 	m_transform_size_8x8_flag = false;
 
+	m_intra16x16PredMode = -1;
+
 	m_pps_active = NULL;
 	m_slice = NULL;
 
@@ -112,6 +114,12 @@ UINT32 CMacroblock::Parse_macroblock()
 	else
 	{
 		// To do: Intra_16x16 mode
+		m_intra16x16PredMode = (m_mb_type - 1) % 4;
+		m_cbp_luma = (m_mb_type <= 12) ? 0 : 15;
+		m_cbp_chroma = (m_mb_type / 4) % 3;
+
+		// intra_chroma_pred_mode
+		m_intra_chroma_pred_mode = Get_uev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 	}
 
 	if (m_mb_type == 0 || m_mb_type == 25)
@@ -121,7 +129,7 @@ UINT32 CMacroblock::Parse_macroblock()
 		m_cbp_chroma = m_coded_block_pattern / 16;
 	}
 	
-	if (m_mb_type == 0 || m_mb_type == 25)
+	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
 	{
 		m_mb_qp_delta = Get_sev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);
 	}
@@ -129,9 +137,9 @@ UINT32 CMacroblock::Parse_macroblock()
 	// Êä³ömb headerÐÅÏ¢
 	Dump_macroblock_info();
 
-	interpret_mb_mode();
 	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
 	{
+		interpret_mb_mode();
 		m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
 		m_residual->Parse_macroblock_residual(residualLength);
 	}
@@ -148,14 +156,17 @@ void CMacroblock::Dump_macroblock_info()
 
 	g_traceFile << "***** MB: " << to_string(m_mb_idx) << " *****" <<endl;
 	g_traceFile << "mb_type: " << to_string(m_mb_type) << endl;
-	if (!m_transform_size_8x8_flag)
+	if (m_mb_type == 0)
 	{
-		for (int idx = 0; idx < 16; idx++)
+		if (!m_transform_size_8x8_flag)
 		{
-			g_traceFile << "prev_intra4x4_pred_mode_flag: " << m_pred_struct[idx].prev_intra_pred_mode_flag << endl;
-			if (!m_pred_struct[idx].prev_intra_pred_mode_flag)
+			for (int idx = 0; idx < 16; idx++)
 			{
-				g_traceFile << "rem_intra4x4_pred_mode: " << to_string(m_pred_struct[idx].rem_intra_pred_mode) << endl;
+				g_traceFile << "prev_intra4x4_pred_mode_flag: " << m_pred_struct[idx].prev_intra_pred_mode_flag << endl;
+				if (!m_pred_struct[idx].prev_intra_pred_mode_flag)
+				{
+					g_traceFile << "rem_intra4x4_pred_mode: " << to_string(m_pred_struct[idx].rem_intra_pred_mode) << endl;
+				}
 			}
 		}
 	}
@@ -360,7 +371,7 @@ int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
-		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, 3);
+		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, 1);
 	}
 	return nzCoeff;
 }
@@ -376,7 +387,7 @@ int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int leftIdx, int compone
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
-		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 3, block_idc_y);
+		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 1, block_idc_y);
 	}
 
 	return nzCoeff;
