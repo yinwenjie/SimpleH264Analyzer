@@ -31,15 +31,16 @@ int CResidual::Parse_macroblock_residual(UINT32 &dataLength)
 		Dump_residual_luma16x16_DC();
 		if (cbp_luma)
 		{
-			// todo: luma16x16_AC
+			parse_luma_residual(LUMA_INTRA16x16AC, cbp_luma);
+			Dump_residual_luma(LUMA_INTRA16x16AC);
 		}
 	} 
 	else if (m_macroblock_belongs->m_mb_type == I4MB)
 	{
 		if (cbp_luma)
 		{
-			parse_luma_residual_4x4(cbp_luma);		
-			Dump_residual_info_4x4();			
+			parse_luma_residual(LUMA, cbp_luma);		
+			Dump_residual_luma(LUMA);
 		}
 	}	
 
@@ -63,13 +64,29 @@ UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc
 	return chroma_AC_residual[component][block_idc_y][block_idc_x].numCoeff;
 }
 
-void CResidual::Dump_residual_info_4x4()
+void CResidual::Dump_residual_luma(int blockType)
 {
 #if TRACE_CONFIG_LOGOUT
 
 #if TRACE_CONFIG_MACROBLOCK_RESIDUAL
 
-	g_traceFile << "Luma Residual 4x4:" << endl;
+	Coeff4x4Block (*targetBlock)[4] = NULL;
+	string name;
+
+	if (blockType == LUMA)
+	{
+		g_traceFile << "Luma Residual 4x4:" << endl;
+		targetBlock = luma_residual;
+		name = "Luma";
+	} 
+	else if (blockType == LUMA_INTRA16x16AC)
+	{
+		g_traceFile << "Luma Residual 16x16 AC:" << endl;
+		targetBlock = luma_residual16x16_AC;
+		name = "Luma16x16AC";
+	}
+
+	
 	for (int outRow = 0; outRow < 4; outRow += 2)
 	{
 		for (int outColumn = 0; outColumn < 4; outColumn += 2)
@@ -78,33 +95,33 @@ void CResidual::Dump_residual_info_4x4()
 			{
 				for (int column = outColumn; column < outColumn + 2; column++)
 				{
-					g_traceFile << "Luma[" << row << "][" << column << "]: ";
-					if (luma_residual[row][column].emptyBlock)
+					g_traceFile << name <<"[" << row << "][" << column << "]: ";
+					if (targetBlock[row][column].emptyBlock)
 					{
 						g_traceFile << "Empty." << endl;
 					}
 					else
 					{
-						g_traceFile << "numCoeff: " << to_string(luma_residual[row][column].numCoeff) << "\ttrailingOnes: " << to_string(luma_residual[row][column].trailingOnes) << endl;
-						if (luma_residual[row][column].numCoeff)
+						g_traceFile << "numCoeff: " << to_string(targetBlock[row][column].numCoeff) << "\ttrailingOnes: " << to_string(targetBlock[row][column].trailingOnes) << endl;
+						if (targetBlock[row][column].numCoeff)
 						{
-							if (luma_residual[row][column].trailingOnes)
+							if (targetBlock[row][column].trailingOnes)
 							{
 								g_traceFile << "\ttrailingSign: ";
-								for (int idx = 0; idx < luma_residual[row][column].trailingOnes; idx++)
+								for (int idx = 0; idx < targetBlock[row][column].trailingOnes; idx++)
 								{
-									g_traceFile << to_string(luma_residual[row][column].trailingSign[idx]) << " ";
+									g_traceFile << to_string(targetBlock[row][column].trailingSign[idx]) << " ";
 								}
 								g_traceFile << endl;
 							}
 
-							int levelCnt = luma_residual[row][column].numCoeff - luma_residual[row][column].trailingOnes;
+							int levelCnt = targetBlock[row][column].numCoeff - targetBlock[row][column].trailingOnes;
 							if (levelCnt)
 							{
 								g_traceFile << "\tlevels: ";
 								for (int idx = 0; idx < levelCnt; idx++)
 								{
-									g_traceFile << to_string(luma_residual[row][column].levels[idx]) << " ";
+									g_traceFile << to_string(targetBlock[row][column].levels[idx]) << " ";
 								}
 								g_traceFile << endl;
 							}
@@ -273,7 +290,7 @@ void CResidual::Dump_residual_luma16x16_DC()
 #endif
 }
 
-int CResidual::parse_luma_residual_4x4(UINT8 cbp_luma)
+int CResidual::parse_luma_residual(int blockType, UINT8 cbp_luma)
 {
 	int err = 0;
 	int idx8x8 = 0, block_x = 0, block_y = 0, block_sub_idc_x = 0, block_sub_idc_y = 0;
@@ -295,7 +312,7 @@ int CResidual::parse_luma_residual_4x4(UINT8 cbp_luma)
 						if (cbp_luma & (1 << idx8x8))
 						{
 							luma_residual[block_sub_idc_y][block_sub_idc_x].emptyBlock = false;
-							err = get_luma4x4_coeffs(LUMA, block_sub_idc_x, block_sub_idc_y);
+							err = get_luma4x4_coeffs(blockType, block_sub_idc_x, block_sub_idc_y);
 							if (err < 0)
 							{
 								return err;
@@ -340,6 +357,7 @@ int CResidual::get_luma4x4_coeffs(int blockType, int block_idc_x, int block_idc_
 		break;
 	case LUMA_INTRA16x16AC:
 		max_coeff_num = 15;
+		targetBlock = &luma_residual16x16_AC[block_idc_y][block_idc_x];
 		break;
 	default:
 		break;

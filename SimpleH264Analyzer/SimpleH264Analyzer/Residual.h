@@ -37,7 +37,7 @@ public:
 	UINT8 Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y);
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y);
 
-	void  Dump_residual_info_4x4();
+	void  Dump_residual_luma(int blockType);
 	void  Dump_residual_chroma(UINT8 cbp_chroma);
 	void  Dump_residual_chroma_DC();
 	void  Dump_residual_chroma_AC();
@@ -54,8 +54,9 @@ private:
 	Coeff4x4Block chroma_AC_residual[2][2][2];
 
 	Coeff4x4Block luma_residual16x16_DC;
+	Coeff4x4Block luma_residual16x16_AC[4][4];
 
-	int parse_luma_residual_4x4(UINT8 cbp_luma);
+	int parse_luma_residual(int blockType, UINT8 cbp_luma);
 	int get_luma4x4_coeffs(int blockType, int block_idc_x, int block_idc_y);
 
 	int parse_luma_residual_16x16_DC();
