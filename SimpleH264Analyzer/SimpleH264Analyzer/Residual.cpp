@@ -27,7 +27,12 @@ int CResidual::Parse_macroblock_residual(UINT32 &dataLength)
 
 	if (m_macroblock_belongs->m_mb_type == I16MB)
 	{
-
+		parse_luma_residual_16x16_DC();
+		Dump_residual_luma16x16_DC();
+		if (cbp_luma)
+		{
+			// todo: luma16x16_AC
+		}
 	} 
 	else if (m_macroblock_belongs->m_mb_type == I4MB)
 	{
@@ -36,13 +41,13 @@ int CResidual::Parse_macroblock_residual(UINT32 &dataLength)
 			parse_luma_residual_4x4(cbp_luma);		
 			Dump_residual_info_4x4();			
 		}
-
-		if (cbp_chroma)
-		{
-			parse_chroma_residual(cbp_chroma);
-			Dump_residual_chroma(cbp_chroma);
-		}
 	}	
+
+	if (cbp_chroma)
+	{
+		parse_chroma_residual(cbp_chroma);
+		Dump_residual_chroma(cbp_chroma);
+	}
 
 	dataLength = 8 * m_bypeOffset + m_bitOffset - originOffset;
 	return kPARSING_ERROR_NO_ERROR;
@@ -225,6 +230,49 @@ void CResidual::Dump_residual_chroma_AC()
 #endif
 }
 
+void CResidual::Dump_residual_luma16x16_DC()
+{
+#if TRACE_CONFIG_LOGOUT
+
+#if TRACE_CONFIG_MACROBLOCK_RESIDUAL
+	g_traceFile << "Luma Residual 16x16 DC:" << endl;
+	g_traceFile << "Luma16x16DC: ";
+	if (luma_residual16x16_DC.emptyBlock == true)
+	{
+		g_traceFile << "Empty." << endl;
+	} 
+	else
+	{
+		g_traceFile << "numCoeff: " << to_string(luma_residual16x16_DC.numCoeff) << "\ttrailingOnes: " << to_string(luma_residual16x16_DC.trailingOnes) << endl;
+		if (luma_residual16x16_DC.numCoeff != 0)
+		{
+			if (luma_residual16x16_DC.trailingOnes != 0)
+			{
+				g_traceFile << "\ttrailingSign: ";
+				for (int idx = 0; idx < luma_residual16x16_DC.trailingOnes; idx++)
+				{
+					g_traceFile << to_string(luma_residual16x16_DC.trailingSign[idx]) << " ";
+				}
+				g_traceFile << endl;
+			}
+			int levelCnt = luma_residual16x16_DC.numCoeff - luma_residual16x16_DC.trailingOnes;
+			if (levelCnt)
+			{
+				g_traceFile << "\tlevels: ";
+				for (int idx = 0; idx < levelCnt; idx++)
+				{
+					g_traceFile << to_string(luma_residual16x16_DC.levels[idx]) << " ";
+				}
+				g_traceFile << endl;
+			}
+		}
+	}
+
+#endif
+
+#endif
+}
+
 int CResidual::parse_luma_residual_4x4(UINT8 cbp_luma)
 {
 	int err = 0;
@@ -247,7 +295,7 @@ int CResidual::parse_luma_residual_4x4(UINT8 cbp_luma)
 						if (cbp_luma & (1 << idx8x8))
 						{
 							luma_residual[block_sub_idc_y][block_sub_idc_x].emptyBlock = false;
-							err = get_luma4x4_coeffs(block_sub_idc_x, block_sub_idc_y);
+							err = get_luma4x4_coeffs(LUMA, block_sub_idc_x, block_sub_idc_y);
 							if (err < 0)
 							{
 								return err;
@@ -270,25 +318,25 @@ int CResidual::parse_luma_residual_4x4(UINT8 cbp_luma)
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
+int CResidual::get_luma4x4_coeffs(int blockType, int block_idc_x, int block_idc_y)
 {
 	int err = 0;
 	int mb_type = m_macroblock_belongs->m_mb_type;
-	int block_type = (mb_type == I16MB || mb_type == IPCM) ? LUMA_INTRA16x16AC : LUMA;
 	int max_coeff_num = 0;
 	int numCoeff_vlcIdx = 0, prefixLength = 0, suffixLength = 0, level_prefix = 0, level_suffix = 0;
 	int levelSuffixSize = 0, levelCode = 0, i = 0;
 
 	Coeff4x4Block *targetBlock = NULL;
 	
-	switch (block_type)
+	switch (blockType)
 	{
 	case LUMA:
 		max_coeff_num = 16;
 		targetBlock = &luma_residual[block_idc_y][block_idc_x];
 		break;
 	case LUMA_INTRA16x16DC:
-		max_coeff_num = 15;
+		max_coeff_num = 16;
+		targetBlock = &luma_residual16x16_DC;
 		break;
 	case LUMA_INTRA16x16AC:
 		max_coeff_num = 15;
@@ -419,6 +467,17 @@ int CResidual::get_luma4x4_coeffs(int block_idc_x, int block_idc_y)
 			run = 0;
 		}
 		targetBlock->runBefore[i] = zerosLeft;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CResidual::parse_luma_residual_16x16_DC()
+{
+	int err = get_luma4x4_coeffs(LUMA_INTRA16x16DC, 0, 0);
+	if (err < 0)
+	{
+		return err;
 	}
 
 	return kPARSING_ERROR_NO_ERROR;

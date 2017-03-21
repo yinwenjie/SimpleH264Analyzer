@@ -41,6 +41,7 @@ public:
 	void  Dump_residual_chroma(UINT8 cbp_chroma);
 	void  Dump_residual_chroma_DC();
 	void  Dump_residual_chroma_AC();
+	void  Dump_residual_luma16x16_DC();
 
 private:
 	CMacroblock *m_macroblock_belongs;
@@ -55,7 +56,9 @@ private:
 	Coeff4x4Block luma_residual16x16_DC;
 
 	int parse_luma_residual_4x4(UINT8 cbp_luma);
-	int get_luma4x4_coeffs(int block_idc_x, int block_idc_y);
+	int get_luma4x4_coeffs(int blockType, int block_idc_x, int block_idc_y);
+
+	int parse_luma_residual_16x16_DC();
 
 	int parse_chroma_residual(UINT8 cbp_chroma);
 	int get_chroma_DC_coeffs(int chroma_idx);
