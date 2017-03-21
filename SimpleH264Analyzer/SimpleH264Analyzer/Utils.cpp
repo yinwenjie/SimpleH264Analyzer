@@ -3,7 +3,7 @@
 
 //********************Parsing Bitstream**********************
 // Get bool value from bit position..
-int Get_bit_at_position(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
+int Get_bit_at_position(UINT8 *buf, UINT32 &bytePosition, UINT8 &bitPosition)
 {
 	UINT8 mask = 0, val = 0;
 
@@ -19,7 +19,7 @@ int Get_bit_at_position(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
 }
 
 // Parse bit stream using Expo-Columb coding
-int Get_uev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
+int Get_uev_code_num(UINT8 *buf, UINT32 &bytePosition, UINT8 &bitPosition)
 {
 	assert(bitPosition < 8);
 	UINT8 val = 0, prefixZeroCount = 0;
@@ -50,7 +50,7 @@ int Get_uev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
 }
 
 // Parse bit stream using signed-Expo-Columb coding
-int Get_sev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
+int Get_sev_code_num(UINT8 *buf, UINT32 &bytePosition, UINT8 &bitPosition)
 {
 	int uev = Get_uev_code_num(buf, bytePosition, bitPosition);
 	int sign = (uev % 2) ? 1 : -1;
@@ -60,7 +60,7 @@ int Get_sev_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition)
 }
 
 // Parse bit stream as unsigned int bits
-int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 length)
+int Get_uint_code_num(UINT8 *buf, UINT32 &bytePosition, UINT8 &bitPosition, UINT8 length)
 {
 	UINT32 uVal = 0;
 
@@ -71,7 +71,7 @@ int Get_uint_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8
 
 	return uVal;
 }
-int Peek_uint_code_num(UINT8 *buf, UINT8 bytePosition, UINT8 bitPosition, UINT8 length)
+int Peek_uint_code_num(UINT8 *buf, UINT32 bytePosition, UINT8 bitPosition, UINT8 length)
 {
 	UINT32 uVal = 0;
 
@@ -85,7 +85,7 @@ int Peek_uint_code_num(UINT8 *buf, UINT8 bytePosition, UINT8 bitPosition, UINT8 
 
 
 // Parse bit stream as me(coded_block_pattern)
-int Get_me_code_num(UINT8 *buf, UINT8 &bytePosition, UINT8 &bitPosition, UINT8 mode)
+int Get_me_code_num(UINT8 *buf, UINT32 &bytePosition, UINT8 &bitPosition, UINT8 mode)
 {
 	int intra_cbp[48] = { 47, 31, 15, 0, 23, 27, 29, 30, 7, 11, 13, 14, 39, 43, 45, 46, 16, 3, 5, 10, 12, 19, 21, 26, 28, 35, 37, 42, 44, 1, 2 ,4, 8, 17,18,20,24,6,9,22,25,32,33,34,36,40,38,41};
 	int uev = Get_uev_code_num(buf, bytePosition, bitPosition);

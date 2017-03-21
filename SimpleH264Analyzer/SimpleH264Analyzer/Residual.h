@@ -46,7 +46,7 @@ public:
 private:
 	CMacroblock *m_macroblock_belongs;
 	UINT8  *m_pSODB;
-	UINT8  m_bypeOffset;
+	UINT32 m_bypeOffset;
 	UINT8  m_bitOffset;
 
 	Coeff4x4Block luma_residual[4][4];

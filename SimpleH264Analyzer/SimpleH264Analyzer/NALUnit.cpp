@@ -44,7 +44,8 @@ int CNALUnit::Parse_as_seq_param_set(CSeqParamSet *sps)
 	UINT32 frame_crop_offset[4] = {0};
 	bool   vui_parameters_present_flag = 0;
 
-	UINT8 bypePosition = 3, bitPosition = 0; 
+	UINT8  bitPosition = 0; 
+	UINT32 bypePosition = 3;
 	UINT32 flags = 0;
 
 	profile_idc = m_pSODB[0];
@@ -147,7 +148,8 @@ int CNALUnit::Parse_as_pic_param_set(CPicParamSet *pps)
 	bool   constrained_intra_pred_flag = 0;
 	bool   redundant_pic_cnt_present_flag = 0;
 
-	UINT8 bypePosition = 0, bitPosition = 0;
+	UINT8  bitPosition = 0;
+	UINT32 bypePosition = 0;
 	UINT16 flags = 0;
 
 	pps_id = Get_uev_code_num(m_pSODB, bypePosition, bitPosition);

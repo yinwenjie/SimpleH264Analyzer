@@ -33,7 +33,8 @@ CSliceHeader::~CSliceHeader()
 UINT32 CSliceHeader::Parse_slice_header()
 {
 	UINT32 sliceHeaderLengthInBits = 0;
-	UINT8 bytePosition = 0, bitPosition = 0;
+	UINT8  bitPosition = 0;
+	UINT32 bytePosition = 0;
 
 	m_first_mb_in_slice = Get_uev_code_num(m_pSODB, bytePosition, bitPosition);
 	m_slice_type = Get_uev_code_num(m_pSODB, bytePosition, bitPosition);

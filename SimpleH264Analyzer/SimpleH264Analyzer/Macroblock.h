@@ -69,7 +69,7 @@ public:
 private:
 	UINT8  *m_pSODB;
 	UINT32 m_mbDataSize;
-	UINT8  m_bypeOffset;
+	UINT32  m_bypeOffset;
 	UINT8  m_bitOffset;
 
 	CPicParamSet *m_pps_active;
