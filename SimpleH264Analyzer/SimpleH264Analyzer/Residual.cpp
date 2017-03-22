@@ -673,7 +673,7 @@ int CResidual::get_chroma_AC_coeffs(int chroma_idx, int block_idc_x, int block_i
 	{
 		numCoeff_vlcIdx = 1;
 	}
-	else if (numCoeff_vlcIdx < 8)
+	else if (numberCurrent < 8)
 	{
 		numCoeff_vlcIdx = 2;
 	}
