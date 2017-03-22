@@ -372,7 +372,7 @@ int CResidual::get_luma4x4_coeffs(int blockType, int block_idc_x, int block_idc_
 	{
 		numCoeff_vlcIdx = 1;
 	}
-	else if (numCoeff_vlcIdx < 8)
+	else if (numberCurrent < 8)
 	{
 		numCoeff_vlcIdx = 2;
 	}
@@ -808,7 +808,7 @@ int CResidual::get_numCoeff_and_trailingOnes(UINT8 &totalCoeff, UINT8 &trailingO
 	else
 	{
 		totalCoeff = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 4);
-		trailingOnes = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 4);
+		trailingOnes = Get_uint_code_num(m_pSODB, m_bypeOffset, m_bitOffset, 2);
 		if (!totalCoeff && trailingOnes == 3)
 		{
 			trailingOnes = 0;
