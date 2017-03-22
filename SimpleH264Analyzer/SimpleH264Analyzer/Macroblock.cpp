@@ -116,7 +116,7 @@ UINT32 CMacroblock::Parse_macroblock()
 		// To do: Intra_16x16 mode
 		m_intra16x16PredMode = (m_mb_type - 1) % 4;
 		m_cbp_luma = (m_mb_type <= 12) ? 0 : 15;
-		m_cbp_chroma = (m_mb_type / 4) % 3;
+		m_cbp_chroma = ((m_mb_type - 1) / 4) % 3;
 
 		// intra_chroma_pred_mode
 		m_intra_chroma_pred_mode = Get_uev_code_num(m_pSODB, m_bypeOffset, m_bitOffset);

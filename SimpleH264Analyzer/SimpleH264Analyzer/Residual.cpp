@@ -56,7 +56,26 @@ int CResidual::Parse_macroblock_residual(UINT32 &dataLength)
 
 UINT8 CResidual::Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y)
 {	
-	return luma_residual[block_idc_y][block_idc_x].numCoeff;
+	UINT8 numCoeff = 0;
+
+	if (m_macroblock_belongs->m_mb_type == I4MB)
+	{
+		numCoeff = luma_residual[block_idc_y][block_idc_x].numCoeff;
+	}
+	else if (m_macroblock_belongs->m_mb_type = I16MB)
+	{
+		if (block_idc_x == 0 && block_idc_y == 0)
+		{
+			numCoeff = luma_residual16x16_DC.numCoeff;
+		}
+
+		if (m_macroblock_belongs->m_cbp_luma)
+		{
+			numCoeff = luma_residual16x16_AC[block_idc_y][block_idc_x].numCoeff;
+		}
+	}
+
+	return numCoeff;
 }
 
 UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y)
