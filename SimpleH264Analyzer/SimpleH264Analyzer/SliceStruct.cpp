@@ -69,7 +69,6 @@ int CSliceStruct::Parse()
 
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();			
 	}
-	exit(0);// to be deleted..
 	
 	return kPARSING_ERROR_NO_ERROR;
 }

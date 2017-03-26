@@ -23,6 +23,7 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 
 	m_pps_active = NULL;
 	m_slice = NULL;
+	m_pred_struct = NULL;
 
 	m_residual = NULL;
 
