@@ -23,6 +23,7 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 
 	m_pps_active = NULL;
 	m_slice = NULL;
+	m_pred_struct = NULL;
 
 	m_residual = NULL;
 
@@ -337,7 +338,14 @@ int CMacroblock::get_top_neighbor_coeff_numbers(int topIdx, int block_idc_x, int
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
-		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(block_idc_x, 3);
+		if (targetMB->m_residual)
+		{
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(block_idc_x, 3);
+		}
+		else
+		{
+			nzCoeff = 0;
+		}
 	}
 
 	return nzCoeff;
@@ -354,7 +362,14 @@ int CMacroblock::get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_x, i
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
-		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(3, block_idc_y);
+		if (targetMB->m_residual)
+		{
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(3, block_idc_y);
+		}
+		else
+		{
+			nzCoeff = 0;
+		}
 	}
 
 	return nzCoeff;
@@ -371,7 +386,14 @@ int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
-		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, 1);
+		if (targetMB->m_residual)
+		{
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, 1);
+		} 
+		else
+		{
+			nzCoeff = 0;
+		}		
 	}
 	return nzCoeff;
 }
@@ -387,7 +409,14 @@ int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int leftIdx, int compone
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
-		nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 1, block_idc_y);
+		if (targetMB->m_residual)
+		{
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 1, block_idc_y);
+		}
+		else
+		{
+			nzCoeff = 0;
+		}
 	}
 
 	return nzCoeff;
