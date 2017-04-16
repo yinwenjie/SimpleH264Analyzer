@@ -13,6 +13,25 @@ CResidual::CResidual(UINT8 *pSODB, UINT32 offset, CMacroblock *mb)
 	m_pSODB = pSODB;
 	m_bypeOffset = offset / 8;
 	m_bitOffset = offset % 8;
+
+	for (int i = 0; i < 16; i++)
+	{
+		for (int j = 0; j < 16; j++)
+		{
+			m_coeff_matrix_luma[i][j] = 0;
+		}
+	}
+
+	for (int chrIdx = 0; chrIdx < 2; chrIdx++)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				m_coeff_matrix_chroma[chrIdx][i][j] = 0;
+			}
+		}
+	}
 }
 
 CResidual::~CResidual()
@@ -81,6 +100,25 @@ UINT8 CResidual::Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y)
 UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y)
 {
 	return chroma_AC_residual[component][block_idc_y][block_idc_x].numCoeff;
+}
+
+void CResidual::Restore_coeff_matrix()
+{
+	UINT8 cbp_luma = m_macroblock_belongs->m_cbp_luma;
+	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
+
+	if (m_macroblock_belongs->m_mb_type == I4MB)
+	{
+		for (int blk8Idx = 0; blk8Idx < 4; blk8Idx++)
+		{
+			int rowIdxStart = 8 * (blk8Idx % 2), columnIdxStart = 8 * (blk8Idx / 2);
+			if (cbp_luma & (1 << blk8Idx))
+			{
+				restore_8x8_coeff_block(&m_coeff_matrix_luma[rowIdxStart][columnIdxStart], blk8Idx, LUMA);
+			}
+		}
+	}
+	
 }
 
 void CResidual::Dump_residual_luma(int blockType)
@@ -989,3 +1027,46 @@ int CResidual::search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &c
 found:
 	return err;
 }
+
+void CResidual::restore_8x8_coeff_block(int *start, int idx, int blockType)
+{
+	int max_coeff_num = 0;
+	switch (blockType)
+	{
+	case LUMA:
+		max_coeff_num = 16;
+		break;
+	case LUMA_INTRA16x16DC:
+		max_coeff_num = 16;
+		break;
+	case LUMA_INTRA16x16AC:
+		max_coeff_num = 15;
+		break;
+	default:
+		break;
+	}
+
+	int coeffBuf[16] = { 0 };
+	int blkRowIdxStart = 4 * (idx / 2), blkColumnIdxStart = 4 * (idx % 2);
+	for (int rowIdx = blkRowIdxStart; rowIdx < blkRowIdxStart + 2; rowIdx++)
+	{
+		for (int columnIdx = blkColumnIdxStart; columnIdx < blkColumnIdxStart + 2; columnIdx ++)
+		{
+			UINT8 numCoeff = luma_residual[rowIdx][columnIdx].numCoeff, coeffIdx = numCoeff;
+			UINT8 trailingOnes = luma_residual[rowIdx][columnIdx].trailingOnes, trailingLeft = trailingOnes;
+			
+			// write trailing ones
+			for (int i = numCoeff + trailingOnes - 1, j = trailingOnes - 1; j >= 0; j--)
+			{
+				coeffBuf[i--] = luma_residual[rowIdx][columnIdx].trailingSign[j];
+			}
+
+			// write levels
+			for (int i = numCoeff - 1; i >= 0; i--)
+			{
+				coeffBuf[i] = luma_residual[rowIdx][columnIdx].levels[numCoeff - 1 - i];
+			}
+		}
+	}
+}
+

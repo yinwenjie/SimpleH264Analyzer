@@ -36,6 +36,7 @@ public:
 	int Parse_macroblock_residual(UINT32 &dataLength);
 	UINT8 Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y);
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y);
+	void Restore_coeff_matrix();
 
 	void  Dump_residual_luma(int blockType);
 	void  Dump_residual_chroma(UINT8 cbp_chroma);
@@ -48,6 +49,9 @@ private:
 	UINT8  *m_pSODB;
 	UINT32 m_bypeOffset;
 	UINT8  m_bitOffset;
+
+	int m_coeff_matrix_luma[16][16];
+	int m_coeff_matrix_chroma[2][8][8];
 
 	Coeff4x4Block luma_residual[4][4];
 	Coeff4x4Block chroma_DC_residual[2];
@@ -74,6 +78,8 @@ private:
 	int get_total_zeros_chromaDC(UINT8 &totalZeros, int totalZeros_vlcIdx);
 
 	int search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
+
+	void restore_8x8_coeff_block(int *start, int idx, int blockType);
 };
 
 #endif
