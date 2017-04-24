@@ -7,6 +7,13 @@
 
 using namespace std;
 
+void swap(int &x, int &y)
+{
+	int temp = x;
+	x = y;
+	y = temp;
+}
+
 CResidual::CResidual(UINT8 *pSODB, UINT32 offset, CMacroblock *mb)
 {
 	m_macroblock_belongs = mb;
@@ -114,7 +121,7 @@ void CResidual::Restore_coeff_matrix()
 			int rowIdxStart = 8 * (blk8Idx % 2), columnIdxStart = 8 * (blk8Idx / 2);
 			if (cbp_luma & (1 << blk8Idx))
 			{
-				restore_8x8_coeff_block(&m_coeff_matrix_luma[rowIdxStart][columnIdxStart], blk8Idx, LUMA);
+				restore_8x8_coeff_block(m_coeff_matrix_luma, blk8Idx, LUMA);
 			}
 		}
 	}
@@ -1028,7 +1035,7 @@ found:
 	return err;
 }
 
-void CResidual::restore_8x8_coeff_block(int *start, int idx, int blockType)
+void CResidual::restore_8x8_coeff_block(int (*matrix)[16], int idx, int blockType)
 {
 	int max_coeff_num = 0;
 	switch (blockType)
@@ -1046,27 +1053,58 @@ void CResidual::restore_8x8_coeff_block(int *start, int idx, int blockType)
 		break;
 	}
 
-	int coeffBuf[16] = { 0 };
-	int blkRowIdxStart = 4 * (idx / 2), blkColumnIdxStart = 4 * (idx % 2);
+	int blkRowIdxStart = 2 * (idx / 2), blkColumnIdxStart = 2 * (idx % 2);
 	for (int rowIdx = blkRowIdxStart; rowIdx < blkRowIdxStart + 2; rowIdx++)
 	{
 		for (int columnIdx = blkColumnIdxStart; columnIdx < blkColumnIdxStart + 2; columnIdx ++)
 		{
+			int coeffBuf[16] = { 0 };
 			UINT8 numCoeff = luma_residual[rowIdx][columnIdx].numCoeff, coeffIdx = numCoeff;
 			UINT8 trailingOnes = luma_residual[rowIdx][columnIdx].trailingOnes, trailingLeft = trailingOnes;
-			
+			UINT8 totalZeros = luma_residual[rowIdx][columnIdx].totalZeros;
+
 			// write trailing ones
-			for (int i = numCoeff + trailingOnes - 1, j = trailingOnes - 1; j >= 0; j--)
+			for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
 			{
 				coeffBuf[i--] = luma_residual[rowIdx][columnIdx].trailingSign[j];
 			}
 
 			// write levels
-			for (int i = numCoeff - 1; i >= 0; i--)
+			for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
 			{
-				coeffBuf[i] = luma_residual[rowIdx][columnIdx].levels[numCoeff - 1 - i];
+				coeffBuf[i] = luma_residual[rowIdx][columnIdx].levels[numCoeff - trailingOnes - 1 - i];
 			}
+
+			// move levels with run_before
+			for (int i = numCoeff - 1; i > 0; i--)
+			{
+				swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+				totalZeros -= luma_residual[rowIdx][columnIdx].runBefore[i];
+			}
+			swap(coeffBuf[0], coeffBuf[totalZeros]);
+
+			insert_matrix(m_coeff_matrix_luma, coeffBuf, 0, 16, columnIdx, rowIdx);
 		}
+	}
+}
+
+const int SNGL_SCAN[16][2] =
+{
+	{ 0, 0 }, { 1, 0 }, { 0, 1 }, { 0, 2 },
+	{ 1, 1 }, { 2, 0 }, { 3, 0 }, { 2, 1 },
+	{ 1, 2 }, { 0, 3 }, { 1, 3 }, { 2, 2 },
+	{ 3, 1 }, { 3, 2 }, { 2, 3 }, { 3, 3 }
+};
+
+void CResidual::insert_matrix(int(*matrix)[16], int *block, int start, int maxCoeffNum, int x, int y)
+{
+	int row = 0, column = 0, startX = 4 * x, startY = 4 * y;
+	for (int idx = 0, pos0 = start; idx < maxCoeffNum && pos0 < 16; idx++)
+	{
+		row = SNGL_SCAN[pos0][0] + startY;
+		column = SNGL_SCAN[pos0][1] + startX;
+		matrix[row][column] = block[idx];
+		pos0++;
 	}
 }
 

@@ -143,6 +143,11 @@ UINT32 CMacroblock::Parse_macroblock()
 		interpret_mb_mode();
 		m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
 		m_residual->Parse_macroblock_residual(residualLength);
+
+		if (m_mb_idx == 0)// to be deleted
+		{
+			m_residual->Restore_coeff_matrix();
+		}
 	}
 
 	m_mbDataSize = m_bypeOffset * 8 + m_bitOffset - m_mbDataSize + residualLength;
