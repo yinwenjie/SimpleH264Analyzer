@@ -7,6 +7,13 @@
 
 using namespace std;
 
+void swap(int &x, int &y)
+{
+	int temp = x;
+	x = y;
+	y = temp;
+}
+
 CResidual::CResidual(UINT8 *pSODB, UINT32 offset, CMacroblock *mb)
 {
 	m_macroblock_belongs = mb;
@@ -1054,17 +1061,29 @@ void CResidual::restore_8x8_coeff_block(int *start, int idx, int blockType)
 		{
 			UINT8 numCoeff = luma_residual[rowIdx][columnIdx].numCoeff, coeffIdx = numCoeff;
 			UINT8 trailingOnes = luma_residual[rowIdx][columnIdx].trailingOnes, trailingLeft = trailingOnes;
-			
+			UINT8 totalZeros = luma_residual[rowIdx][columnIdx].totalZeros;
+
 			// write trailing ones
-			for (int i = numCoeff + trailingOnes - 1, j = trailingOnes - 1; j >= 0; j--)
+			for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
 			{
 				coeffBuf[i--] = luma_residual[rowIdx][columnIdx].trailingSign[j];
 			}
 
 			// write levels
-			for (int i = numCoeff - 1; i >= 0; i--)
+			for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
 			{
-				coeffBuf[i] = luma_residual[rowIdx][columnIdx].levels[numCoeff - 1 - i];
+				coeffBuf[i] = luma_residual[rowIdx][columnIdx].levels[numCoeff - trailingOnes - 1 - i];
+			}
+
+			// move levels with run_before
+			for (int i = numCoeff - 1; i > 0; i--)
+			{
+				for (int i = numCoeff - 1; i > 0; i--)
+				{
+					swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+					totalZeros -= luma_residual[rowIdx][columnIdx].runBefore[numCoeff - 1 - i];
+				}
+				swap(coeffBuf[0], coeffBuf[totalZeros]);
 			}
 		}
 	}
