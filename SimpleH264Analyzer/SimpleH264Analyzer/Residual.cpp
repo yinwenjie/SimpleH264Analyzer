@@ -112,20 +112,26 @@ UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc
 void CResidual::Restore_coeff_matrix()
 {
 	UINT8 cbp_luma = m_macroblock_belongs->m_cbp_luma;
-	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
 
 	if (m_macroblock_belongs->m_mb_type == I4MB)
 	{
 		for (int blk8Idx = 0; blk8Idx < 4; blk8Idx++)
 		{
-			int rowIdxStart = 8 * (blk8Idx % 2), columnIdxStart = 8 * (blk8Idx / 2);
 			if (cbp_luma & (1 << blk8Idx))
 			{
-				restore_8x8_coeff_block(m_coeff_matrix_luma, blk8Idx, LUMA);
+				restore_8x8_coeff_block_luma(m_coeff_matrix_luma, blk8Idx, LUMA);
 			}
 		}
 	}
+	else if (m_macroblock_belongs->m_mb_type == I16MB)
+	{
+	}
 	
+
+	for (int blk8Idx = 0; blk8Idx < 2; blk8Idx++)
+	{
+		restore_8x8_coeff_block_chroma(m_coeff_matrix_chroma, blk8Idx);
+	}
 }
 
 void CResidual::Dump_residual_luma(int blockType)
@@ -1035,7 +1041,7 @@ found:
 	return err;
 }
 
-void CResidual::restore_8x8_coeff_block(int (*matrix)[16], int idx, int blockType)
+void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blockType)
 {
 	int max_coeff_num = 0;
 	switch (blockType)
@@ -1086,6 +1092,11 @@ void CResidual::restore_8x8_coeff_block(int (*matrix)[16], int idx, int blockTyp
 			insert_matrix(m_coeff_matrix_luma, coeffBuf, 0, 16, columnIdx, rowIdx);
 		}
 	}
+}
+
+void CResidual::restore_8x8_coeff_block_chroma(int(*matrix)[8][8], int idx)
+{
+
 }
 
 const int SNGL_SCAN[16][2] =
