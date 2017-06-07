@@ -112,7 +112,6 @@ UINT8 CResidual::Get_sub_block_number_coeffs_chroma(int component, int block_idc
 void CResidual::Restore_coeff_matrix()
 {
 	UINT8 cbp_luma = m_macroblock_belongs->m_cbp_luma;
-
 	if (m_macroblock_belongs->m_mb_type == I4MB)
 	{
 		for (int blk8Idx = 0; blk8Idx < 4; blk8Idx++)
@@ -127,10 +126,13 @@ void CResidual::Restore_coeff_matrix()
 	{
 	}
 	
-
-	for (int blk8Idx = 0; blk8Idx < 2; blk8Idx++)
+	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
+	if (cbp_chroma > 0)
 	{
-		restore_8x8_coeff_block_chroma(m_coeff_matrix_chroma, blk8Idx);
+		for (int blk8Idx = 0; blk8Idx < 2; blk8Idx++)
+		{
+			restore_8x8_coeff_block_chroma_DC(m_coeff_matrix_chroma, blk8Idx);
+		}
 	}
 }
 
@@ -1097,6 +1099,33 @@ void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blo
 void CResidual::restore_8x8_coeff_block_chroma(int(*matrix)[8][8], int idx)
 {
 
+}
+
+void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[8][8], int idx)
+{
+	UINT8 numCoeff = chroma_DC_residual[idx].numCoeff;
+	UINT8 trailingOnes = chroma_DC_residual[idx].trailingOnes, trailingLeft = trailingOnes;
+	UINT8 totalZeros = chroma_DC_residual[idx].totalZeros;
+	int coeffBuf[4] = { 0 };
+
+	// write trailing ones
+	for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
+	{
+		coeffBuf[i--] = chroma_DC_residual[idx].trailingSign[j];
+	}
+
+	// write levels
+	for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
+	{
+		coeffBuf[i] = chroma_DC_residual[idx].levels[numCoeff - trailingOnes - 1 - i];
+	}
+
+	// move levels with run_before
+	for (int i = numCoeff - 1; i > 0; i--)
+	{
+		swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+		totalZeros -= chroma_DC_residual[idx].runBefore[i];
+	}
 }
 
 const int SNGL_SCAN[16][2] =
