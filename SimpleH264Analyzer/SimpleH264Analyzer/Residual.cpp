@@ -133,6 +133,14 @@ void CResidual::Restore_coeff_matrix()
 		{
 			restore_8x8_coeff_block_chroma_DC(m_coeff_matrix_chroma, blk8Idx);
 		}
+
+		if (cbp_chroma > 1)
+		{
+			for (int chrIdx = 0; chrIdx < 2; chrIdx++)
+			{
+				restore_8x8_coeff_block_chroma_AC(m_coeff_matrix_chroma, chrIdx);
+			}
+		}
 	}
 }
 
@@ -1096,9 +1104,39 @@ void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blo
 	}
 }
 
-void CResidual::restore_8x8_coeff_block_chroma(int(*matrix)[8][8], int idx)
+void CResidual::restore_8x8_coeff_block_chroma_AC(int(*matrix)[8][8], int idx)
 {
+	int coeffBuf[15] = { 0 };
+	for (int rowIdx = 0; rowIdx < 2; rowIdx++)
+	{
+		for (int columnIdx = 0; columnIdx < 2; columnIdx++)
+		{
+			UINT8 numCoeff = chroma_AC_residual[idx][rowIdx][columnIdx].numCoeff;
+			UINT8 trailingOnes = chroma_AC_residual[idx][rowIdx][columnIdx].trailingOnes, trailingLeft = trailingOnes;
+			UINT8 totalZeros = chroma_AC_residual[idx][rowIdx][columnIdx].totalZeros;
 
+			// write trailing ones
+			for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
+			{
+				coeffBuf[i--] = chroma_AC_residual[idx][rowIdx][columnIdx].trailingSign[j];
+			}
+
+			// write levels
+			for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
+			{
+				coeffBuf[i] = chroma_AC_residual[idx][rowIdx][columnIdx].levels[numCoeff - trailingOnes - 1 - i];
+			}
+
+			// move levels with run_before
+			for (int i = numCoeff - 1; i > 0; i--)
+			{
+				swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+				totalZeros -= chroma_AC_residual[idx][rowIdx][columnIdx].runBefore[i];
+			}
+
+			// insert coeffBuf......
+		}
+	}
 }
 
 void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[8][8], int idx)
@@ -1126,6 +1164,8 @@ void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[8][8], int idx)
 		swap(coeffBuf[i], coeffBuf[i + totalZeros]);
 		totalZeros -= chroma_DC_residual[idx].runBefore[i];
 	}
+
+	// insert coeffBuf......
 }
 
 const int SNGL_SCAN[16][2] =

@@ -80,8 +80,8 @@ private:
 	int search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	void restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blockType);
-	void restore_8x8_coeff_block_chroma(int (*matrix)[8][8], int idx);
-	void restore_8x8_coeff_block_chroma_DC(int(*matrix)[8][8], int idx);
+	void restore_8x8_coeff_block_chroma_AC(int (*matrix)[8][8], int idx);
+	void restore_8x8_coeff_block_chroma_DC(int (*matrix)[8][8], int idx);
 	void insert_matrix(int(*matrix)[16], int *block, int start, int maxCoeffNum, int x, int y);
 };
 
