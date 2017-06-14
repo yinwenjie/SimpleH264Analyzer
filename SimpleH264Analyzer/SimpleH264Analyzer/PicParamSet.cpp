@@ -109,3 +109,8 @@ bool CPicParamSet::Get_entropy_coding_flag()
 {
 	return m_entropy_coding_flag;
 }
+
+int CPicParamSet::Get_pic_init_qp()
+{
+	return m_pic_init_qp;
+}

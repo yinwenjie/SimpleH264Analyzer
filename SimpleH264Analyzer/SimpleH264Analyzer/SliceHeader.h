@@ -29,6 +29,7 @@ public:
 	void  Dump_slice_header_info();
 
 	UINT8 Get_slice_type();
+	int  Get_slice_qp_delta();
 private:
 	CSeqParamSet *m_sps_active;
 	CPicParamSet *m_pps_active;

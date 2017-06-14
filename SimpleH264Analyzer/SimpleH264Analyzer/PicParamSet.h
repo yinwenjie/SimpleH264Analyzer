@@ -20,6 +20,7 @@ public:
 	bool Get_bottom_field_pic_order_in_frame_present_flag();
 	bool Get_transform_8x8_mode_flag();
 	bool Get_entropy_coding_flag();
+	int  Get_pic_init_qp();
 
 	void Dump_pps_info();
 

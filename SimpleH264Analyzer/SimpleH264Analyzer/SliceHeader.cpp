@@ -138,3 +138,8 @@ UINT8 CSliceHeader::Get_slice_type()
 {
 	return m_slice_type;
 }
+
+int CSliceHeader::Get_slice_qp_delta()
+{
+	return m_slice_qp_delta;
+}
