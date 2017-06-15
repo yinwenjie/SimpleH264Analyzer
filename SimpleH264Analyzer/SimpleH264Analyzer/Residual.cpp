@@ -51,6 +51,8 @@ int CResidual::Parse_macroblock_residual(UINT32 &dataLength)
 	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
 	UINT32 originOffset = 8 * m_bypeOffset + m_bitOffset;
 
+	m_qp = m_macroblock_belongs->m_mb_qp;
+
 	if (m_macroblock_belongs->m_mb_type == I16MB)
 	{
 		parse_luma_residual_16x16_DC();
@@ -1178,12 +1180,13 @@ const int SNGL_SCAN[16][2] =
 
 void CResidual::insert_matrix(int(*matrix)[16], int *block, int start, int maxCoeffNum, int x, int y)
 {
+	int qp_per = m_qp / 6, qp_rem = m_qp % 6;
 	int row = 0, column = 0, startX = 4 * x, startY = 4 * y;
 	for (int idx = 0, pos0 = start; idx < maxCoeffNum && pos0 < 16; idx++)
 	{
-		row = SNGL_SCAN[pos0][0] + startY;
-		column = SNGL_SCAN[pos0][1] + startX;
-		matrix[row][column] = block[idx];
+		row = SNGL_SCAN[pos0][0];
+		column = SNGL_SCAN[pos0][1];
+		matrix[row + startY][column + startX] = block[idx] * dequant_coef[qp_rem][row][column] << qp_per;
 		pos0++;
 	}
 }
