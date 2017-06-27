@@ -95,6 +95,8 @@ private:
 	void restore_8x8_coeff_block_chroma_AC(int (*matrix)[8][8], int idx);
 	void restore_8x8_coeff_block_chroma_DC(int (*matrix)[8][8], int idx);
 	void insert_matrix(int(*matrix)[16], int *block, int start, int maxCoeffNum, int x, int y);
+
+	void coeff_invers_transform(int (*coeff_buf)[4], int(*residual_buf)[4]);
 };
 
 #endif

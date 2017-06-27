@@ -1182,12 +1182,63 @@ void CResidual::insert_matrix(int(*matrix)[16], int *block, int start, int maxCo
 {
 	int qp_per = m_qp / 6, qp_rem = m_qp % 6;
 	int row = 0, column = 0, startX = 4 * x, startY = 4 * y;
+	int coeff_buf[4][4] = { 0 }, residual_buf[4][4] = { 0 };
 	for (int idx = 0, pos0 = start; idx < maxCoeffNum && pos0 < 16; idx++)
 	{
 		row = SNGL_SCAN[pos0][0];
 		column = SNGL_SCAN[pos0][1];
-		matrix[row + startY][column + startX] = block[idx] * dequant_coef[qp_rem][row][column] << qp_per;
+		//matrix[row + startY][column + startX]
+		coeff_buf[row][column] = block[idx] * dequant_coef[qp_rem][row][column] << qp_per;
 		pos0++;
+	}
+
+	coeff_invers_transform(coeff_buf, residual_buf);
+}
+
+void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4])
+{
+	int temp1[4] = { 0 }, temp2[4] = { 0 };
+
+	// horizontal-trans
+	for (int colum = 0; colum < 4; colum++)
+	{
+		for (int row = 0; row < 4; row++)
+		{
+			temp1[row] = coeff_buf[row][colum];
+		}
+
+		temp2[0] = (temp1[0] + temp1[2]);
+		temp2[1] = (temp1[0] - temp1[2]);
+		temp2[2] = (temp1[1] >> 1) - temp1[3];
+		temp2[3] = temp1[1] + (temp1[3] >> 1);
+
+		for (int i = 0; i < 2; i++)
+		{
+			int i1 = 3 - i;
+			residual_buf[i][colum] = temp2[i] + temp2[i1];
+			residual_buf[i1][colum] = temp2[i] - temp2[i1];
+		}
+	}
+
+	// vertical-trans
+	for (int colum = 0; colum < 4; colum++)
+	{
+		for (int row = 0; row < 4; row++)
+		{
+			temp1[row] = residual_buf[row][colum];
+		}
+
+		temp2[0] = (temp1[0] + temp1[2]);
+		temp2[1] = (temp1[0] - temp1[2]);
+		temp2[2] = (temp1[1] >> 1) - temp1[3];
+		temp2[3] = temp1[1] + (temp1[3] >> 1);
+
+		for (int j = 0; j < 2; j++)
+		{
+			int j1 = 3 - j;
+			residual_buf[colum][j1] = temp2[j] + temp2[j1];
+			residual_buf[colum][j] = temp2[j] - temp2[j1];
+		}
 	}
 }
 
