@@ -1200,11 +1200,11 @@ void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]
 	int temp1[4] = { 0 }, temp2[4] = { 0 };
 
 	// horizontal-trans
-	for (int colum = 0; colum < 4; colum++)
+	for (int j = 0; j < 4; j++)
 	{
-		for (int row = 0; row < 4; row++)
+		for (int i = 0; i < 4; i++)
 		{
-			temp1[row] = coeff_buf[row][colum];
+			temp1[i] = coeff_buf[i][j];
 		}
 
 		temp2[0] = (temp1[0] + temp1[2]);
@@ -1215,17 +1215,17 @@ void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]
 		for (int i = 0; i < 2; i++)
 		{
 			int i1 = 3 - i;
-			residual_buf[i][colum] = temp2[i] + temp2[i1];
-			residual_buf[i1][colum] = temp2[i] - temp2[i1];
+			residual_buf[i][j] = temp2[i] + temp2[i1];
+			residual_buf[i1][j] = temp2[i] - temp2[i1];
 		}
 	}
 
 	// vertical-trans
-	for (int colum = 0; colum < 4; colum++)
+	for (int i = 0; i < 4; i++)
 	{
-		for (int row = 0; row < 4; row++)
+		for (int j = 0; j < 4; j++)
 		{
-			temp1[row] = residual_buf[row][colum];
+			temp1[j] = residual_buf[i][j];
 		}
 
 		temp2[0] = (temp1[0] + temp1[2]);
@@ -1236,8 +1236,8 @@ void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]
 		for (int j = 0; j < 2; j++)
 		{
 			int j1 = 3 - j;
-			residual_buf[colum][j1] = temp2[j] + temp2[j1];
-			residual_buf[colum][j] = temp2[j] - temp2[j1];
+			residual_buf[i][j] = temp2[j] + temp2[j1];
+			residual_buf[i][j1] = temp2[j] - temp2[j1];
 		}
 	}
 }
