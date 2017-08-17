@@ -21,21 +21,27 @@ CResidual::CResidual(UINT8 *pSODB, UINT32 offset, CMacroblock *mb)
 	m_bypeOffset = offset / 8;
 	m_bitOffset = offset % 8;
 
-	for (int i = 0; i < 16; i++)
+	for (int idx = 0; idx < 16; idx++)
 	{
-		for (int j = 0; j < 16; j++)
+		for (int i = 0; i < 16; i++)
 		{
-			m_coeff_matrix_luma[i][j] = 0;
+			for (int j = 0; j < 16; j++)
+			{
+				m_coeff_matrix_luma[idx][i][j] = 0;
+			}
 		}
 	}
 
 	for (int chrIdx = 0; chrIdx < 2; chrIdx++)
 	{
-		for (int i = 0; i < 8; i++)
+		for (int idx = 0; idx < 4; idx++)
 		{
-			for (int j = 0; j < 8; j++)
+			for (int i = 0; i < 4; i++)
 			{
-				m_coeff_matrix_chroma[chrIdx][i][j] = 0;
+				for (int j = 0; j < 4; j++)
+				{
+					m_coeff_matrix_chroma[chrIdx][idx][i][j] = 0;
+				}
 			}
 		}
 	}
@@ -1053,7 +1059,7 @@ found:
 	return err;
 }
 
-void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blockType)
+void CResidual::restore_8x8_coeff_block_luma(int(*matrix)[4][4], int idx, int blockType)
 {
 	int max_coeff_num = 0;
 	switch (blockType)
@@ -1106,7 +1112,7 @@ void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blo
 	}
 }
 
-void CResidual::restore_8x8_coeff_block_chroma_AC(int(*matrix)[8][8], int idx)
+void CResidual::restore_8x8_coeff_block_chroma_AC(int(*matrix)[4][4][4], int idx)
 {
 	int coeffBuf[15] = { 0 };
 	for (int rowIdx = 0; rowIdx < 2; rowIdx++)
@@ -1141,7 +1147,7 @@ void CResidual::restore_8x8_coeff_block_chroma_AC(int(*matrix)[8][8], int idx)
 	}
 }
 
-void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[8][8], int idx)
+void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[4][4][4], int idx)
 {
 	UINT8 numCoeff = chroma_DC_residual[idx].numCoeff;
 	UINT8 trailingOnes = chroma_DC_residual[idx].trailingOnes, trailingLeft = trailingOnes;
@@ -1168,6 +1174,10 @@ void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[8][8], int idx)
 	}
 
 	// insert coeffBuf......
+	for (int pos = 0; pos < 4; pos++)
+	{
+		m_coeff_matrix_chroma[idx][pos][0][0] = coeffBuf[pos];
+	}
 }
 
 const int SNGL_SCAN[16][2] =
@@ -1178,7 +1188,7 @@ const int SNGL_SCAN[16][2] =
 	{ 3, 1 }, { 3, 2 }, { 2, 3 }, { 3, 3 }
 };
 
-void CResidual::insert_matrix(int(*matrix)[16], int *block, int start, int maxCoeffNum, int x, int y)
+void CResidual::insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y)
 {
 	int qp_per = m_qp / 6, qp_rem = m_qp % 6;
 	int row = 0, column = 0, startX = 4 * x, startY = 4 * y;

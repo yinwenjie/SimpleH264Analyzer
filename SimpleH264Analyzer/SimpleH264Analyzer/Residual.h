@@ -62,8 +62,8 @@ private:
 
 	int m_qp;
 
-	int m_coeff_matrix_luma[16][16];
-	int m_coeff_matrix_chroma[2][8][8];
+	int m_coeff_matrix_luma[16][4][4];
+	int m_coeff_matrix_chroma[2][4][4][4];
 
 	Coeff4x4Block luma_residual[4][4];
 	Coeff4x4Block chroma_DC_residual[2];
@@ -91,10 +91,10 @@ private:
 
 	int search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
-	void restore_8x8_coeff_block_luma(int (*matrix)[16], int idx, int blockType);
-	void restore_8x8_coeff_block_chroma_AC(int (*matrix)[8][8], int idx);
-	void restore_8x8_coeff_block_chroma_DC(int (*matrix)[8][8], int idx);
-	void insert_matrix(int(*matrix)[16], int *block, int start, int maxCoeffNum, int x, int y);
+	void restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int blockType);
+	void restore_8x8_coeff_block_chroma_AC(int (*matrix)[4][4][4], int idx);
+	void restore_8x8_coeff_block_chroma_DC(int (*matrix)[4][4][4], int idx);
+	void insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y);
 
 	void coeff_invers_transform(int (*coeff_buf)[4], int(*residual_buf)[4]);
 };
