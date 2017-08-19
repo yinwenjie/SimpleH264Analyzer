@@ -28,6 +28,7 @@ CResidual::CResidual(UINT8 *pSODB, UINT32 offset, CMacroblock *mb)
 			for (int j = 0; j < 16; j++)
 			{
 				m_coeff_matrix_luma[idx][i][j] = 0;
+				m_residual_matrix_luma[idx][i][j] = 0;
 			}
 		}
 	}
@@ -41,6 +42,7 @@ CResidual::CResidual(UINT8 *pSODB, UINT32 offset, CMacroblock *mb)
 				for (int j = 0; j < 4; j++)
 				{
 					m_coeff_matrix_chroma[chrIdx][idx][i][j] = 0;
+					m_residual_matrix_chroma[chrIdx][idx][i][j] = 0;
 				}
 			}
 		}
@@ -1108,6 +1110,8 @@ void CResidual::restore_8x8_coeff_block_luma(int(*matrix)[4][4], int idx, int bl
 			swap(coeffBuf[0], coeffBuf[totalZeros]);
 
 			insert_matrix(m_coeff_matrix_luma, coeffBuf, 0, 16, columnIdx, rowIdx);
+
+			coeff_invers_transform(m_coeff_matrix_luma[4 * rowIdx + columnIdx], m_residual_matrix_luma[4 * rowIdx + columnIdx]);
 		}
 	}
 }
@@ -1191,18 +1195,37 @@ const int SNGL_SCAN[16][2] =
 void CResidual::insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y)
 {
 	int qp_per = m_qp / 6, qp_rem = m_qp % 6;
-	int row = 0, column = 0, startX = 4 * x, startY = 4 * y;
+	int row = 0, column = 0, block_index = x + 4 * y, startX = start / 4, startY = start % 4;
 	int coeff_buf[4][4] = { 0 }, residual_buf[4][4] = { 0 };
 	for (int idx = 0, pos0 = start; idx < maxCoeffNum && pos0 < 16; idx++)
 	{
 		row = SNGL_SCAN[pos0][0];
 		column = SNGL_SCAN[pos0][1];
-		//matrix[row + startY][column + startX]
-		coeff_buf[row][column] = block[idx] * dequant_coef[qp_rem][row][column] << qp_per;
+		matrix[block_index][row + startY][column + startX] = block[idx] * dequant_coef[qp_rem][row][column] << qp_per;
 		pos0++;
 	}
 
-	coeff_invers_transform(coeff_buf, residual_buf);
+	// Debug >
+	printf("\nBlock( %d , %d ):\n", x, y);
+	for (int a = 0; a < 4; a++)
+	{
+		for (int b = 0; b < 4; b++)
+		{
+			printf("%4d\t", matrix[block_index][a][b]);
+		}
+		printf("\n");
+	}
+	// Debug <
+
+//	coeff_invers_transform(coeff_buf, residual_buf);
+	
+// 	for (int m = 0; m < 4; m++)
+// 	{
+// 		for (int n = 0; n < 4; n++)
+// 		{
+// 			matrix[block_index][m][n] = residual_buf[m][n];
+// 		}
+// 	}
 }
 
 void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4])

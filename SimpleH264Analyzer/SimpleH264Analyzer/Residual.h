@@ -65,6 +65,9 @@ private:
 	int m_coeff_matrix_luma[16][4][4];
 	int m_coeff_matrix_chroma[2][4][4][4];
 
+	int m_residual_matrix_luma[16][4][4];
+	int m_residual_matrix_chroma[2][4][4][4];
+
 	Coeff4x4Block luma_residual[4][4];
 	Coeff4x4Block chroma_DC_residual[2];
 	Coeff4x4Block chroma_AC_residual[2][2][2];
