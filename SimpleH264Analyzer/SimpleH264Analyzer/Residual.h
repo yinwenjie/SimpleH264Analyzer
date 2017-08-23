@@ -47,6 +47,7 @@ public:
 	UINT8 Get_sub_block_number_coeffs(int block_idc_x, int block_idc_y);
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_x, int block_idc_y);
 	void Restore_coeff_matrix();
+	void Inverse_transform();
 
 	void  Dump_residual_luma(int blockType);
 	void  Dump_residual_chroma(UINT8 cbp_chroma);
@@ -97,6 +98,9 @@ private:
 	void restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int blockType);
 	void restore_8x8_coeff_block_chroma_AC(int (*matrix)[4][4][4], int idx);
 	void restore_8x8_coeff_block_chroma_DC(int (*matrix)[4][4][4], int idx);
+
+	void restore_16x16_coeff_block_luma_DC(int(*matrix)[4][4]);
+
 	void insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y);
 
 	void coeff_invers_transform(int (*coeff_buf)[4], int(*residual_buf)[4]);
