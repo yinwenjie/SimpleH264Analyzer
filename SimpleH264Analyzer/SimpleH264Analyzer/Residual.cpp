@@ -135,6 +135,13 @@ void CResidual::Restore_coeff_matrix()
 	else if (m_macroblock_belongs->m_mb_type == I16MB)
 	{
 		restore_16x16_coeff_block_luma_DC(m_coeff_matrix_luma);
+		for (int blk8Idx = 0; blk8Idx < 4; blk8Idx++)
+		{
+			if (cbp_luma & (1 << blk8Idx))
+			{
+				restore_8x8_coeff_block_luma(m_coeff_matrix_luma, blk8Idx, LUMA_INTRA16x16AC);
+			}
+		}
 	}
 	
 	UINT8 cbp_chroma = m_macroblock_belongs->m_cbp_chroma;
@@ -1069,20 +1076,22 @@ found:
 
 void CResidual::restore_8x8_coeff_block_luma(int(*matrix)[4][4], int idx, int blockType)
 {
-	int max_coeff_num = 0;
+	int start_pos = 0, max_coeff_num = 0;
 	switch (blockType)
 	{
 	case LUMA:
+		start_pos = 0;
 		max_coeff_num = 16;
 		break;
-	case LUMA_INTRA16x16DC:
-		max_coeff_num = 16;
-		break;
+// 	case LUMA_INTRA16x16DC:
+// 		max_coeff_num = 16;
+// 		break;
 	case LUMA_INTRA16x16AC:
+		start_pos = 1;
 		max_coeff_num = 15;
 		break;
 	default:
-		break;
+		return;
 	}
 
 	int blkRowIdxStart = 2 * (idx / 2), blkColumnIdxStart = 2 * (idx % 2);
@@ -1115,7 +1124,7 @@ void CResidual::restore_8x8_coeff_block_luma(int(*matrix)[4][4], int idx, int bl
 			}
 			swap(coeffBuf[0], coeffBuf[totalZeros]);
 
-			insert_matrix(m_coeff_matrix_luma, coeffBuf, 0, 16, columnIdx, rowIdx);
+			insert_matrix(m_coeff_matrix_luma, coeffBuf, start_pos, max_coeff_num, columnIdx, rowIdx);
 
 //			coeff_invers_transform(m_coeff_matrix_luma[4 * rowIdx + columnIdx], m_residual_matrix_luma[4 * rowIdx + columnIdx]);
 		}
