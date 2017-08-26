@@ -28,6 +28,14 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 	m_residual = NULL;
 
 	m_coeffArray = NULL;
+
+	for (int i = 0; i < 16; i++)
+	{
+		for (int j = 0; j < 16; j++)
+		{
+			m_pred_block[i][j] = 0;
+		}
+	}
 }
 
 
@@ -184,6 +192,24 @@ void CMacroblock::Dump_macroblock_info()
 #endif
 
 #endif
+}
+
+int CMacroblock::Decode_macroblock()
+{
+	int err = 0;
+	if (m_mb_type == I4MB)
+	{
+		err = get_pred_blocks_4x4();
+		if (err < 0)
+		{
+			return err;
+		}
+	} 
+	else if (m_mb_type == I16MB)
+	{
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
 }
 
 CPicParamSet * CMacroblock::Get_pps_active()
@@ -457,4 +483,9 @@ int CMacroblock::search_for_value_in_2D_table(int &value1, int &value2, int &cod
 
 found:
 	return err;
+}
+
+int CMacroblock::get_pred_blocks_4x4()
+{
+	return kPARSING_ERROR_NO_ERROR;
 }

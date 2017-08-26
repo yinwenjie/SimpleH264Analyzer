@@ -55,6 +55,7 @@ public:
 	void Set_slice_struct(CSliceStruct *sliceStruct);
 	UINT32 Parse_macroblock();
 	void Dump_macroblock_info();
+	int Decode_macroblock();
 
 	CPicParamSet *Get_pps_active();
 
@@ -86,6 +87,7 @@ private:
 	int  m_mb_qp_delta;
 
 	CResidual *m_residual;
+	UINT8 m_pred_block[16][16];
 
 	void interpret_mb_mode();
 
@@ -96,6 +98,8 @@ private:
 	int get_left_neighbor_coeff_numbers_chroma(int leftIdx, int component, int block_idc_x, int block_idc_y);
 
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
+
+	int get_pred_blocks_4x4();
 };
 
 #endif
