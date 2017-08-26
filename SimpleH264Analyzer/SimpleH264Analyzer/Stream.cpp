@@ -31,6 +31,14 @@ CStreamFile::CStreamFile(TCHAR *fileName)
 		file_error(1);
 	}
 #endif
+
+#if TRACE_CONFIG_TEMP_LOG
+	g_tempFile.open(L"temp.txt");
+	if (!g_tempFile.is_open())
+	{
+		file_error(1);
+	}
+#endif
 }
 
 //Îö¹¹º¯Êý
@@ -62,6 +70,10 @@ CStreamFile::~CStreamFile()
 
 #if TRACE_CONFIG_LOGOUT
 	g_traceFile.close();
+#endif
+
+#if TRACE_CONFIG_TEMP_LOG
+	g_tempFile.close();
 #endif
 }
 
