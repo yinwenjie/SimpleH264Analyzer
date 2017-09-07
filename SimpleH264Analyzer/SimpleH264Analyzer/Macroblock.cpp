@@ -486,6 +486,73 @@ found:
 }
 
 int CMacroblock::get_pred_blocks_4x4()
-{
+{	
+	int err = 0;
+	for (UINT8 block_idx = 0; block_idx < 16; block_idx++)
+	{
+		err = get_pred_block_of_idx(block_idx);
+		if (err < 0)
+		{
+			return err;
+		}
+	}
+
 	return kPARSING_ERROR_NO_ERROR;
 }
+
+int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
+{
+	int topIdx = 0, leftIdx = 0, leftNum = 0, topNum = 0;
+	bool available_top = false, available_left = false, dcPredModePredictionFlag = false;
+
+	get_neighbor_available(available_top, available_left, topIdx, leftIdx, blkIdx % 4, blkIdx / 4);
+	if (!available_left && !available_top)
+	{
+		dcPredModePredictionFlag = true;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_pred_mode_at_idx(UINT8 blkIdx)
+{
+	return m_intra_pred_mode[blkIdx];
+}
+
+int CMacroblock::get_left_neighbor_intra_pred_mode(int leftIdx, int block_idc_x, int block_idc_y)
+{
+	int target_idx_x = 0;
+	UINT8 pred_mode = 0;
+
+	if (leftIdx == m_mb_idx)
+	{
+		target_idx_x = block_idc_x - 1;
+		pred_mode = get_pred_mode_at_idx(target_idx_x * 3 + block_idc_y);
+	}
+	else
+	{
+		CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
+		pred_mode = targetMB->get_pred_mode_at_idx(block_idc_y * 3 + target_idx_x);
+	}
+
+	return pred_mode;
+}
+
+int CMacroblock::get_top_neighbor_intra_pred_mode(int topIdx, int block_idc_x, int block_idc_y)
+{
+	int target_idx_y = 0;
+	UINT8 pred_mode = 0;
+
+	if (topIdx == m_mb_idx)
+	{
+		target_idx_y = block_idc_y - 1;
+		pred_mode = get_pred_mode_at_idx(target_idx_y * 3 + block_idc_x);;
+	}
+	else
+	{
+		CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
+		pred_mode = targetMB->get_pred_mode_at_idx(block_idc_x * 3 + target_idx_y);
+	}
+	return pred_mode;
+}
+

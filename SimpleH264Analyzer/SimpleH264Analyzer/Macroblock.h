@@ -86,6 +86,7 @@ private:
 	UINT8  m_coded_block_pattern;
 	int  m_mb_qp_delta;
 
+	UINT8 m_intra_pred_mode[16];
 	CResidual *m_residual;
 	UINT8 m_pred_block[16][16];
 
@@ -100,6 +101,10 @@ private:
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	int get_pred_blocks_4x4();
+	int get_pred_block_of_idx(UINT8 blkIdx);
+	int get_pred_mode_at_idx(UINT8 blkIdx);
+	int get_top_neighbor_intra_pred_mode(int leftIdx, int block_idc_x, int block_idc_y);
+	int get_left_neighbor_intra_pred_mode(int topIdx, int block_idc_x, int block_idc_y);
 };
 
 #endif
