@@ -36,6 +36,11 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 			m_pred_block[i][j] = 0;
 		}
 	}
+
+	for (int i = 0; i < 16; i++)
+	{
+		m_intra_pred_mode[i] = -1;
+	}
 }
 
 
@@ -502,13 +507,42 @@ int CMacroblock::get_pred_blocks_4x4()
 
 int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 {
-	int topIdx = 0, leftIdx = 0, leftNum = 0, topNum = 0;
+	UINT8 topMBType = 0, leftMBType = 0;
+	int topIdx = 0, leftIdx = 0, leftMode = -1, topMode = -1, this_intra_mode = -1;
 	bool available_top = false, available_left = false, dcPredModePredictionFlag = false;
 
 	get_neighbor_available(available_top, available_left, topIdx, leftIdx, blkIdx % 4, blkIdx / 4);
-	if (!available_left && !available_top)
+	if (!available_left || !available_top)
 	{
 		dcPredModePredictionFlag = true;
+	}
+	else
+	{
+		leftMode = get_left_neighbor_intra_pred_mode_and_mbtype(leftIdx, blkIdx % 4, blkIdx / 4, topMBType);		
+		topMode = get_top_neighbor_intra_pred_mode_and_mbtype(topIdx, blkIdx % 4, blkIdx / 4, leftMBType);
+	}
+
+	if (dcPredModePredictionFlag || leftMBType != I4MB)
+	{
+		leftMode = 2;
+	} 
+	if (dcPredModePredictionFlag || topMBType != I4MB)
+	{
+		topMode = 2;
+	}
+
+	int predIntra4x4PredMode = min(leftMode, topMode);
+	if (m_pred_struct[blkIdx].prev_intra_pred_mode_flag)
+	{
+		this_intra_mode = predIntra4x4PredMode;
+	} 
+	else if (m_pred_struct[blkIdx].rem_intra_pred_mode < predIntra4x4PredMode)
+	{
+		this_intra_mode = m_pred_struct[blkIdx].rem_intra_pred_mode;
+	} 
+	else
+	{
+		this_intra_mode = m_pred_struct[blkIdx].rem_intra_pred_mode + 1;
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -519,7 +553,7 @@ int CMacroblock::get_pred_mode_at_idx(UINT8 blkIdx)
 	return m_intra_pred_mode[blkIdx];
 }
 
-int CMacroblock::get_left_neighbor_intra_pred_mode(int leftIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_top_neighbor_intra_pred_mode_and_mbtype(int leftIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type)
 {
 	int target_idx_x = 0;
 	UINT8 pred_mode = 0;
@@ -527,18 +561,20 @@ int CMacroblock::get_left_neighbor_intra_pred_mode(int leftIdx, int block_idc_x,
 	if (leftIdx == m_mb_idx)
 	{
 		target_idx_x = block_idc_x - 1;
+		mb_type = m_mb_type;
 		pred_mode = get_pred_mode_at_idx(target_idx_x * 3 + block_idc_y);
 	}
 	else
 	{
 		CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
+		mb_type = targetMB->m_mb_type;
 		pred_mode = targetMB->get_pred_mode_at_idx(block_idc_y * 3 + target_idx_x);
 	}
 
 	return pred_mode;
 }
 
-int CMacroblock::get_top_neighbor_intra_pred_mode(int topIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_left_neighbor_intra_pred_mode_and_mbtype(int topIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type)
 {
 	int target_idx_y = 0;
 	UINT8 pred_mode = 0;
@@ -546,11 +582,13 @@ int CMacroblock::get_top_neighbor_intra_pred_mode(int topIdx, int block_idc_x, i
 	if (topIdx == m_mb_idx)
 	{
 		target_idx_y = block_idc_y - 1;
+		mb_type = m_mb_type;
 		pred_mode = get_pred_mode_at_idx(target_idx_y * 3 + block_idc_x);;
 	}
 	else
 	{
 		CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
+		mb_type = targetMB->m_mb_type;
 		pred_mode = targetMB->get_pred_mode_at_idx(block_idc_x * 3 + target_idx_y);
 	}
 	return pred_mode;

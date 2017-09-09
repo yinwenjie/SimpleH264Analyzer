@@ -103,8 +103,8 @@ private:
 	int get_pred_blocks_4x4();
 	int get_pred_block_of_idx(UINT8 blkIdx);
 	int get_pred_mode_at_idx(UINT8 blkIdx);
-	int get_top_neighbor_intra_pred_mode(int leftIdx, int block_idc_x, int block_idc_y);
-	int get_left_neighbor_intra_pred_mode(int topIdx, int block_idc_x, int block_idc_y);
+	int get_top_neighbor_intra_pred_mode_and_mbtype(int leftIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type);
+	int get_left_neighbor_intra_pred_mode_and_mbtype(int topIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type);
 };
 
 #endif
