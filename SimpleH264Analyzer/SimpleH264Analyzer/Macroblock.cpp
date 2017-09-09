@@ -545,6 +545,8 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 		this_intra_mode = m_pred_struct[blkIdx].rem_intra_pred_mode + 1;
 	}
 
+	m_intra_pred_mode[blkIdx] = this_intra_mode;
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 
