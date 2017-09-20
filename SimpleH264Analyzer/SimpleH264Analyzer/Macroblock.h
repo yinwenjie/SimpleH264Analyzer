@@ -42,6 +42,24 @@ typedef struct MacroBlockCoeffArray
 	}
 } MacroBlockCoeffArray;
 
+//相邻块位置结构
+typedef struct NeighborBlockPos
+{
+	UINT32 target_mb_idx;
+	UINT8 block_x;
+	UINT8 block_y;
+} NeighborBlockPos;
+
+//相邻块信息
+typedef struct NeighborBlocks
+{
+	UINT8 flags;				//Availability of neighbor blocks: 1 - left; 2 - top; 4 - top_right; 8 - top_left;
+	NeighborBlockPos left;
+	NeighborBlockPos top;
+	NeighborBlockPos top_right;
+	NeighborBlockPos top_left;
+} NeighborBlocks;
+
 // 宏块类
 class CMacroblock
 {
@@ -102,7 +120,14 @@ private:
 
 	int get_pred_blocks_4x4();
 	int get_pred_block_of_idx(UINT8 blkIdx);
+	int construct_pred_block(UINT8 blkIdx, int predMode);
+	int get_reference_pixels(UINT8 blkIdx, UINT8 *refPixBuf);
 	int get_pred_mode_at_idx(UINT8 blkIdx);
+
+	int get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int block_idc_x, int block_idc_y);
+
+	const CMacroblock* get_top_neighbor_block(int block_idc_x, int block_idc_y, int &top_idx);
+	const CMacroblock* get_left_neighbor_block(int block_idc_x, int block_idc_y, int &left_idx);
 	int get_top_neighbor_intra_pred_mode_and_mbtype(int leftIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type);
 	int get_left_neighbor_intra_pred_mode_and_mbtype(int topIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type);
 };
