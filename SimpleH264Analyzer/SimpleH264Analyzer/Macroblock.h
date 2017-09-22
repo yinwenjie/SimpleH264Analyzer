@@ -124,7 +124,7 @@ private:
 	int get_reference_pixels(UINT8 blkIdx, UINT8 *refPixBuf);
 	int get_pred_mode_at_idx(UINT8 blkIdx);
 
-	int get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int block_idc_x, int block_idc_y);
+	int get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
 
 	const CMacroblock* get_top_neighbor_block(int block_idc_x, int block_idc_y, int &top_idx);
 	const CMacroblock* get_left_neighbor_block(int block_idc_x, int block_idc_y, int &left_idx);
