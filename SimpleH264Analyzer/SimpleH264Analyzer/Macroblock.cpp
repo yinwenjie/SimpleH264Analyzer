@@ -508,10 +508,15 @@ int CMacroblock::get_pred_blocks_4x4()
 int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 {
 	UINT8 topMBType = 0, leftMBType = 0;
-	int topIdx = 0, leftIdx = 0, leftMode = -1, topMode = -1, this_intra_mode = -1;
-	bool available_top = false, available_left = false, dcPredModePredictionFlag = false;
+	NeighborBlocks neighbors;
+	UINT8 blk_row = blkIdx % 4, blk_column = blkIdx / 4;
+	
+	get_neighbor_blocks_avaiablility(neighbors, blkIdx % 4, blkIdx / 4);
 
-	get_neighbor_available(available_top, available_left, topIdx, leftIdx, blkIdx % 4, blkIdx / 4);
+	bool dcPredModePredictionFlag = false;
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
+	int topIdx = neighbors.top.target_mb_idx, leftIdx = neighbors.left.target_mb_idx, leftMode = -1, topMode = -1, this_intra_mode = -1;
+
 	if (!available_left || !available_top)
 	{
 		dcPredModePredictionFlag = true;
@@ -561,6 +566,7 @@ int CMacroblock::construct_pred_block(UINT8 blkIdx, int predMode)
 
 int CMacroblock::get_reference_pixels(UINT8 blkIdx, UINT8 *refPixBuf)
 {
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 
