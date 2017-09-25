@@ -555,16 +555,16 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::construct_pred_block(UINT8 blkIdx, int predMode)
+int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode)
 {
 	UINT8 refPixBuf[13] = { 0 };
 
-	get_reference_pixels(blkIdx, refPixBuf);
+	get_reference_pixels(neighbors, blkIdx, refPixBuf);
 
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::get_reference_pixels(UINT8 blkIdx, UINT8 *refPixBuf)
+int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UINT8 *refPixBuf)
 {
 
 	return kPARSING_ERROR_NO_ERROR;
