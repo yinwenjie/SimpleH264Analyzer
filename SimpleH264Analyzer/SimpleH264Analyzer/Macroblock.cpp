@@ -505,13 +505,71 @@ int CMacroblock::get_pred_blocks_4x4()
 	return kPARSING_ERROR_NO_ERROR;
 }
 
+/*
+block position of each index:
+	row:  0   1   2   3
+		 _______________
+col:0	| 0 | 1 | 4 | 5 |
+	1	| 2 | 3 | 6 | 7 |
+	2	| 8 | 9 | 12| 13|
+	3	| 10| 11| 14| 15|
+*/
+int CMacroblock::block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column)
+{
+/*
+block8_index of each index:			block4_index of each index:
+	row:  0   1   2   3					row:  0   1   2   3
+		 _______________					 _______________
+col:0	| 0 | 0 | 1 | 1 |			col:0	| 0 | 1 | 0 | 1 |
+	1	| 0 | 0 | 1 | 1 |				1	| 2 | 3 | 2 | 3 |
+	2	| 2 | 2 | 3 | 3 |				2	| 0 | 1 | 0 | 1 |
+	3	| 2 | 2 | 3 | 3 |				3	| 2 | 3 | 2 | 3 |
+*/
+	UINT8 block8_idx = blkIdx / 4, block4_index = blkIdx % 4; /* 0 1 2 3 */
+
+/*
+(block_row, block_column) of each index:
+	row:    0       1       2       3
+		 _______________ _______________
+col:0	| (0,0) | (1,0) | (0,0) | (1,0) |
+	1	| (0,1) | (1,1) | (0,1) | (1,1) |
+	2	| (0,0) | (1,0) | (0,0) | (1,0) |
+	3	| (0,1) | (1,1) | (0,1) | (1,1) |
+*/
+	UINT8 block4_row = block4_index % 2, block4_column = block4_index / 2; /* 0 1 */
+
+/*
+(block_row, block_column) of each index:
+	row:    0       1       2       3
+		 _______________ _______________
+col:0	| (0,0) | (1,0) | (2,0) | (3,0) |
+	1	| (0,1) | (1,1) | (2,1) | (3,1) |
+	2	| (0,2) | (1,2) | (2,2) | (3,2) |
+	3	| (0,3) | (1,3) | (2,3) | (3,3) |
+*/
+	UINT8 block_row = block4_row + 2 * (block8_idx % 2), block_column = block4_column + 2 * (block8_idx / 2);
+
+	block_pos_row = block_row;
+	block_pos_column = block_column;
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
 int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 {
 	UINT8 topMBType = 0, leftMBType = 0;
 	NeighborBlocks neighbors;
-	UINT8 blk_row = blkIdx % 4, blk_column = blkIdx / 4;
+	UINT8 blk_row = 0, blk_column = 0;
+
+// 	for (int idx = 0; idx < 16; idx++)
+// 	{
+// 		block_index_to_position(idx, blk_row, blk_column);
+// 		printf("%d: (%d, %d)\n", idx, blk_row, blk_column);
+// 	}
+
+	block_index_to_position(blkIdx, blk_row, blk_column);
 	
-	get_neighbor_blocks_avaiablility(neighbors, blkIdx % 4, blkIdx / 4);
+	get_neighbor_blocks_avaiablility(neighbors, blk_row, blk_column);
 
 	bool dcPredModePredictionFlag = false;
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
@@ -523,8 +581,8 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 	}
 	else
 	{
-		leftMode = get_left_neighbor_intra_pred_mode_and_mbtype(leftIdx, blkIdx % 4, blkIdx / 4, topMBType);		
-		topMode = get_top_neighbor_intra_pred_mode_and_mbtype(topIdx, blkIdx % 4, blkIdx / 4, leftMBType);
+		leftMode = get_left_neighbor_intra_pred_mode_and_mbtype(leftIdx, blk_row, blk_column, topMBType);
+		topMode = get_top_neighbor_intra_pred_mode_and_mbtype(topIdx, blk_row, blk_column, leftMBType);
 	}
 
 	if (dcPredModePredictionFlag || leftMBType != I4MB)

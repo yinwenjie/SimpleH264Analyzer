@@ -119,6 +119,7 @@ private:
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	int get_pred_blocks_4x4();
+	int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column);
 	int get_pred_block_of_idx(UINT8 blkIdx);
 
 	int construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode);
