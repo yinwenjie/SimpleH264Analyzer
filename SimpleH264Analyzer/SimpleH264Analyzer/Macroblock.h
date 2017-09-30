@@ -46,8 +46,8 @@ typedef struct MacroBlockCoeffArray
 typedef struct NeighborBlockPos
 {
 	UINT32 target_mb_idx;
-	UINT8 block_x;
-	UINT8 block_y;
+	UINT8 block_row;
+	UINT8 block_column;
 } NeighborBlockPos;
 
 //œ‡¡⁄øÈ–≈œ¢
@@ -119,7 +119,10 @@ private:
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	int get_pred_blocks_4x4();
+
 	int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column);
+	UINT8 position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column);
+
 	int get_pred_block_of_idx(UINT8 blkIdx);
 
 	int construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode);
@@ -128,10 +131,8 @@ private:
 
 	int get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
 
-	const CMacroblock* get_top_neighbor_block(int block_idc_x, int block_idc_y, int &top_idx);
-	const CMacroblock* get_left_neighbor_block(int block_idc_x, int block_idc_y, int &left_idx);
-	int get_top_neighbor_intra_pred_mode_and_mbtype(int leftIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type);
-	int get_left_neighbor_intra_pred_mode_and_mbtype(int topIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type);
+	int get_top_neighbor_block_intra_mode(NeighborBlockPos top);
+	int get_left_neighbor_block_intra_mode(NeighborBlockPos left);
 };
 
 #endif

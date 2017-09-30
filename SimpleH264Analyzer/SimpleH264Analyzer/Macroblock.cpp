@@ -555,6 +555,14 @@ col:0	| (0,0) | (1,0) | (2,0) | (3,0) |
 	return kPARSING_ERROR_NO_ERROR;
 }
 
+UINT8 CMacroblock::position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column)
+{
+	int block8_row = block_pos_row / 2, block8_column = block_pos_column / 2, block8_index = block8_row + block8_column * 2;
+	int block4_row = block_pos_row % 2, block4_column = block_pos_column % 2, block4_index = block4_row + block4_column * 2;
+
+	return block4_index + 4 * block8_index;
+}
+
 int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 {
 	UINT8 topMBType = 0, leftMBType = 0;
@@ -573,7 +581,7 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 
 	bool dcPredModePredictionFlag = false;
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
-	int topIdx = neighbors.top.target_mb_idx, leftIdx = neighbors.left.target_mb_idx, leftMode = -1, topMode = -1, this_intra_mode = -1;
+	int leftMode = -1, topMode = -1, this_intra_mode = -1;
 
 	if (!available_left || !available_top)
 	{
@@ -581,8 +589,12 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 	}
 	else
 	{
-		leftMode = get_left_neighbor_intra_pred_mode_and_mbtype(leftIdx, blk_row, blk_column, topMBType);
-		topMode = get_top_neighbor_intra_pred_mode_and_mbtype(topIdx, blk_row, blk_column, leftMBType);
+		CMacroblock *leftMB = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
+		CMacroblock *topMB = m_slice->Get_macroblock_at_index(neighbors.top.target_mb_idx);
+		leftMBType = leftMB->m_mb_type;
+		topMBType = topMB->m_mb_type;
+		leftMode = leftMB->get_left_neighbor_block_intra_mode(neighbors.left);
+		topMode = topMB->get_top_neighbor_block_intra_mode(neighbors.top);
 	}
 
 	if (dcPredModePredictionFlag || leftMBType != I4MB)
@@ -647,8 +659,8 @@ int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int
 	{
 		neighbors.flags |= 1;
 		neighbors.left.target_mb_idx = (block_idc_row == 0 ? (mb_idx - 1) : mb_idx);
-		neighbors.left.block_x = (block_idc_row == 0 ? 3 : (block_idc_row - 1));
-		neighbors.left.block_y = block_idc_column;
+		neighbors.left.block_row = (block_idc_row == 0 ? 3 : (block_idc_row - 1));
+		neighbors.left.block_column = block_idc_column;
 	}
 	else //×ó±ßÑØºê¿é
 	{
@@ -660,8 +672,8 @@ int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int
 		{
 			neighbors.flags |= 1;
 			neighbors.left.target_mb_idx = mb_idx;
-			neighbors.left.block_x = block_idc_row - 1;
-			neighbors.left.block_y = block_idc_column;
+			neighbors.left.block_row = block_idc_row - 1;
+			neighbors.left.block_column = block_idc_column;
 		}
 	}
 
@@ -669,8 +681,8 @@ int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int
 	{
 		neighbors.flags |= 2;
 		neighbors.top.target_mb_idx = (block_idc_column == 0 ? mb_idx - width_in_mb : mb_idx);
-		neighbors.top.block_x = block_idc_row;
-		neighbors.top.block_y = (block_idc_column == 0) ? 3 : block_idc_column - 1;
+		neighbors.top.block_row = block_idc_row;
+		neighbors.top.block_column = (block_idc_column == 0) ? 3 : block_idc_column - 1;
 	}
 	else //ÉÏ±ßÑØºê¿é
 	{
@@ -682,8 +694,8 @@ int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int
 		{
 			neighbors.flags |= 2;
 			neighbors.top.target_mb_idx = mb_idx;
-			neighbors.top.block_x = block_idc_row;
-			neighbors.top.block_y = block_idc_column - 1;
+			neighbors.top.block_row = block_idc_row;
+			neighbors.top.block_column = block_idc_column - 1;
 		}
 	}
 
@@ -697,26 +709,26 @@ int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int
 		if (block_idc_row != 0 && block_idc_column != 0)
 		{
 			neighbors.top_left.target_mb_idx = mb_idx;
-			neighbors.top_left.block_x = block_idc_row - 1;
-			neighbors.top_left.block_y = block_idc_column - 1;
+			neighbors.top_left.block_row = block_idc_row - 1;
+			neighbors.top_left.block_column = block_idc_column - 1;
 		}
 		else if (block_idc_row == 0 && block_idc_column == 0)
 		{
 			neighbors.top_left.target_mb_idx = mb_idx - width_in_mb - 1;
-			neighbors.top_left.block_x = 3;
-			neighbors.top_left.block_y = 3;
+			neighbors.top_left.block_row = 3;
+			neighbors.top_left.block_column = 3;
 		}
 		else if (block_idc_row != 0 && block_idc_column == 0)
 		{
 			neighbors.top_left.target_mb_idx = mb_idx - width_in_mb;
-			neighbors.top_left.block_x = block_idc_row - 1;
-			neighbors.top_left.block_y = 3;
+			neighbors.top_left.block_row = block_idc_row - 1;
+			neighbors.top_left.block_column = 3;
 		}
 		else if (block_idc_row == 0 && block_idc_column != 0)
 		{
 			neighbors.top_left.target_mb_idx = mb_idx - 1;
-			neighbors.top_left.block_x = 3;
-			neighbors.top_left.block_y = block_idc_column - 1;
+			neighbors.top_left.block_row = 3;
+			neighbors.top_left.block_column = block_idc_column - 1;
 		}
 	}
 
@@ -730,74 +742,38 @@ int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int
 		if (block_idc_row == 3 && block_idc_column == 0)
 		{
 			neighbors.top_right.target_mb_idx = mb_idx - width_in_mb;
-			neighbors.top_right.block_x = 0;
-			neighbors.top_right.block_y = 3;
+			neighbors.top_right.block_row = 0;
+			neighbors.top_right.block_column = 3;
 		}
 		else if (block_idc_column == 0 && block_idc_row != 3)
 		{
 			neighbors.top_right.target_mb_idx = mb_idx - width_in_mb - 1;
-			neighbors.top_right.block_x = block_idc_row + 1;
-			neighbors.top_right.block_y = 3;
+			neighbors.top_right.block_row = block_idc_row + 1;
+			neighbors.top_right.block_column = 3;
 		}
 		else if (block_idc_row != 3 && block_idc_column != 0)
 		{
 			neighbors.top_right.target_mb_idx = mb_idx;
-			neighbors.top_right.block_x = block_idc_row + 1;
-			neighbors.top_right.block_y = block_idc_column - 1;
+			neighbors.top_right.block_row = block_idc_row + 1;
+			neighbors.top_right.block_column = block_idc_column - 1;
 		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-const CMacroblock* CMacroblock::get_top_neighbor_block(int block_idc_x, int block_idc_y, int &top_idx)
+int CMacroblock::get_top_neighbor_block_intra_mode(NeighborBlockPos top)
 {
-	return this;
+	UINT8 block_row = top.block_row, block_column = top.block_column;
+	UINT8 block_index = position_to_block_index(block_row, block_column);
+
+	return m_intra_pred_mode[block_index];
 }
 
-const CMacroblock* CMacroblock::get_left_neighbor_block(int block_idc_x, int block_idc_y, int &left_idx)
+int CMacroblock::get_left_neighbor_block_intra_mode(NeighborBlockPos left)
 {
-	return this;
+	UINT8 block_row = left.block_row, block_column = left.block_column;
+	UINT8 block_index = position_to_block_index(block_row, block_column);
+
+	return m_intra_pred_mode[block_index];
 }
-
-int CMacroblock::get_top_neighbor_intra_pred_mode_and_mbtype(int leftIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type)
-{
-	int target_idx_x = 0;
-	UINT8 pred_mode = 0;
-
-	if (leftIdx == m_mb_idx)
-	{
-		target_idx_x = block_idc_x - 1;
-		mb_type = m_mb_type;
-		pred_mode = get_pred_mode_at_idx(target_idx_x * 3 + block_idc_y);
-	}
-	else
-	{
-		CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
-		mb_type = targetMB->m_mb_type;
-		pred_mode = targetMB->get_pred_mode_at_idx(block_idc_y * 3 + target_idx_x);
-	}
-
-	return pred_mode;
-}
-
-int CMacroblock::get_left_neighbor_intra_pred_mode_and_mbtype(int topIdx, int block_idc_x, int block_idc_y, UINT8 &mb_type)
-{
-	int target_idx_y = 0;
-	UINT8 pred_mode = 0;
-
-	if (topIdx == m_mb_idx)
-	{
-		target_idx_y = block_idc_y - 1;
-		mb_type = m_mb_type;
-		pred_mode = get_pred_mode_at_idx(target_idx_y * 3 + block_idc_x);;
-	}
-	else
-	{
-		CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
-		mb_type = targetMB->m_mb_type;
-		pred_mode = targetMB->get_pred_mode_at_idx(block_idc_x * 3 + target_idx_y);
-	}
-	return pred_mode;
-}
-
