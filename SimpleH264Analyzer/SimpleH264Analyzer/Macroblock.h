@@ -129,7 +129,7 @@ private:
 	int get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UINT8 *refPixBuf);
 	int get_pred_mode_at_idx(UINT8 blkIdx);
 
-	int get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
+	int get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
 
 	int get_top_neighbor_block_intra_mode(NeighborBlockPos top);
 	int get_left_neighbor_block_intra_mode(NeighborBlockPos left);

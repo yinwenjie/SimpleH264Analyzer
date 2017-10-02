@@ -577,7 +577,7 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 
 	block_index_to_position(blkIdx, blk_row, blk_column);
 	
-	get_neighbor_blocks_avaiablility(neighbors, blk_row, blk_column);
+	get_neighbor_blocks_availablility(neighbors, blk_row, blk_column);
 
 	bool dcPredModePredictionFlag = false;
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
@@ -645,7 +645,7 @@ int CMacroblock::get_pred_mode_at_idx(UINT8 blkIdx)
 	return m_intra_pred_mode[blkIdx];
 }
 
-int CMacroblock::get_neighbor_blocks_avaiablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column)
+int CMacroblock::get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column)
 {
 	int mb_idx = m_mb_idx;
 	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
