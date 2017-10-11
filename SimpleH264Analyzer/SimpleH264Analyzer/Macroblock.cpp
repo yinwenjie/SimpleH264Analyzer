@@ -593,8 +593,8 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 		CMacroblock *topMB = m_slice->Get_macroblock_at_index(neighbors.top.target_mb_idx);
 		leftMBType = leftMB->m_mb_type;
 		topMBType = topMB->m_mb_type;
-		leftMode = leftMB->get_left_neighbor_block_intra_mode(neighbors.left);
-		topMode = topMB->get_top_neighbor_block_intra_mode(neighbors.top);
+		leftMode = leftMB->get_neighbor_block_intra_mode(neighbors.left);
+		topMode = topMB->get_neighbor_block_intra_mode(neighbors.top);
 	}
 
 	if (dcPredModePredictionFlag || leftMBType != I4MB)
@@ -621,6 +621,7 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 	}
 
 	m_intra_pred_mode[blkIdx] = this_intra_mode;
+	m_pred_struct[blkIdx].block_mode = this_intra_mode;
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -762,17 +763,9 @@ int CMacroblock::get_neighbor_blocks_availablility(NeighborBlocks &neighbors, in
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::get_top_neighbor_block_intra_mode(NeighborBlockPos top)
+int CMacroblock::get_neighbor_block_intra_mode(NeighborBlockPos block)
 {
-	UINT8 block_row = top.block_row, block_column = top.block_column;
-	UINT8 block_index = position_to_block_index(block_row, block_column);
-
-	return m_intra_pred_mode[block_index];
-}
-
-int CMacroblock::get_left_neighbor_block_intra_mode(NeighborBlockPos left)
-{
-	UINT8 block_row = left.block_row, block_column = left.block_column;
+	UINT8 block_row = block.block_row, block_column = block.block_column;
 	UINT8 block_index = position_to_block_index(block_row, block_column);
 
 	return m_intra_pred_mode[block_index];
