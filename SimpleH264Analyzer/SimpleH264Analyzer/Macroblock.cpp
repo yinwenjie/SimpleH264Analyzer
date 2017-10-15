@@ -633,9 +633,58 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 
 int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode)
 {
-	UINT8 refPixBuf[13] = { 0 };
+	UINT8 refPixBuf[13] = { 0 }, predVal = 0;
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
 
 	get_reference_pixels(neighbors, blkIdx, refPixBuf);
+
+	switch (predMode)
+	{
+	case VERT_PRED:
+		if (!available_top && !available_left)
+		{
+			predVal = 128;
+		} 
+		else if (available_top && available_left)
+		{
+			predVal = (refPixBuf[0] + refPixBuf[1] + refPixBuf[2] + refPixBuf[3] + refPixBuf[5] + refPixBuf[6] + refPixBuf[7] + refPixBuf[8] + 4) / 8;
+		}
+		else if (!available_top && available_left)
+		{
+			predVal = (refPixBuf[0] + refPixBuf[1] + refPixBuf[2] + refPixBuf[3] + 2) / 4;
+		}
+		else if (available_top && !available_left)
+		{
+			predVal = (refPixBuf[5] + refPixBuf[6] + refPixBuf[7] + refPixBuf[8] + 2) / 4;
+		}
+
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				m_pred_block[blkIdx][column][row] = predVal;
+			}
+		}
+		break;
+	case HOR_PRED:
+		break;
+	case DC_PRED:
+		break;
+	case DIAG_DOWN_LEFT_PRED:
+		break;
+	case DIAG_DOWN_RIGHT_PRED:
+		break;
+	case VERT_RIGHT_PRED:
+		break;
+	case HOR_DOWN_PRED:
+		break;
+	case VERT_LEFT_PRED:
+		break;
+	case HOR_UP_PRED:
+		break;
+	default:
+		break;
+	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }
