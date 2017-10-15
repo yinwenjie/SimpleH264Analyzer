@@ -29,11 +29,14 @@ CMacroblock::CMacroblock(UINT8 *pSODB, UINT32 offset, int idx)
 
 	m_coeffArray = NULL;
 
-	for (int i = 0; i < 16; i++)
+	for (int idx = 0; idx < 16; idx++)
 	{
-		for (int j = 0; j < 16; j++)
+		for (int i = 0; i < 4; i++)
 		{
-			m_pred_block[i][j] = 0;
+			for (int j = 0; j < 4; j++)
+			{
+				m_pred_block[idx][i][j] = 0;
+			}
 		}
 	}
 
@@ -626,6 +629,7 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 	m_pred_struct[blkIdx].block_mode = this_intra_mode;
 
 	g_tempFile << "Intra Prediction Mode: " << to_string(this_intra_mode) << endl;
+	construct_pred_block(neighbors, blkIdx, this_intra_mode);
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -641,6 +645,60 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 
 int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UINT8 *refPixBuf)
 {
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
+	UINT8 blk_row = -1, blk_column = -1;
+	CMacroblock *ref_mb = NULL;
+
+	block_index_to_position(blkIdx, blk_row, blk_column);
+
+	if (available_left)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
+		refPixBuf[0] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][0];
+		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][1];
+		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][2];
+		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][3];
+	} 
+	else
+	{
+		refPixBuf[0] = refPixBuf[1] = refPixBuf[2] = refPixBuf[3] = 128;
+	}
+
+	if (available_top_left)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top_left.target_mb_idx);
+		refPixBuf[4] = ref_mb->m_reconstructed_block[neighbors.top_left.block_column][neighbors.top_left.block_row][3][3];
+	} 
+	else
+	{
+		refPixBuf[4] = 128;
+	}
+
+	if (available_top)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top.target_mb_idx);
+		refPixBuf[5] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][0][3];
+		refPixBuf[6] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][1][3];
+		refPixBuf[7] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][2][3];
+		refPixBuf[8] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][3][3];
+	} 
+	else
+	{
+		refPixBuf[5] = refPixBuf[6] = refPixBuf[7] = refPixBuf[8] = 128;
+	}
+
+	if (available_top_right)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top_right.target_mb_idx);
+		refPixBuf[9] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][0][3];
+		refPixBuf[10] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][1][3];
+		refPixBuf[11] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][2][3];
+		refPixBuf[12] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][3][3];
+	} 
+	else
+	{
+		refPixBuf[9] = refPixBuf[10] = refPixBuf[11] = refPixBuf[12] = 128;
+	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }

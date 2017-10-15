@@ -105,7 +105,8 @@ private:
 
 	UINT8 m_intra_pred_mode[16];
 	CResidual *m_residual;
-	UINT8 m_pred_block[16][16];
+	UINT8 m_pred_block[16][4][4];
+	UINT8 m_reconstructed_block[4][4][4][4];
 
 	void interpret_mb_mode();
 
