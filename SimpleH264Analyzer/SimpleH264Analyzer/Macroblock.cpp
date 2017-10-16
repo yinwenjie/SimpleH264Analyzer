@@ -635,16 +635,31 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 
 int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode)
 {
-	UINT8 refPixBuf[13] = { 0 }, predVal = 0;
+	UINT8 refPixBuf[13] = { 0 }, predVal = 0, *refPtr = NULL;
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
-	
+	int zVR = 0, zHD = 0, zHU = 0, refIndex = 0;
+
 	get_reference_pixels(neighbors, blkIdx, refPixBuf);
 
 	switch (predMode)
 	{
 	case VERT_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				m_pred_block[blkIdx][column][row] = refPixBuf[5 + row];
+			}
+		}
 		break;
 	case HOR_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				m_pred_block[blkIdx][column][row] = refPixBuf[3 - column];
+			}
+		}
 		break;
 	case DC_PRED:
 		if (!available_top && !available_left)
@@ -673,16 +688,153 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 		}
 		break;
 	case DIAG_DOWN_LEFT_PRED:
+		refPtr = refPixBuf + 5;
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				if (row == 3 && column == 3)
+				{
+					m_pred_block[blkIdx][column][row] = (refPtr[6] + 3 * refPtr[7] + 2) >> 2;
+				} 
+				else
+				{
+					m_pred_block[blkIdx][column][row] = (refPtr[row + column] + 2 * refPtr[row + column + 1] + refPtr[row + column + 2]) >> 2;
+				}
+			}
+		}
 		break;
 	case DIAG_DOWN_RIGHT_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				if (row == column)
+				{
+					m_pred_block[blkIdx][column][row] = (refPixBuf[4] + 2 * refPixBuf[5] + refPixBuf[6] + 2) >> 2;
+				}
+				else
+				{
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[-(abs(column - row) - 1)] + 2 * refPtr[-abs(column - row)] + refPtr[-(abs(column - row) + 1)] + 1) >> 2;
+				}
+			}
+		}
 		break;
 	case VERT_RIGHT_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				zVR = 2 * row - column;
+				switch (zVR)
+				{
+				case 0:
+				case 2:
+				case 4:
+				case 6:
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - column >> 1] + refPtr[row - column >> 1 + 1] + 1) >> 1;
+					break;
+				case 1:
+				case 3:
+				case 5:
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - column >> 1 - 1] + 2 * refPtr[row - column >> 1] + refPtr[row - column >> 1 + 1] + 2) >> 2;
+					break;
+				case -1:
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[-2] + 2 * refPtr[-1] + refPtr[0] + 2) >> 2;
+					break;
+				case -2:
+				case -3:
+					refPtr = refPixBuf + 4;
+					m_pred_block[blkIdx][column][row] = (refPtr[-column] + 2 * refPtr[1 - column] + refPtr[2 - column] + 2) >> 2;
+					break;
+				default:
+					break;
+				}
+			}
+		}
 		break;
 	case HOR_DOWN_PRED:
+		refPtr = refPixBuf + 4;
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				zHD = 2 * column - row;
+				refIndex = column - row >> 1;
+				switch (zHD)
+				{
+				case 0:
+				case 2:
+				case 4:
+				case 6:
+					m_pred_block[blkIdx][column][row] = (refPtr[-refIndex] + refPtr[-refIndex - 1] + 1) >> 1;
+					break;
+				case 1:
+				case 3:
+				case 5:
+					m_pred_block[blkIdx][column][row] = (refPtr[-refIndex + 1] + refPtr[-refIndex] + refPtr[-refIndex - 1] + 2) >> 2;
+					break;
+				case -1:
+					m_pred_block[blkIdx][column][row] = (refPtr[-1] + 2 * refPtr[0] + refPtr[1] + 2) >> 2;
+					break;
+				case -2:
+				case -3:
+					m_pred_block[blkIdx][column][row] = (refPtr[row] + 2 * refPtr[row - 1] + refPtr[row - 2] + 2) >> 2;
+					break;
+				default:
+					break;
+				}
+			}
+		}
 		break;
 	case VERT_LEFT_PRED:
+		refPtr = refPixBuf + 5;
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				if (column == 0 || column == 2)
+				{
+					m_pred_block[blkIdx][column][row] = (refPtr[row + column >> 1] + refPtr[row + column >> 1 + 1] + 1) >> 1;
+				} 
+				else
+				{
+					m_pred_block[blkIdx][column][row] = (refPtr[row + column >> 1] + 2 * refPtr[row + column >> 1 + 1] + refPtr[row + column >> 1 + 1] + 2) >> 2;
+				}
+			}
+		}
 		break;
 	case HOR_UP_PRED:
+		refPtr = refPixBuf + 3;
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				zHU = row + 2 * column;
+				switch (zHU)
+				{
+				case 0:
+				case 2:
+				case 4:
+					m_pred_block[blkIdx][column][row] = (refPtr[-(column + row >> 1)] + refPtr[-(column + row >> 1 + 1)] + 1) >> 1;
+					break;
+				case 1:
+				case 3:
+					m_pred_block[blkIdx][column][row] = (refPtr[-(column + row >> 1)] + 2 * refPtr[-(column + row >> 1 + 1)] + refPtr[-(column + row >> 1 + 2)] + 2) >> 2;
+					break;
+				case 5:
+					m_pred_block[blkIdx][column][row] = (refPixBuf[1] + 3 * refPixBuf[0] + 2) >> 2;
+					break;
+				default:
+					m_pred_block[blkIdx][column][row] = refPixBuf[0];
+					break;
+				}
+			}
+		}
 		break;
 	default:
 		break;
@@ -704,10 +856,10 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 	if (available_left)
 	{
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
-		refPixBuf[0] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][0];
-		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][1];
-		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][2];
-		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][3];
+		refPixBuf[0] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][3];
+		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][2];
+		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][1];
+		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][0];
 	} 
 	else
 	{
