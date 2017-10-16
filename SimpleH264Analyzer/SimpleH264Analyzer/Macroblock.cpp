@@ -641,6 +641,24 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 	switch (predMode)
 	{
 	case VERT_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				m_pred_block[blkIdx][column][row] = refPixBuf[5 + row];
+			}
+		}
+		break;
+	case HOR_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				m_pred_block[blkIdx][column][row] = refPixBuf[3 - column];
+			}
+		}
+		break;
+	case DC_PRED:
 		if (!available_top && !available_left)
 		{
 			predVal = 128;
@@ -665,10 +683,6 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 				m_pred_block[blkIdx][column][row] = predVal;
 			}
 		}
-		break;
-	case HOR_PRED:
-		break;
-	case DC_PRED:
 		break;
 	case DIAG_DOWN_LEFT_PRED:
 		break;
@@ -700,10 +714,10 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 	if (available_left)
 	{
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
-		refPixBuf[0] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][0];
-		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][1];
-		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][2];
-		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][3];
+		refPixBuf[0] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][3];
+		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][2];
+		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][1];
+		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][0];
 	} 
 	else
 	{
