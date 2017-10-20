@@ -633,7 +633,7 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 
 int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode)
 {
-	UINT8 refPixBuf[13] = { 0 }, predVal = 0;
+	UINT8 refPixBuf[13] = { 0 }, predVal = 0, *refPtr = NULL;
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
 
 	get_reference_pixels(neighbors, blkIdx, refPixBuf);
@@ -685,8 +685,38 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 		}
 		break;
 	case DIAG_DOWN_LEFT_PRED:
+		refPtr = refPixBuf + 5;
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				if (row == 3 && column == 3)
+				{
+					m_pred_block[blkIdx][column][row] = (refPtr[6] + 3 * refPtr[7] + 2) >> 2;
+				} 
+				else
+				{
+					m_pred_block[blkIdx][column][row] = (refPtr[row + column] + 2 * refPtr[row + column + 1] + refPtr[row + column + 2]) >> 2;
+				}
+			}
+		}
 		break;
 	case DIAG_DOWN_RIGHT_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				if (row == column)
+				{
+					m_pred_block[blkIdx][column][row] = (refPixBuf[4] + 2 * refPixBuf[5] + refPixBuf[6] + 2) >> 2;
+				}
+				else
+				{
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPixBuf[abs(column - row) - 2] + 2 * refPixBuf[abs(column - row) - 1] + refPixBuf[abs(column - row)] + 2) >> 2;
+				}
+			}
+		}
 		break;
 	case VERT_RIGHT_PRED:
 		break;
