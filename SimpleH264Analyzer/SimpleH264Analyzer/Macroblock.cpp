@@ -635,6 +635,7 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 {
 	UINT8 refPixBuf[13] = { 0 }, predVal = 0, *refPtr = NULL;
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
+	int zVR = 0, zHD = 0, zHU = 0;
 
 	get_reference_pixels(neighbors, blkIdx, refPixBuf);
 
@@ -713,12 +714,46 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 				else
 				{
 					refPtr = refPixBuf + 5;
-					m_pred_block[blkIdx][column][row] = (refPixBuf[abs(column - row) - 2] + 2 * refPixBuf[abs(column - row) - 1] + refPixBuf[abs(column - row)] + 2) >> 2;
+					m_pred_block[blkIdx][column][row] = (refPtr[-(abs(column - row) - 1)] + 2 * refPtr[-abs(column - row)] + refPtr[-(abs(column - row) + 1)] + 1) >> 2;
 				}
 			}
 		}
 		break;
 	case VERT_RIGHT_PRED:
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				zVR = 2 * row - column;
+				switch (zVR)
+				{
+				case 0:
+				case 2:
+				case 4:
+				case 6:
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - column >> 1] + refPtr[row - column >> 1 + 1] + 1) >> 1;
+					break;
+				case 1:
+				case 3:
+				case 5:
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - column >> 1 - 1] + 2 * refPtr[row - column >> 1] + refPtr[row - column >> 1 + 1] + 2) >> 2;
+					break;
+				case -1:
+					refPtr = refPixBuf + 5;
+					m_pred_block[blkIdx][column][row] = (refPtr[-2] + 2 * refPtr[-1] + refPtr[0] + 2) >> 2;
+					break;
+				case -2:
+				case -3:
+					refPtr = refPixBuf + 4;
+					m_pred_block[blkIdx][column][row] = (refPtr[-column] + 2 * refPtr[1 - column] + refPtr[2 - column] + 2) >> 2;
+					break;
+				default:
+					break;
+				}
+			}
+		}
 		break;
 	case HOR_DOWN_PRED:
 		break;
