@@ -120,8 +120,8 @@ private:
 
 	UINT8 m_intra_pred_mode[16];
 	CResidual *m_residual;
-	UINT8 m_pred_block[16][4][4];
-	UINT8 m_reconstructed_block[4][4][4][4];
+	int m_pred_block[16][4][4];
+	int m_reconstructed_block[4][4][4][4];
 
 	void interpret_mb_mode();
 
@@ -134,6 +134,7 @@ private:
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	int get_pred_blocks_4x4();
+	int reconstruct_blocks_4x4();
 
 	int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column);
 	UINT8 position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column);

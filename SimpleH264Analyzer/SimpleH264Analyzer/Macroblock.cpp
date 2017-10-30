@@ -212,6 +212,11 @@ int CMacroblock::Decode_macroblock()
 		{
 			return err;
 		}
+		err = reconstruct_blocks_4x4();
+		if (err < 0)
+		{
+			return err;
+		}
 	} 
 	else if (m_mb_type == I16MB)
 	{
@@ -502,6 +507,56 @@ int CMacroblock::get_pred_blocks_4x4()
 		if (err < 0)
 		{
 			return err;
+		}
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::reconstruct_blocks_4x4()
+{
+	int err = 0, temp = 0;
+	UINT8 blk_row = -1, blk_column = -1;
+	for (UINT8 block_idx = 0; block_idx < 16; block_idx++)
+	{
+		block_index_to_position(block_idx, blk_row, blk_column);
+		printf("Prediction Block:\n");
+		for (int c = 0; c < 4; c++)
+		{
+			for (int r = 0; r < 4; r++)
+			{
+				printf("%4d", m_pred_block[block_idx][c][r]);
+			}
+			printf("\n");
+		}
+
+		printf("Residual Block:\n");
+		for (int c = 0; c < 4; c++)
+		{
+			for (int r = 0; r < 4; r++)
+			{
+				printf("%6d", m_residual->m_residual_matrix_luma[block_idx][c][r]);
+			}
+			printf("\n");
+		}
+
+		for (int c = 0; c < 4; c++)
+		{
+			for (int r = 0; r < 4; r++)
+			{
+				temp = (m_pred_block[block_idx][c][r] << 6) + m_residual->m_residual_matrix_luma[block_idx][c][r];
+				m_reconstructed_block[blk_column][blk_row][c][r] = max(0, min(255, (temp + 32) >> 6));
+			}
+		}
+
+		printf("Reconstructed Block:\n");
+		for (int c = 0; c < 4; c++)
+		{
+			for (int r = 0; r < 4; r++)
+			{
+				printf("%6d", m_reconstructed_block[blk_column][blk_row][c][r]);
+			}
+			printf("\n");
 		}
 	}
 

@@ -1126,7 +1126,7 @@ void CResidual::restore_8x8_coeff_block_luma(int(*matrix)[4][4], int idx, int bl
 
 			insert_matrix(m_coeff_matrix_luma, coeffBuf, start_pos, max_coeff_num, columnIdx, rowIdx);
 
-//			coeff_invers_transform(m_coeff_matrix_luma[4 * rowIdx + columnIdx], m_residual_matrix_luma[4 * rowIdx + columnIdx]);
+			coeff_invers_transform(m_coeff_matrix_luma[4 * rowIdx + columnIdx], m_residual_matrix_luma[4 * rowIdx + columnIdx]);
 		}
 	}
 }
