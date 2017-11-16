@@ -249,12 +249,12 @@ void CMacroblock::interpret_mb_mode()
 	}
 }
 
-int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y)
+int CMacroblock::Get_number_current(int block_idc_row, int block_idc_column)
 {
 	int nC = 0, topIdx = 0, leftIdx = 0, leftNum = 0, topNum = 0;
 	bool available_top = false, available_left = false;
 
-	get_neighbor_available(available_top, available_left, topIdx, leftIdx, block_idc_x, block_idc_y);
+	get_neighbor_available(available_top, available_left, topIdx, leftIdx, block_idc_row, block_idc_column);
 
 	if (!available_left && !available_top)
 	{
@@ -264,11 +264,11 @@ int CMacroblock::Get_number_current(int block_idc_x, int block_idc_y)
 	{
 		if (available_left)
 		{			
-			leftNum = get_left_neighbor_coeff_numbers(leftIdx, block_idc_x, block_idc_y);			
+			leftNum = get_left_neighbor_coeff_numbers(leftIdx, block_idc_row, block_idc_column);			
 		}
 		if (available_top)
 		{		
-			topNum = get_top_neighbor_coeff_numbers(topIdx, block_idc_x, block_idc_y);			
+			topNum = get_top_neighbor_coeff_numbers(topIdx, block_idc_row, block_idc_column);			
 		}
 
 		nC = leftNum + topNum;
@@ -316,7 +316,7 @@ int CMacroblock::Get_number_current_chroma(int component, int block_idc_x, int b
 	return nC;
 }
 
-int CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_row, int block_idc_column)
 {
 	int mb_idx = m_mb_idx;
 	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
@@ -327,11 +327,11 @@ int CMacroblock::get_neighbor_available(bool &available_top, bool &available_lef
 	if (!top_edge_mb)
 	{
 		available_top = true;
-		topIdx = block_idc_y == 0 ? (mb_idx - width_in_mb) : mb_idx;
+		topIdx = block_idc_column == 0 ? (mb_idx - width_in_mb) : mb_idx;
 	}
 	else //ÉÏ±ßÑØºê¿é
 	{
-		if (block_idc_y == 0)
+		if (block_idc_column == 0)
 		{
 			available_top = false;
 		} 
@@ -345,11 +345,11 @@ int CMacroblock::get_neighbor_available(bool &available_top, bool &available_lef
 	if (!left_edge_mb)
 	{
 		available_left = true;
-		leftIdx = block_idc_x == 0 ? (mb_idx - 1) : mb_idx;
+		leftIdx = block_idc_row == 0 ? (mb_idx - 1) : mb_idx;
 	}
 	else //×ó±ßÑØºê¿é
 	{
-		if (block_idc_x == 0)
+		if (block_idc_row == 0)
 		{
 			available_left = false;
 		} 
@@ -363,21 +363,21 @@ int CMacroblock::get_neighbor_available(bool &available_top, bool &available_lef
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::get_top_neighbor_coeff_numbers(int topIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_top_neighbor_coeff_numbers(int topIdx, int block_idc_row, int block_idc_column)
 {
-	int nzCoeff = 0, target_idx_y = 0;
+	int nzCoeff = 0, target_idx_column = 0;
 
 	if (topIdx == m_mb_idx)
 	{
-		target_idx_y = block_idc_y - 1;
-		nzCoeff = m_residual->Get_sub_block_number_coeffs(block_idc_x, target_idx_y);
+		target_idx_column = block_idc_column - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs(block_idc_row, target_idx_column);
 	}
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
 		if (targetMB->m_residual)
 		{
-			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(block_idc_x, 3);
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(block_idc_row, 3);
 		}
 		else
 		{
@@ -388,20 +388,20 @@ int CMacroblock::get_top_neighbor_coeff_numbers(int topIdx, int block_idc_x, int
 	return nzCoeff;
 }
 
-int CMacroblock::get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_x, int block_idc_y)
+int CMacroblock::get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_row, int block_idc_column)
 {
-	int nzCoeff = 0, target_idx_x = 0;
+	int nzCoeff = 0, target_idx_row = 0;
 	if (leftIdx == m_mb_idx)
 	{
-		target_idx_x = block_idc_x - 1;
-		nzCoeff = m_residual->Get_sub_block_number_coeffs(target_idx_x, block_idc_y);
+		target_idx_row = block_idc_row - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs(target_idx_row, block_idc_column);
 	}
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
 		if (targetMB->m_residual)
 		{
-			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(3, block_idc_y);
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs(3, block_idc_column);
 		}
 		else
 		{
@@ -412,20 +412,20 @@ int CMacroblock::get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_x, i
 	return nzCoeff;
 }
 
-int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component, int block_idc_x, int block_idc_y)
+int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component, int block_idc_row, int block_idc_column)
 {
-	int nzCoeff = 0, target_idx_y = 0;
+	int nzCoeff = 0, target_idx_column = 0;
 	if (topIdx == m_mb_idx)
 	{
-		target_idx_y = block_idc_y - 1;
-		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, target_idx_y);
+		target_idx_column = block_idc_column - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_row, target_idx_column);
 	}
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(topIdx);
 		if (targetMB->m_residual)
 		{
-			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_x, 1);
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, block_idc_row, 1);
 		} 
 		else
 		{
@@ -435,20 +435,20 @@ int CMacroblock::get_top_neighbor_coeff_numbers_chroma(int topIdx, int component
 	return nzCoeff;
 }
 
-int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int leftIdx, int component, int block_idc_x, int block_idc_y)
+int CMacroblock::get_left_neighbor_coeff_numbers_chroma(int leftIdx, int component, int block_idc_row, int block_idc_column)
 {
-	int nzCoeff = 0, target_idx_x = 0;
+	int nzCoeff = 0, target_idx_row = 0;
 	if (leftIdx == m_mb_idx)
 	{
-		target_idx_x = block_idc_x - 1;
-		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, target_idx_x, block_idc_y);
+		target_idx_row = block_idc_row - 1;
+		nzCoeff = m_residual->Get_sub_block_number_coeffs_chroma(component, target_idx_row, block_idc_column);
 	}
 	else
 	{
 		const CMacroblock *targetMB = m_slice->Get_macroblock_at_index(leftIdx);
 		if (targetMB->m_residual)
 		{
-			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 1, block_idc_y);
+			nzCoeff = targetMB->m_residual->Get_sub_block_number_coeffs_chroma(component, 1, block_idc_column);
 		}
 		else
 		{
@@ -519,54 +519,6 @@ col:0	| 0 | 1 | 4 | 5 |
 	2	| 8 | 9 | 12| 13|
 	3	| 10| 11| 14| 15|
 */
-int CMacroblock::block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column)
-{
-/*
-block8_index of each index:			block4_index of each index:
-	row:  0   1   2   3					row:  0   1   2   3
-		 _______________					 _______________
-col:0	| 0 | 0 | 1 | 1 |			col:0	| 0 | 1 | 0 | 1 |
-	1	| 0 | 0 | 1 | 1 |				1	| 2 | 3 | 2 | 3 |
-	2	| 2 | 2 | 3 | 3 |				2	| 0 | 1 | 0 | 1 |
-	3	| 2 | 2 | 3 | 3 |				3	| 2 | 3 | 2 | 3 |
-*/
-	UINT8 block8_idx = blkIdx / 4, block4_index = blkIdx % 4; /* 0 1 2 3 */
-
-/*
-(block_row, block_column) of each index:
-	row:    0       1       2       3
-		 _______________ _______________
-col:0	| (0,0) | (1,0) | (0,0) | (1,0) |
-	1	| (0,1) | (1,1) | (0,1) | (1,1) |
-	2	| (0,0) | (1,0) | (0,0) | (1,0) |
-	3	| (0,1) | (1,1) | (0,1) | (1,1) |
-*/
-	UINT8 block4_row = block4_index % 2, block4_column = block4_index / 2; /* 0 1 */
-
-/*
-(block_row, block_column) of each index:
-	row:    0       1       2       3
-		 _______________ _______________
-col:0	| (0,0) | (1,0) | (2,0) | (3,0) |
-	1	| (0,1) | (1,1) | (2,1) | (3,1) |
-	2	| (0,2) | (1,2) | (2,2) | (3,2) |
-	3	| (0,3) | (1,3) | (2,3) | (3,3) |
-*/
-	UINT8 block_row = block4_row + 2 * (block8_idx % 2), block_column = block4_column + 2 * (block8_idx / 2);
-
-	block_pos_row = block_row;
-	block_pos_column = block_column;
-
-	return kPARSING_ERROR_NO_ERROR;
-}
-
-UINT8 CMacroblock::position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column)
-{
-	int block8_row = block_pos_row / 2, block8_column = block_pos_column / 2, block8_index = block8_row + block8_column * 2;
-	int block4_row = block_pos_row % 2, block4_column = block_pos_column % 2, block4_index = block4_row + block4_column * 2;
-
-	return block4_index + 4 * block8_index;
-}
 
 int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 {
@@ -641,25 +593,25 @@ int CMacroblock::reconstruct_block_of_idx(UINT8 block_idx)
 
 	block_index_to_position(block_idx, blk_row, blk_column);
 
-// 	printf("Prediction Block:\n");
-// 	for (int c = 0; c < 4; c++)
-// 	{
-// 		for (int r = 0; r < 4; r++)
-// 		{
-// 			printf("%4d", m_pred_block[block_idx][c][r]);
-// 		}
-// 		printf("\n");
-// 	}
-// 
-// 	printf("Residual Block:\n");
-// 	for (int c = 0; c < 4; c++)
-// 	{
-// 		for (int r = 0; r < 4; r++)
-// 		{
-// 			printf("%6d", m_residual->m_residual_matrix_luma[block_idx][c][r]);
-// 		}
-// 		printf("\n");
-// 	}
+	printf("Prediction Block:\n");
+	for (int c = 0; c < 4; c++)
+	{
+		for (int r = 0; r < 4; r++)
+		{
+			printf("%4d", m_pred_block[block_idx][c][r]);
+		}
+		printf("\n");
+	}
+
+	printf("Residual Block:\n");
+	for (int c = 0; c < 4; c++)
+	{
+		for (int r = 0; r < 4; r++)
+		{
+			printf("%6d", m_residual->m_residual_matrix_luma[block_idx][c][r]);
+		}
+		printf("\n");
+	}
 
 	for (int c = 0; c < 4; c++)
 	{
@@ -670,15 +622,15 @@ int CMacroblock::reconstruct_block_of_idx(UINT8 block_idx)
 		}
 	}
 
-// 	printf("Reconstructed Block:\n");
-// 	for (int c = 0; c < 4; c++)
-// 	{
-// 		for (int r = 0; r < 4; r++)
-// 		{
-// 			printf("%6d", m_reconstructed_block[blk_column][blk_row][c][r]);
-// 		}
-// 		printf("\n");
-// 	}
+	printf("Reconstructed Block:\n");
+	for (int c = 0; c < 4; c++)
+	{
+		for (int r = 0; r < 4; r++)
+		{
+			printf("%6d", m_reconstructed_block[blk_column][blk_row][c][r]);
+		}
+		printf("\n");
+	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -686,7 +638,8 @@ int CMacroblock::reconstruct_block_of_idx(UINT8 block_idx)
 int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode)
 {
 	UINT8 refPixBuf[13] = { 0 }, predVal = 0, *refPtr = NULL;
-	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, 
+		available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
 	int zVR = 0, zHD = 0, zHU = 0, refIndex = 0;
 
 	get_reference_pixels(neighbors, blkIdx, refPixBuf);
@@ -905,9 +858,9 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 	{
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
 		refPixBuf[0] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][3];
-		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][2];
-		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][1];
-		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][3][0];
+		refPixBuf[1] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][2][3];
+		refPixBuf[2] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][1][3];
+		refPixBuf[3] = ref_mb->m_reconstructed_block[neighbors.left.block_column][neighbors.left.block_row][0][3];
 	} 
 	else
 	{
@@ -927,9 +880,9 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 	if (available_top)
 	{
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top.target_mb_idx);
-		refPixBuf[5] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][0][3];
-		refPixBuf[6] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][1][3];
-		refPixBuf[7] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][2][3];
+		refPixBuf[5] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][3][0];
+		refPixBuf[6] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][3][1];
+		refPixBuf[7] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][3][2];
 		refPixBuf[8] = ref_mb->m_reconstructed_block[neighbors.top.block_column][neighbors.top.block_row][3][3];
 	} 
 	else
@@ -947,7 +900,7 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 	} 
 	else
 	{
-		refPixBuf[9] = refPixBuf[10] = refPixBuf[11] = refPixBuf[12] = 128;
+		refPixBuf[9] = refPixBuf[10] = refPixBuf[11] = refPixBuf[12] = refPixBuf[8];
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -1045,7 +998,8 @@ int CMacroblock::get_neighbor_blocks_availablility(NeighborBlocks &neighbors, in
 		}
 	}
 
-	if ((right_edge_mb && block_idc_row == 3) || (top_edge_mb && block_idc_column == 0) || (block_idc_row == 3 && block_idc_column != 0))
+	if ((right_edge_mb && block_idc_row == 3) || (top_edge_mb && block_idc_column == 0) ||
+		(block_idc_row == 3 && block_idc_column != 0) || (block_idc_row == 1 && block_idc_column == 1) || (block_idc_row == 1 && block_idc_column == 3))
 	{
 		neighbors.flags &= 11;
 	}

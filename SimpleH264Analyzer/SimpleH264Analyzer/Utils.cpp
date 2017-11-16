@@ -115,3 +115,53 @@ int Extract_single_nal_unit(const char* fileName, UINT8 *nalBuf, UINT32 nalLen)
 	nal.close();
 	return 0;
 }
+
+
+int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column)
+{
+	/*
+	block8_index of each index:			block4_index of each index:
+	row:  0   1   2   3					row:  0   1   2   3
+	_______________					 _______________
+	col:0	| 0 | 0 | 1 | 1 |			col:0	| 0 | 1 | 0 | 1 |
+	1	| 0 | 0 | 1 | 1 |				1	| 2 | 3 | 2 | 3 |
+	2	| 2 | 2 | 3 | 3 |				2	| 0 | 1 | 0 | 1 |
+	3	| 2 | 2 | 3 | 3 |				3	| 2 | 3 | 2 | 3 |
+	*/
+	UINT8 block8_idx = blkIdx / 4, block4_index = blkIdx % 4; /* 0 1 2 3 */
+
+	/*
+	(block_row, block_column) of each index:
+	row:    0       1       2       3
+	_______________ _______________
+	col:0	| (0,0) | (1,0) | (0,0) | (1,0) |
+	1	| (0,1) | (1,1) | (0,1) | (1,1) |
+	2	| (0,0) | (1,0) | (0,0) | (1,0) |
+	3	| (0,1) | (1,1) | (0,1) | (1,1) |
+	*/
+	UINT8 block4_row = block4_index % 2, block4_column = block4_index / 2; /* 0 1 */
+
+	/*
+	(block_row, block_column) of each index:
+	row:    0       1       2       3
+	_______________ _______________
+	col:0	| (0,0) | (1,0) | (2,0) | (3,0) |
+	1	| (0,1) | (1,1) | (2,1) | (3,1) |
+	2	| (0,2) | (1,2) | (2,2) | (3,2) |
+	3	| (0,3) | (1,3) | (2,3) | (3,3) |
+	*/
+	UINT8 block_row = block4_row + 2 * (block8_idx % 2), block_column = block4_column + 2 * (block8_idx / 2);
+
+	block_pos_row = block_row;
+	block_pos_column = block_column;
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+UINT8 position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column)
+{
+	int block8_row = block_pos_row / 2, block8_column = block_pos_column / 2, block8_index = block8_row + block8_column * 2;
+	int block4_row = block_pos_row % 2, block4_column = block_pos_column % 2, block4_index = block4_row + block4_column * 2;
+
+	return block4_index + 4 * block8_index;
+}

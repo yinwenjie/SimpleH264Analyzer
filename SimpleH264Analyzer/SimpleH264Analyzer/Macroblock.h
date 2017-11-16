@@ -135,9 +135,6 @@ private:
 
 	int get_intra_blocks_4x4();
 
-	int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column);
-	UINT8 position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column);
-
 	int get_pred_block_of_idx(UINT8 blkIdx);
 	int reconstruct_block_of_idx(UINT8 block_idx);
 
