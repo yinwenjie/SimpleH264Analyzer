@@ -764,13 +764,17 @@ void CMacroblock::dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf)
 
 #if TRACE_CONFIG_BLOCK
 	g_tempFile << "Macroblock: " << to_string(m_mb_idx) << " - Block: " << to_string(blkIdx) << endl;
+	
+#if TRACE_CONFIG_BLOCK_REF_PIX
 	g_tempFile << "Reference pixels:" << endl;
 	for (int i = 0; i < 13; i++)
 	{
 		g_tempFile << to_string(refPixBuf[i]) << " ";
 	}
 	g_tempFile << endl;
+#endif
 
+#if TRACE_CONFIG_BLOCK_PRED_BLOCK
 	g_tempFile << "Prediction Block: " << endl;
 	for (int column = 0; column < 4; column++)
 	{
@@ -780,6 +784,7 @@ void CMacroblock::dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf)
 		}
 		g_tempFile << endl;
 	}
+#endif
 
 #endif
 
