@@ -628,7 +628,6 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 	m_intra_pred_mode[blkIdx] = this_intra_mode;
 	m_pred_struct[blkIdx].block_mode = this_intra_mode;
 
-	g_tempFile << "Intra Prediction Mode: " << to_string(this_intra_mode) << endl;
 	construct_pred_block(neighbors, blkIdx, this_intra_mode);
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -636,9 +635,60 @@ int CMacroblock::get_pred_block_of_idx(UINT8 blkIdx)
 
 int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode)
 {
-	UINT8 refPixBuf[13] = { 0 };
-
+	UINT8 refPixBuf[13] = { 0 }, predVal = 0;
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_right = neighbors.flags & 4, available_top_left = neighbors.flags & 8;
+	
 	get_reference_pixels(neighbors, blkIdx, refPixBuf);
+
+	switch (predMode)
+	{
+	case VERT_PRED:
+		break;
+	case HOR_PRED:
+		break;
+	case DC_PRED:
+		if (!available_top && !available_left)
+		{
+			predVal = 128;
+		} 
+		else if (available_top && available_left)
+		{
+			predVal = (refPixBuf[0] + refPixBuf[1] + refPixBuf[2] + refPixBuf[3] + refPixBuf[5] + refPixBuf[6] + refPixBuf[7] + refPixBuf[8] + 4) / 8;
+		}
+		else if (!available_top && available_left)
+		{
+			predVal = (refPixBuf[0] + refPixBuf[1] + refPixBuf[2] + refPixBuf[3] + 2) / 4;
+		}
+		else if (available_top && !available_left)
+		{
+			predVal = (refPixBuf[5] + refPixBuf[6] + refPixBuf[7] + refPixBuf[8] + 2) / 4;
+		}
+
+		for (int column = 0; column < 4; column++)
+		{
+			for (int row = 0; row < 4; row++)
+			{
+				m_pred_block[blkIdx][column][row] = predVal;
+			}
+		}
+		break;
+	case DIAG_DOWN_LEFT_PRED:
+		break;
+	case DIAG_DOWN_RIGHT_PRED:
+		break;
+	case VERT_RIGHT_PRED:
+		break;
+	case HOR_DOWN_PRED:
+		break;
+	case VERT_LEFT_PRED:
+		break;
+	case HOR_UP_PRED:
+		break;
+	default:
+		break;
+	}
+
+	dump_block_info(blkIdx, refPixBuf);
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -706,6 +756,35 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 int CMacroblock::get_pred_mode_at_idx(UINT8 blkIdx)
 {
 	return m_intra_pred_mode[blkIdx];
+}
+
+void CMacroblock::dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf)
+{
+#if TRACE_CONFIG_MACROBLOCK
+
+#if TRACE_CONFIG_BLOCK
+	g_tempFile << "Macroblock: " << to_string(m_mb_idx) << " - Block: " << to_string(blkIdx) << endl;
+	g_tempFile << "Reference pixels:" << endl;
+	for (int i = 0; i < 13; i++)
+	{
+		g_tempFile << to_string(refPixBuf[i]) << " ";
+	}
+	g_tempFile << endl;
+
+	g_tempFile << "Prediction Block: " << endl;
+	for (int column = 0; column < 4; column++)
+	{
+		for (int row = 0; row < 4; row++)
+		{
+			g_tempFile << to_string(m_pred_block[blkIdx][column][row]) << " ";
+		}
+		g_tempFile << endl;
+	}
+
+#endif
+
+#endif
+
 }
 
 int CMacroblock::get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column)

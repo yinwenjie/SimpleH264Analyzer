@@ -17,6 +17,20 @@ typedef enum
 	IPCM
 } MacroblockType;
 
+//4×4帧内预测模式
+typedef enum
+{
+	VERT_PRED,
+	HOR_PRED,
+	DC_PRED,
+	DIAG_DOWN_LEFT_PRED,
+	DIAG_DOWN_RIGHT_PRED,
+	VERT_RIGHT_PRED,
+	HOR_DOWN_PRED,
+	VERT_LEFT_PRED,
+	HOR_UP_PRED
+} IntraMode4x4;
+
 // 预测模式结构
 typedef struct IntraPredStruct
 {
@@ -128,9 +142,9 @@ private:
 	int construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode);
 	int get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UINT8 *refPixBuf);
 	int get_pred_mode_at_idx(UINT8 blkIdx);
+	void dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf);
 
 	int get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
-
 	int get_neighbor_block_intra_mode(NeighborBlockPos block);
 };
 

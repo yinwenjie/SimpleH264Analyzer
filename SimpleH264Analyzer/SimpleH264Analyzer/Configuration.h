@@ -14,6 +14,8 @@
 
 #define TRACE_CONFIG_MACROBLOCK 1
 
+#define TRACE_CONFIG_BLOCK 1
+
 #define TRACE_CONFIG_MACROBLOCK_RESIDUAL 1
 
 // Trace file declaration..
