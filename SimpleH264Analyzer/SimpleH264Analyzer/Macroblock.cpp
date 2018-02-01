@@ -734,13 +734,13 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 				case 4:
 				case 6:
 					refPtr = refPixBuf + 5;
-					m_pred_block[blkIdx][column][row] = (refPtr[row - column >> 1] + refPtr[row - column >> 1 + 1] + 1) >> 1;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - (column >> 1)] + refPtr[row - (column >> 1) + 1] + 1) >> 1;
 					break;
 				case 1:
 				case 3:
 				case 5:
 					refPtr = refPixBuf + 5;
-					m_pred_block[blkIdx][column][row] = (refPtr[row - column >> 1 - 1] + 2 * refPtr[row - column >> 1] + refPtr[row - column >> 1 + 1] + 2) >> 2;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - (column >> 1) - 1] + 2 * refPtr[row - (column >> 1)] + refPtr[row - (column >> 1) + 1] + 2) >> 2;
 					break;
 				case -1:
 					refPtr = refPixBuf + 5;
@@ -799,11 +799,11 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 			{
 				if (column == 0 || column == 2)
 				{
-					m_pred_block[blkIdx][column][row] = (refPtr[row + column >> 1] + refPtr[row + column >> 1 + 1] + 1) >> 1;
+					m_pred_block[blkIdx][column][row] = (refPtr[row + (column >> 1)] + refPtr[row + (column >> 1) + 1] + 1) >> 1;
 				} 
 				else
 				{
-					m_pred_block[blkIdx][column][row] = (refPtr[row + column >> 1] + 2 * refPtr[row + column >> 1 + 1] + refPtr[row + column >> 1 + 1] + 2) >> 2;
+					m_pred_block[blkIdx][column][row] = (refPtr[row + (column >> 1)] + 2 * refPtr[row + (column >> 1) + 1] + refPtr[row + (column >> 1) + 1] + 2) >> 2;
 				}
 			}
 		}
@@ -820,11 +820,11 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 				case 0:
 				case 2:
 				case 4:
-					m_pred_block[blkIdx][column][row] = (refPtr[-(column + row >> 1)] + refPtr[-(column + row >> 1 + 1)] + 1) >> 1;
+					m_pred_block[blkIdx][column][row] = (refPtr[-(column + (row >> 1))] + refPtr[-(column + (row >> 1) + 1)] + 1) >> 1;
 					break;
 				case 1:
 				case 3:
-					m_pred_block[blkIdx][column][row] = (refPtr[-(column + row >> 1)] + 2 * refPtr[-(column + row >> 1 + 1)] + refPtr[-(column + row >> 1 + 2)] + 2) >> 2;
+					m_pred_block[blkIdx][column][row] = (refPtr[-(column + (row >> 1))] + 2 * refPtr[-(column + (row >> 1) + 1)] + refPtr[-(column + (row >> 1) + 2)] + 2) >> 2;
 					break;
 				case 5:
 					m_pred_block[blkIdx][column][row] = (refPixBuf[1] + 3 * refPixBuf[0] + 2) >> 2;
