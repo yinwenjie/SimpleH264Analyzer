@@ -91,12 +91,13 @@ public:
 
 	CPicParamSet *Get_pps_active();
 
-	int Get_number_current(int block_idc_x, int block_idc_y);
-	int Get_number_current_chroma(int component, int block_idc_x, int block_idc_y);
+	int Get_number_current(int block_idc_row, int block_idc_column);
+	int Get_number_current_chroma(int component, int block_idc_row, int block_idc_column);
 
 	UINT8  m_mb_type;
 	UINT8  m_cbp_luma;
 	UINT8  m_cbp_chroma;
+	int  m_mb_qp;
 	int  m_intra16x16PredMode;
 
 private:
@@ -124,18 +125,15 @@ private:
 
 	void interpret_mb_mode();
 
-	int get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_x, int block_idc_y);
-	int get_top_neighbor_coeff_numbers(int topIdx, int block_idc_x, int block_idc_y);
-	int get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_x, int block_idc_y);
-	int get_top_neighbor_coeff_numbers_chroma(int topIdx, int component, int block_idc_x, int block_idc_y);
-	int get_left_neighbor_coeff_numbers_chroma(int leftIdx, int component, int block_idc_x, int block_idc_y);
+	int get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_row, int block_idc_column);
+	int get_top_neighbor_coeff_numbers(int topIdx, int block_idc_row, int block_idc_column);
+	int get_left_neighbor_coeff_numbers(int leftIdx, int block_idc_row, int block_idc_column);
+	int get_top_neighbor_coeff_numbers_chroma(int topIdx, int component, int block_idc_row, int block_idc_column);
+	int get_left_neighbor_coeff_numbers_chroma(int leftIdx, int component, int block_idc_row, int block_idc_column);
 
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
-	int get_pred_blocks_4x4();
-
-	int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column);
-	UINT8 position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column);
+	int get_intra_blocks_4x4();
 
 	int get_pred_block_of_idx(UINT8 blkIdx);
 

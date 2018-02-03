@@ -22,4 +22,6 @@ int Get_me_code_num(UINT8 *buf, UINT32 &bytePosition, UINT8 &bitPosition, UINT8 
 
 int Extract_single_nal_unit(const char* fileName, UINT8 *nalBuf, UINT32 nalLen);
 
+int block_index_to_position(UINT8 blkIdx, UINT8 &block_pos_row, UINT8 &block_pos_column);
+UINT8 position_to_block_index(UINT8 block_pos_row, UINT8 block_pos_column);
 #endif
