@@ -94,8 +94,9 @@ private:
 
 	int search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
-	void restore_8x8_coeff_block(int (*matrix)[4][4], int idx, int blockType);
+	void restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int blockType);
 	void insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y);
+	void coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]);
 };
 
 #endif

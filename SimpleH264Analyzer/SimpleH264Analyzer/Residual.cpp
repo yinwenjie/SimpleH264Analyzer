@@ -131,7 +131,7 @@ void CResidual::Restore_coeff_matrix()
 			int rowIdxStart = 8 * (blk8Idx % 2), columnIdxStart = 8 * (blk8Idx / 2);
 			if (cbp_luma & (1 << blk8Idx))
 			{
-				restore_8x8_coeff_block(m_coeff_matrix_luma, blk8Idx, LUMA);
+				restore_8x8_coeff_block_luma(m_coeff_matrix_luma, blk8Idx, LUMA);
 			}
 		}
 	}
@@ -1045,7 +1045,7 @@ found:
 	return err;
 }
 
-void CResidual::restore_8x8_coeff_block(int (*matrix)[4][4], int idx, int blockType)
+void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int blockType)
 {
 	int max_coeff_num = 0;
 	switch (blockType)
@@ -1091,6 +1091,9 @@ void CResidual::restore_8x8_coeff_block(int (*matrix)[4][4], int idx, int blockT
 			swap(coeffBuf[0], coeffBuf[totalZeros]);
 
 			insert_matrix(m_coeff_matrix_luma, coeffBuf, 0, 16, columnIdx, rowIdx);
+
+			int blkIdx = position_to_block_index(rowIdx, columnIdx);
+			coeff_invers_transform(m_coeff_matrix_luma[blkIdx], m_residual_matrix_luma[blkIdx]);
 		}
 	}
 }
@@ -1115,6 +1118,53 @@ void CResidual::insert_matrix(int(*matrix)[4][4], int *block, int start, int max
 		column = SNGL_SCAN[pos0][1];
 		matrix[block_index][column + startc][row + startr] = block[idc] * dequant_coef[qp_rem][row][column] << qp_per;
 		pos0++;
+	}
+}
+
+void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4])
+{
+	int temp1[4] = { 0 }, temp2[4] = { 0 };
+
+	// horizontal-trans
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			temp1[i] = coeff_buf[i][j];
+		}
+
+		temp2[0] = (temp1[0] + temp1[2]);
+		temp2[1] = (temp1[0] - temp1[2]);
+		temp2[2] = (temp1[1] >> 1) - temp1[3];
+		temp2[3] = temp1[1] + (temp1[3] >> 1);
+
+		for (int i = 0; i < 2; i++)
+		{
+			int i1 = 3 - i;
+			residual_buf[i][j] = temp2[i] + temp2[i1];
+			residual_buf[i1][j] = temp2[i] - temp2[i1];
+		}
+	}
+
+	// vertical-trans
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			temp1[j] = residual_buf[i][j];
+		}
+
+		temp2[0] = (temp1[0] + temp1[2]);
+		temp2[1] = (temp1[0] - temp1[2]);
+		temp2[2] = (temp1[1] >> 1) - temp1[3];
+		temp2[3] = temp1[1] + (temp1[3] >> 1);
+
+		for (int j = 0; j < 2; j++)
+		{
+			int j1 = 3 - j;
+			residual_buf[i][j] = temp2[j] + temp2[j1];
+			residual_buf[i][j1] = temp2[j] - temp2[j1];
+		}
 	}
 }
 

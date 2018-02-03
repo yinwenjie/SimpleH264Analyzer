@@ -136,6 +136,7 @@ private:
 	int get_intra_blocks_4x4();
 
 	int get_pred_block_of_idx(UINT8 blkIdx);
+	int reconstruct_block_of_idx(UINT8 block_idx);
 
 	int construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode);
 	int get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UINT8 *refPixBuf);
