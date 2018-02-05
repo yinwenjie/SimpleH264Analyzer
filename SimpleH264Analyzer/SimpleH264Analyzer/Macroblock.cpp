@@ -677,6 +677,7 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 		}
 		break;
 	case VERT_RIGHT_PRED:
+		refPtr = refPixBuf + 4;
 		for (int column = 0; column < 4; column++)
 		{
 			for (int row = 0; row < 4; row++)
@@ -688,22 +689,18 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 				case 2:
 				case 4:
 				case 6:
-					refPtr = refPixBuf + 5;
 					m_pred_block[blkIdx][column][row] = (refPtr[row - (column >> 1)] + refPtr[row - (column >> 1) + 1] + 1) >> 1;
 					break;
 				case 1:
 				case 3:
 				case 5:
-					refPtr = refPixBuf + 5;
 					m_pred_block[blkIdx][column][row] = (refPtr[row - (column >> 1) - 1] + 2 * refPtr[row - (column >> 1)] + refPtr[row - (column >> 1) + 1] + 2) >> 2;
 					break;
 				case -1:
-					refPtr = refPixBuf + 5;
-					m_pred_block[blkIdx][column][row] = (refPtr[-2] + 2 * refPtr[-1] + refPtr[0] + 2) >> 2;
+					m_pred_block[blkIdx][column][row] = (refPtr[-1] + 2 * refPtr[0] + refPtr[1] + 2) >> 2;
 					break;
 				case -2:
 				case -3:
-					refPtr = refPixBuf + 4;
 					m_pred_block[blkIdx][column][row] = (refPtr[-column] + 2 * refPtr[1 - column] + refPtr[2 - column] + 2) >> 2;
 					break;
 				default:

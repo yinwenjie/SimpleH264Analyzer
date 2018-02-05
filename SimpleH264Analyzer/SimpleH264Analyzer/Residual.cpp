@@ -135,7 +135,33 @@ void CResidual::Restore_coeff_matrix()
 			}
 		}
 	}
+	else if (m_macroblock_belongs->m_mb_type == I16MB)
+	{
+		restore_16x16_coeff_block_luma_DC(m_coeff_matrix_luma);
+		for (int blk8Idx = 0; blk8Idx < 4; blk8Idx++)
+		{
+			if (cbp_luma & (1 << blk8Idx))
+			{
+				restore_8x8_coeff_block_luma(m_coeff_matrix_luma, blk8Idx, LUMA_INTRA16x16AC);
+			}
+		}
+	}
 	
+	if (cbp_chroma > 0)
+	{
+		for (int blk8Idx = 0; blk8Idx < 2; blk8Idx++)
+		{
+			restore_8x8_coeff_block_chroma_DC(m_coeff_matrix_chroma, blk8Idx);
+		}
+
+		if (cbp_chroma > 1)
+		{
+			for (int chrIdx = 0; chrIdx < 2; chrIdx++)
+			{
+				restore_8x8_coeff_block_chroma_AC(m_coeff_matrix_chroma, chrIdx);
+			}
+		}
+	}
 }
 
 void CResidual::Dump_residual_luma(int blockType)
@@ -1095,6 +1121,109 @@ void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int b
 			int blkIdx = position_to_block_index(rowIdx, columnIdx);
 			coeff_invers_transform(m_coeff_matrix_luma[blkIdx], m_residual_matrix_luma[blkIdx]);
 		}
+	}
+}
+
+void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[4][4][4], int idx)
+{
+	UINT8 numCoeff = chroma_DC_residual[idx].numCoeff;
+	UINT8 trailingOnes = chroma_DC_residual[idx].trailingOnes, trailingLeft = trailingOnes;
+	UINT8 totalZeros = chroma_DC_residual[idx].totalZeros;
+	int coeffBuf[4] = { 0 };
+
+	// write trailing ones
+	for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
+	{
+		coeffBuf[i--] = chroma_DC_residual[idx].trailingSign[j];
+	}
+
+	// write levels
+	for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
+	{
+		coeffBuf[i] = chroma_DC_residual[idx].levels[numCoeff - trailingOnes - 1 - i];
+	}
+
+	// move levels with run_before
+	for (int i = numCoeff - 1; i > 0; i--)
+	{
+		swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+		totalZeros -= chroma_DC_residual[idx].runBefore[i];
+	}
+
+	// insert coeffBuf......
+	for (int pos = 0; pos < 4; pos++)
+	{
+		m_coeff_matrix_chroma[idx][pos][0][0] = coeffBuf[pos];
+	}
+}
+
+void CResidual::restore_8x8_coeff_block_chroma_AC(int(*matrix)[4][4][4], int idx)
+{
+	int coeffBuf[15] = { 0 };
+	for (int rowIdx = 0; rowIdx < 2; rowIdx++)
+	{
+		for (int columnIdx = 0; columnIdx < 2; columnIdx++)
+		{
+			UINT8 numCoeff = chroma_AC_residual[idx][rowIdx][columnIdx].numCoeff;
+			UINT8 trailingOnes = chroma_AC_residual[idx][rowIdx][columnIdx].trailingOnes, trailingLeft = trailingOnes;
+			UINT8 totalZeros = chroma_AC_residual[idx][rowIdx][columnIdx].totalZeros;
+
+			// write trailing ones
+			for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
+			{
+				coeffBuf[i--] = chroma_AC_residual[idx][rowIdx][columnIdx].trailingSign[j];
+			}
+
+			// write levels
+			for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
+			{
+				coeffBuf[i] = chroma_AC_residual[idx][rowIdx][columnIdx].levels[numCoeff - trailingOnes - 1 - i];
+			}
+
+			// move levels with run_before
+			for (int i = numCoeff - 1; i > 0; i--)
+			{
+				swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+				totalZeros -= chroma_AC_residual[idx][rowIdx][columnIdx].runBefore[i];
+			}
+
+			// insert coeffBuf......
+			insert_matrix(matrix[idx], coeffBuf, 1, 15, columnIdx, rowIdx);
+		}
+	}
+}
+
+void CResidual::restore_16x16_coeff_block_luma_DC(int(*matrix)[4][4])
+{
+	UINT8 numCoeff = luma_residual16x16_DC.numCoeff;
+	UINT8 trailingOnes = luma_residual16x16_DC.trailingOnes, trailingLeft = trailingOnes;
+	UINT8 totalZeros = luma_residual16x16_DC.totalZeros;
+	int coeffBuf[16] = { 0 };
+
+	// write trailing ones
+	for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
+	{
+		coeffBuf[i--] = luma_residual16x16_DC.trailingSign[j];
+	}
+
+	// write levels
+	for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
+	{
+		coeffBuf[i] = luma_residual16x16_DC.levels[numCoeff - trailingOnes - 1 - i];
+	}
+
+	// move levels with run_before
+	for (int i = numCoeff - 1; i > 0; i--)
+	{
+		swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+		totalZeros -= luma_residual16x16_DC.runBefore[i];
+	}
+	swap(coeffBuf[0], coeffBuf[totalZeros]);
+
+	// insert coeffBuf......
+	for (int pos = 0; pos < 16; pos++)
+	{
+		m_coeff_matrix_luma[pos][0][0] = coeffBuf[pos];
 	}
 }
 
