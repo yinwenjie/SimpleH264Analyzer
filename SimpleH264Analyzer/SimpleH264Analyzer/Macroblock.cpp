@@ -666,12 +666,12 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 			{
 				if (row == column)
 				{
-					m_pred_block[blkIdx][column][row] = (refPixBuf[4] + 2 * refPixBuf[5] + refPixBuf[6] + 2) >> 2;
+					m_pred_block[blkIdx][column][row] = (refPixBuf[5] + 2 * refPixBuf[4] + refPixBuf[3] + 2) >> 2;
 				}
 				else
 				{
-					refPtr = refPixBuf + 5;
-					m_pred_block[blkIdx][column][row] = (refPtr[-(abs(column - row) - 1)] + 2 * refPtr[-abs(column - row)] + refPtr[-(abs(column - row) + 1)] + 1) >> 2;
+					refPtr = refPixBuf + 4;
+					m_pred_block[blkIdx][column][row] = (refPtr[row - column - 1] + 2 * refPtr[row - column] + refPtr[row - column + 1] + 2) >> 2;
 				}
 			}
 		}
@@ -844,9 +844,9 @@ int CMacroblock::get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UI
 	if (available_top_right)
 	{
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top_right.target_mb_idx);
-		refPixBuf[9] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][0][3];
-		refPixBuf[10] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][1][3];
-		refPixBuf[11] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][2][3];
+		refPixBuf[9] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][3][0];
+		refPixBuf[10] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][3][1];
+		refPixBuf[11] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][3][2];
 		refPixBuf[12] = ref_mb->m_reconstructed_block[neighbors.top_right.block_column][neighbors.top_right.block_row][3][3];
 	} 
 	else
