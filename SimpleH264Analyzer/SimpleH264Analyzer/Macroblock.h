@@ -133,6 +133,10 @@ private:
 
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
+	int get_intra_blocks_16x16();
+	int get_neighbor_mb_availablility(NeighborBlocks &neighbors);
+	int get_reference_pixels_16(const NeighborBlocks &neighbors, UINT8 &up_left, UINT8 up[16], UINT8 left[16]);
+
 	int get_intra_blocks_4x4();
 
 	int get_pred_block_of_idx(UINT8 blkIdx);

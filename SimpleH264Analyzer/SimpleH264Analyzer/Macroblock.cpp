@@ -215,6 +215,11 @@ int CMacroblock::Decode_macroblock()
 	} 
 	else if (m_mb_type == I16MB)
 	{
+		err = get_intra_blocks_16x16();
+		if (err < 0)
+		{
+			return err;
+		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -491,6 +496,114 @@ int CMacroblock::search_for_value_in_2D_table(int &value1, int &value2, int &cod
 
 found:
 	return err;
+}
+
+int CMacroblock::get_intra_blocks_16x16()
+{
+	UINT8 up_left = 0, up[16] = { 0 }, left[16] = { 0 };
+	NeighborBlocks neighbors = { 0 };
+
+	get_neighbor_mb_availablility(neighbors);
+
+	int err = get_reference_pixels_16(neighbors, up_left, up, left);
+	if (err < 0)
+	{
+		return err;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_neighbor_mb_availablility(NeighborBlocks &neighbors)
+{
+	int mb_idx = m_mb_idx;
+	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
+	int height_in_mb = m_slice->m_sps_active->Get_pic_height_in_mbs();
+
+	bool left_edge_mb = (mb_idx % width_in_mb == 0);
+	bool top_edge_mb = (mb_idx < width_in_mb);
+
+	if (!left_edge_mb)
+	{
+		neighbors.flags |= 1;
+		neighbors.left.target_mb_idx = mb_idx - 1;
+	}
+	else //×ó±ßÑØºê¿é
+	{
+		neighbors.flags &= 14;
+	}
+
+	if (!top_edge_mb)
+	{
+		neighbors.flags |= 2;
+		neighbors.top.target_mb_idx = mb_idx - width_in_mb;
+	}
+	else //ÉÏ±ßÑØºê¿é
+	{
+		neighbors.flags &= 13;
+	}
+
+	if (!left_edge_mb && !top_edge_mb)
+	{
+		neighbors.flags |= 8;
+		neighbors.top_left.target_mb_idx = mb_idx - width_in_mb - 1;
+	} 
+	else
+	{
+		neighbors.flags &= 7;
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_reference_pixels_16(const NeighborBlocks & neighbors, UINT8 &up_left, UINT8 up[16], UINT8 left[16])
+{
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_left = neighbors.flags & 8;
+	CMacroblock *ref_mb = NULL;
+
+	if (available_top_left)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top_left.target_mb_idx);
+		up_left = ref_mb->m_reconstructed_block[3][3][3][3];
+	} 
+	else
+	{
+		up_left = 0;
+	}
+
+	if (available_top)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top.target_mb_idx);
+		for (int idx = 0; idx < 4; idx++)
+		{
+			up[4 * idx + 0] = ref_mb->m_reconstructed_block[idx][3][0][3];
+			up[4 * idx + 1] = ref_mb->m_reconstructed_block[idx][3][1][3];
+			up[4 * idx + 2] = ref_mb->m_reconstructed_block[idx][3][2][3];
+			up[4 * idx + 3] = ref_mb->m_reconstructed_block[idx][3][3][3];
+		}
+	} 
+	else
+	{
+		memset(up, 0, 16);
+	}
+
+	if (available_left)
+	{
+		ref_mb = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
+		for (int idx = 0; idx < 4; idx++)
+		{
+			left[4 * idx + 0] = ref_mb->m_reconstructed_block[3][idx][3][0];
+			left[4 * idx + 1] = ref_mb->m_reconstructed_block[3][idx][3][1];
+			left[4 * idx + 2] = ref_mb->m_reconstructed_block[3][idx][3][2];
+			left[4 * idx + 3] = ref_mb->m_reconstructed_block[3][idx][3][3];
+		}
+	} 
+	else
+	{
+		memset(left, 0, 16);
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
 }
 
 int CMacroblock::get_intra_blocks_4x4()
