@@ -31,6 +31,15 @@ typedef enum
 	HOR_UP_PRED
 } IntraMode4x4;
 
+//16×16帧内预测模式
+typedef enum
+{
+	VERT_PRED_16,
+	HOR_PRED_16,
+	DC_PRED_16,
+	PLANE_16
+} IntraMode16x16;
+
 // 预测模式结构
 typedef struct IntraPredStruct
 {

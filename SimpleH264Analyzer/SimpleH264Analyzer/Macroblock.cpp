@@ -504,11 +504,60 @@ int CMacroblock::get_intra_blocks_16x16()
 	NeighborBlocks neighbors = { 0 };
 
 	get_neighbor_mb_availablility(neighbors);
+	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_left = neighbors.flags & 8;
 
 	int err = get_reference_pixels_16(neighbors, up_left, up, left);
 	if (err < 0)
 	{
 		return err;
+	}
+
+	switch (m_intra16x16PredMode)
+	{
+	case VERT_PRED_16:
+		if (!available_top)
+		{
+			return kPARSING_INVALID_PRED_MODE;
+		}
+		for (int idx = 0; idx < 16; idx++)
+		{
+			int blk_row = idx % 4;
+			for (int column = 0; column < 4; column++)
+			{
+				for (int row = 0; row < 4; row++)
+				{
+					m_pred_block[idx][column][row] = up[blk_row * 4 + row];
+				}
+			}
+		}
+		break;
+	case HOR_PRED_16:
+		if (!available_left)
+		{
+			return kPARSING_INVALID_PRED_MODE;
+		}
+		for (int idx = 0; idx < 16; idx++)
+		{
+			int blk_column = idx / 4;
+			for (int column = 0; column < 4; column++)
+			{
+				for (int row = 0; row < 4; row++)
+				{
+					m_pred_block[idx][column][row] = left[blk_column * 4 + column];
+				}
+			}
+		}
+		break;
+	case DC_PRED_16:
+		break;
+	case PLANE_16:
+		if (!available_left || !available_top || !available_top_left)
+		{
+			return kPARSING_INVALID_PRED_MODE;
+		}
+		break;
+	default:
+		break;
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
