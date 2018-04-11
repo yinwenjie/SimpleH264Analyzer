@@ -502,6 +502,7 @@ int CMacroblock::get_intra_blocks_16x16()
 {
 	UINT8 up_left = 0, up[16] = { 0 }, left[16] = { 0 };
 	NeighborBlocks neighbors = { 0 };
+	UINT8 pred_blk16[16][16] = { {0} };
 
 	get_neighbor_mb_availablility(neighbors);
 	bool available_left = neighbors.flags & 1, available_top = neighbors.flags & 2, available_top_left = neighbors.flags & 8;
@@ -519,15 +520,11 @@ int CMacroblock::get_intra_blocks_16x16()
 		{
 			return kPARSING_INVALID_PRED_MODE;
 		}
-		for (int idx = 0; idx < 16; idx++)
+		for (int column = 0; column < 16; column++)
 		{
-			int blk_row = idx % 4;
-			for (int column = 0; column < 4; column++)
+			for (int row = 0; row < 16; row++)
 			{
-				for (int row = 0; row < 4; row++)
-				{
-					m_pred_block[idx][column][row] = up[blk_row * 4 + row];
-				}
+				pred_blk16[column][row] = up[row];
 			}
 		}
 		break;
@@ -536,28 +533,95 @@ int CMacroblock::get_intra_blocks_16x16()
 		{
 			return kPARSING_INVALID_PRED_MODE;
 		}
-		for (int idx = 0; idx < 16; idx++)
+		for (int column = 0; column < 16; column++)
 		{
-			int blk_column = idx / 4;
-			for (int column = 0; column < 4; column++)
+			for (int row = 0; row < 16; row++)
 			{
-				for (int row = 0; row < 4; row++)
-				{
-					m_pred_block[idx][column][row] = left[blk_column * 4 + column];
-				}
+				pred_blk16[column][row] = left[column];
 			}
 		}
 		break;
 	case DC_PRED_16:
-		break;
+	{
+		UINT16 sum_up = 0, sum_left = 0, sum_dc = 0;
+		for (int idx = 0; idx < 16; idx++)
+		{
+			if (available_left)
+			{
+				sum_left += left[idx];
+			}
+			if (available_top)
+			{
+				sum_up += up[idx];
+			}
+		}
+		if (available_left && available_top)
+		{
+			sum_dc = (sum_up + sum_left + 16) >> 5;
+		} 
+		else if (!available_top && available_left)
+		{
+			sum_dc = (sum_left + 8) >> 4;
+		} 
+		else if (available_top && !available_left)
+		{
+			sum_dc = (sum_up + 8) >> 4;
+		}
+		else
+		{
+			sum_dc = 128;
+		}
+
+		for (int column = 0; column < 16; column++)
+		{
+			for (int row = 0; row < 16; row++)
+			{
+				pred_blk16[column][row] = sum_dc;
+			}
+		}
+
+	}	break;
 	case PLANE_16:
+	{
 		if (!available_left || !available_top || !available_top_left)
 		{
 			return kPARSING_INVALID_PRED_MODE;
 		}
-		break;
+		UINT16 H = 0, V = 0, a = 0, b = 0, c = 0;
+		for (int idx = 0; idx < 7; idx++)
+		{
+			H += (idx + 1) * (up[8 + idx] - up[6 - idx]);
+			V += (idx + 1) * (left[8 + idx] - left[6 - idx]);
+		}
+		H += 8 * (up[15] - up_left);
+		V += 8 * (left[15] - up_left);
+
+		a = 16 * (up[15] + left[15]);
+		b = (5 * H + 32) >> 6;
+		c = (5 * V + 32) >> 6;
+
+		for (int column = 0; column < 16; column++)
+		{
+			for (int row = 0; row < 16; row++)
+			{
+				pred_blk16[column][row] = max(0, min(((a + b*(row - 7) + c*(column - 7) + 16) >> 5), 255));
+			}
+		}
+	}	break;
 	default:
-		break;
+		return kPARSING_INVALID_PRED_MODE;
+	}
+
+	for (int idx = 0; idx < 16; idx++)
+	{
+		int row_idx = idx % 4, col_idx = idx / 4;
+		for (int blk_col = 0; blk_col < 4; blk_col++)
+		{
+			for (int blk_row = 0; blk_row < 4; blk_row++)
+			{
+				m_pred_block[idx][blk_col][blk_row] = pred_blk16[4*col_idx + blk_col][4*row_idx + blk_row];
+			}
+		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
