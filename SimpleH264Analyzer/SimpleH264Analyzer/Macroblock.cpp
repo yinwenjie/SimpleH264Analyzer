@@ -624,6 +624,8 @@ int CMacroblock::get_intra_blocks_16x16()
 		}
 	}
 
+	dump_block16_info();
+
 	return kPARSING_ERROR_NO_ERROR;
 }
 
@@ -689,10 +691,10 @@ int CMacroblock::get_reference_pixels_16(const NeighborBlocks & neighbors, UINT8
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.top.target_mb_idx);
 		for (int idx = 0; idx < 4; idx++)
 		{
-			up[4 * idx + 0] = ref_mb->m_reconstructed_block[idx][3][0][3];
-			up[4 * idx + 1] = ref_mb->m_reconstructed_block[idx][3][1][3];
-			up[4 * idx + 2] = ref_mb->m_reconstructed_block[idx][3][2][3];
-			up[4 * idx + 3] = ref_mb->m_reconstructed_block[idx][3][3][3];
+			up[4 * idx + 0] = ref_mb->m_reconstructed_block[3][idx][0][3];
+			up[4 * idx + 1] = ref_mb->m_reconstructed_block[3][idx][1][3];
+			up[4 * idx + 2] = ref_mb->m_reconstructed_block[3][idx][2][3];
+			up[4 * idx + 3] = ref_mb->m_reconstructed_block[3][idx][3][3];
 		}
 	} 
 	else
@@ -705,10 +707,10 @@ int CMacroblock::get_reference_pixels_16(const NeighborBlocks & neighbors, UINT8
 		ref_mb = m_slice->Get_macroblock_at_index(neighbors.left.target_mb_idx);
 		for (int idx = 0; idx < 4; idx++)
 		{
-			left[4 * idx + 0] = ref_mb->m_reconstructed_block[3][idx][3][0];
-			left[4 * idx + 1] = ref_mb->m_reconstructed_block[3][idx][3][1];
-			left[4 * idx + 2] = ref_mb->m_reconstructed_block[3][idx][3][2];
-			left[4 * idx + 3] = ref_mb->m_reconstructed_block[3][idx][3][3];
+			left[4 * idx + 0] = ref_mb->m_reconstructed_block[idx][3][3][0];
+			left[4 * idx + 1] = ref_mb->m_reconstructed_block[idx][3][3][1];
+			left[4 * idx + 2] = ref_mb->m_reconstructed_block[idx][3][3][2];
+			left[4 * idx + 3] = ref_mb->m_reconstructed_block[idx][3][3][3];
 		}
 	} 
 	else
@@ -717,6 +719,38 @@ int CMacroblock::get_reference_pixels_16(const NeighborBlocks & neighbors, UINT8
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
+}
+
+void CMacroblock::dump_block16_info()
+{
+#if TRACE_CONFIG_MACROBLOCK
+	g_tempFile << "Macroblock: " << to_string(m_mb_idx) << endl;
+
+#if TRACE_CONFIG_BLOCK_PRED_BLOCK
+	g_tempFile << "Prediction Block: " << endl;
+	UINT8 pred_block16[16][16] = { {0} };
+	for (int idx = 0; idx < 16; idx++)
+	{
+		int row_idx = idx % 4, col_idx = idx / 4;
+		for (int blk_col = 0; blk_col < 4; blk_col++)
+		{
+			for (int blk_row = 0; blk_row < 4; blk_row++)
+			{
+				pred_block16[4 * col_idx + blk_col][4 * row_idx + blk_row] = m_pred_block[idx][blk_col][blk_row];
+			}
+		}
+	}
+	for (int column = 0; column < 16; column++)
+	{
+		for (int row = 0; row < 16; row++)
+		{
+			g_tempFile << to_string(pred_block16[column][row]) << " ";
+		}
+		g_tempFile << endl;
+	}
+#endif
+
+#endif
 }
 
 int CMacroblock::get_intra_blocks_4x4()
@@ -809,6 +843,18 @@ int CMacroblock::reconstruct_block_of_idx(UINT8 block_idx)
 			m_reconstructed_block[blk_column][blk_row][c][r] = max(0, min(255, (temp + 32) >> 6));
 		}
 	}
+
+#if TRACE_CONFIG_BLOCK_RECON_BLOCK
+	g_tempFile << "Luma constructed block:" << endl;
+	for (int column = 0; column < 4; column++)
+	{
+		for (int row = 0; row < 4; row++)
+		{
+			g_tempFile << " " << to_string(m_reconstructed_block[blk_column][blk_row][column][row]);
+		}
+		g_tempFile << endl;
+	}
+#endif
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -1099,7 +1145,7 @@ void CMacroblock::dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf)
 	g_tempFile << "Reference pixels:" << endl;
 	for (int i = 0; i < 13; i++)
 	{
-		g_tempFile << to_string(refPixBuf[i]) << " ";
+		g_tempFile << " " << to_string(refPixBuf[i]);
 	}
 	g_tempFile << endl;
 #endif
@@ -1110,7 +1156,7 @@ void CMacroblock::dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf)
 	{
 		for (int row = 0; row < 4; row++)
 		{
-			g_tempFile << to_string(m_pred_block[blkIdx][column][row]) << " ";
+			g_tempFile << " " << to_string(m_pred_block[blkIdx][column][row]);
 		}
 		g_tempFile << endl;
 	}

@@ -145,6 +145,7 @@ private:
 	int get_intra_blocks_16x16();
 	int get_neighbor_mb_availablility(NeighborBlocks &neighbors);
 	int get_reference_pixels_16(const NeighborBlocks &neighbors, UINT8 &up_left, UINT8 up[16], UINT8 left[16]);
+	void dump_block16_info();
 
 	int get_intra_blocks_4x4();
 
