@@ -1,6 +1,14 @@
 #ifndef _RESIDUAL_H_
 #define _RESIDUAL_H_
 
+const int SNGL_SCAN[16][2] =
+{
+	{ 0, 0 },{ 1, 0 },{ 0, 1 },{ 0, 2 },
+	{ 1, 1 },{ 2, 0 },{ 3, 0 },{ 2, 1 },
+	{ 1, 2 },{ 0, 3 },{ 1, 3 },{ 2, 2 },
+	{ 3, 1 },{ 3, 2 },{ 2, 3 },{ 3, 3 }
+};
+
 //! Dequantization coefficients
 const int dequant_coef[6][4][4] = {
 	{ { 10, 13, 10, 13 },{ 13, 16, 13, 16 },{ 10, 13, 10, 13 },{ 13, 16, 13, 16 } },
@@ -48,6 +56,7 @@ public:
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_row, int block_idc_column);
 	void Restore_coeff_matrix();
 
+	void  Dump_coeff_block(int blk_idx);
 	void  Dump_residual_luma(int blockType);
 	void  Dump_residual_chroma(UINT8 cbp_chroma);
 	void  Dump_residual_chroma_DC();
@@ -95,12 +104,14 @@ private:
 	int search_for_value_in_2D_table(UINT8 &value1, UINT8 &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	void restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int blockType);
+	void restore_4x4_coeff_block_luma(int column_idx, int row_idx, int blockType);
 	void restore_8x8_coeff_block_chroma_DC(int(*matrix)[4][4][4], int idx);
 	void restore_8x8_coeff_block_chroma_AC(int(*matrix)[4][4][4], int idx);
 	void restore_16x16_coeff_block_luma_DC(int(*matrix)[4][4]);
 
 	void insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y);
 	void coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]);
+	void coeff_invers_DC_coeff(int(*coeff_buf)[4]);
 };
 
 #endif

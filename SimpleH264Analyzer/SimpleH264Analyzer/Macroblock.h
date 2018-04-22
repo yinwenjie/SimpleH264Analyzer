@@ -143,8 +143,10 @@ private:
 	int search_for_value_in_2D_table(int &value1, int &value2, int &code, int *lengthTable, int *codeTable, int tableWidth, int tableHeight);
 
 	int get_intra_blocks_16x16();
+	int get_pred_block_16(NeighborBlocks &neighbors, UINT8 &up_left, UINT8 up[16], UINT8 left[16]);
 	int get_neighbor_mb_availablility(NeighborBlocks &neighbors);
 	int get_reference_pixels_16(const NeighborBlocks &neighbors, UINT8 &up_left, UINT8 up[16], UINT8 left[16]);
+	int reconstruct_block_16();
 	void dump_block16_info();
 
 	int get_intra_blocks_4x4();
@@ -155,7 +157,7 @@ private:
 	int construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, int predMode);
 	int get_reference_pixels(NeighborBlocks neighbors, UINT8 blkIdx, UINT8 *refPixBuf);
 	int get_pred_mode_at_idx(UINT8 blkIdx);
-	void dump_block_info(UINT8 blkIdx, UINT8 *refPixBuf);
+	void dump_block_info(UINT8 blkIdx);
 
 	int get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
 	int get_neighbor_block_intra_mode(NeighborBlockPos block);
