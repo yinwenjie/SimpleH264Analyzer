@@ -102,6 +102,7 @@ private:
 
 	void insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int x, int y);
 	void coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]);
+	void coeff_invers_DC_coeff();
 };
 
 #endif

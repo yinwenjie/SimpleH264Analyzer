@@ -767,6 +767,8 @@ void CMacroblock::dump_block16_info()
 				recon_block[4 * col_idx + column][4 * row_idx + row] = m_reconstructed_block[blk_column][blk_row][column][row];
 			}
 		}
+
+		m_residual->Dump_coeff_block(idx);
 	}
 
 #if TRACE_CONFIG_BLOCK_PRED_BLOCK

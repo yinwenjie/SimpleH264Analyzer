@@ -1240,6 +1240,17 @@ void CResidual::restore_16x16_coeff_block_luma_DC(int(*matrix)[4][4])
 	{
 		m_coeff_matrix_luma[pos][0][0] = coeffBuf[pos];
 	}
+
+	printf("\nBefore DC Transform:\n");
+	for (int col = 0; col < 4; col++)
+	{
+		for (int row = 0; row < 4; row++)
+		{
+			int blk_idx = position_to_block_index(row, col);
+			printf("%5d", m_coeff_matrix_luma[blk_idx][0][0]);
+		}
+		printf("\n");
+	}
 }
 
 const int SNGL_SCAN[16][2] =
@@ -1308,6 +1319,22 @@ void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]
 			int j1 = 3 - j;
 			residual_buf[i][j] = temp2[j] + temp2[j1];
 			residual_buf[i][j1] = temp2[j] - temp2[j1];
+		}
+	}
+}
+
+void CResidual::coeff_invers_DC_coeff()
+{
+	int M5[4] = { 0 };
+	int M6[4] = { 0 };
+	int qp_per = (m_qp - MIN_QP) / 6;
+	int qp_rem = (m_qp - MIN_QP) % 6;
+
+	// horizontal
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
 		}
 	}
 }
