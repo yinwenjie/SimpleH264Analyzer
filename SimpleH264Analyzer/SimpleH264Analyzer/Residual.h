@@ -48,6 +48,7 @@ public:
 	UINT8 Get_sub_block_number_coeffs_chroma(int component, int block_idc_row, int block_idc_column);
 	void Restore_coeff_matrix();
 
+	void  Dump_coeff_block(int blk_idx);
 	void  Dump_residual_luma(int blockType);
 	void  Dump_residual_chroma(UINT8 cbp_chroma);
 	void  Dump_residual_chroma_DC();

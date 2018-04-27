@@ -1102,6 +1102,7 @@ int CMacroblock::construct_pred_block(NeighborBlocks neighbors, UINT8 blkIdx, in
 
 #if TRACE_CONFIG_MACROBLOCK
 	g_tempFile << "Macroblock: " << to_string(m_mb_idx) << " - Block: " << to_string(blkIdx) << endl;
+	m_residual->Dump_coeff_block(blkIdx);
 
 #if TRACE_CONFIG_BLOCK_REF_PIX
 	g_tempFile << "Reference pixels:" << endl;

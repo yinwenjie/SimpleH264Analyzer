@@ -164,6 +164,21 @@ void CResidual::Restore_coeff_matrix()
 	}
 }
 
+void CResidual::Dump_coeff_block(int blk_idx)
+{
+#if TRACE_CONFIG_BLOCK_COEF_BLK_LUMA
+	g_tempFile << "Coefficients:" << endl;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			g_tempFile << " " << to_string(m_coeff_matrix_luma[blk_idx][i][j]);
+		}
+		g_tempFile << endl;
+	}
+#endif
+}
+
 void CResidual::Dump_residual_luma(int blockType)
 {
 #if TRACE_CONFIG_LOGOUT
