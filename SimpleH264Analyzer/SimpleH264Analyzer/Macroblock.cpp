@@ -634,7 +634,8 @@ int CMacroblock::get_pred_block_16(NeighborBlocks &neighbors, UINT8 &up_left, UI
 
 	for (int idx = 0; idx < 16; idx++)
 	{
-		int row_idx = idx % 4, col_idx = idx / 4;
+		UINT8 row_idx = -1, col_idx = -1;
+		block_index_to_position(idx, row_idx, col_idx);
 		for (int blk_col = 0; blk_col < 4; blk_col++)
 		{
 			for (int blk_row = 0; blk_row < 4; blk_row++)
@@ -758,13 +759,12 @@ void CMacroblock::dump_block16_info()
 	for (int idx = 0; idx < 16; idx++)
 	{
 		block_index_to_position(idx, blk_row, blk_column);
-		int row_idx = idx % 4, col_idx = idx / 4;
 		for (int column = 0; column < 4; column++)
 		{
 			for (int row = 0; row < 4; row++)
 			{
-				pred_block16[4 * col_idx + column][4 * row_idx + row] = m_pred_block[idx][column][row];
-				recon_block[4 * col_idx + column][4 * row_idx + row] = m_reconstructed_block[blk_column][blk_row][column][row];
+				pred_block16[4 * blk_column + column][4 * blk_row + row] = m_pred_block[idx][column][row];
+				recon_block[4 * blk_column + column][4 * blk_row + row] = m_reconstructed_block[blk_column][blk_row][column][row];
 			}
 		}
 
