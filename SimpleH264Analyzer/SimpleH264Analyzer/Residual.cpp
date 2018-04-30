@@ -1088,55 +1088,64 @@ found:
 
 void CResidual::restore_8x8_coeff_block_luma(int (*matrix)[4][4], int idx, int blockType)
 {
-	int max_coeff_num = 0;
-	switch (blockType)
-	{
-	case LUMA:
-		max_coeff_num = 16;
-		break;
-	case LUMA_INTRA16x16AC:
-		max_coeff_num = 15;
-		break;
-	default:
-		break;
-	}
-
 	int blkColumnIdxStart = 2 * (idx / 2),  blkRowIdxStart = 2 * (idx % 2);
 	for (int columnIdx = blkColumnIdxStart; columnIdx < blkColumnIdxStart + 2; columnIdx ++)
 	{
 		for (int rowIdx = blkRowIdxStart; rowIdx < blkRowIdxStart + 2; rowIdx++)
 		{
-			int coeffBuf[16] = { 0 };
-			UINT8 numCoeff = luma_residual[columnIdx][rowIdx].numCoeff, coeffIdx = numCoeff;
-			UINT8 trailingOnes = luma_residual[columnIdx][rowIdx].trailingOnes, trailingLeft = trailingOnes;
-			UINT8 totalZeros = luma_residual[columnIdx][rowIdx].totalZeros;
-
-			// write trailing ones
-			for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
-			{
-				coeffBuf[i--] = luma_residual[columnIdx][rowIdx].trailingSign[j];
-			}
-
-			// write levels
-			for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
-			{
-				coeffBuf[i] = luma_residual[columnIdx][rowIdx].levels[numCoeff - trailingOnes - 1 - i];
-			}
-
-			// move levels with run_before
-			for (int i = numCoeff - 1; i > 0; i--)
-			{
-				swap(coeffBuf[i], coeffBuf[i + totalZeros]);
-				totalZeros -= luma_residual[columnIdx][rowIdx].runBefore[i];
-			}
-			swap(coeffBuf[0], coeffBuf[totalZeros]);
-
-			insert_matrix(m_coeff_matrix_luma, coeffBuf, 0, 16, columnIdx, rowIdx);
-
-			int blkIdx = position_to_block_index(rowIdx, columnIdx);
-			coeff_invers_transform(m_coeff_matrix_luma[blkIdx], m_residual_matrix_luma[blkIdx]);
+			restore_4x4_coeff_block_luma(columnIdx, rowIdx, blockType);
 		}
 	}
+}
+
+void CResidual::restore_4x4_coeff_block_luma(int column_idx, int row_idx, int blockType)
+{
+	int max_coeff_num = 0, start_idx = 0;
+	Coeff4x4Block *targetBlock = NULL;
+	switch (blockType)
+	{
+	case LUMA:
+		max_coeff_num = 16;
+		targetBlock = &luma_residual[column_idx][row_idx];
+		break;
+	case LUMA_INTRA16x16AC:
+		start_idx = 1;
+		max_coeff_num = 15;
+		targetBlock = &luma_residual16x16_AC[column_idx][row_idx];
+		break;
+	default:
+		break;
+	}
+
+	int coeffBuf[16] = { 0 };
+	UINT8 numCoeff = targetBlock->numCoeff, coeffIdx = numCoeff;
+	UINT8 trailingOnes = targetBlock->trailingOnes, trailingLeft = trailingOnes;
+	UINT8 totalZeros = targetBlock->totalZeros;
+
+	// write trailing ones
+	for (int i = numCoeff - trailingOnes, j = trailingOnes - 1; j >= 0; j--)
+	{
+		coeffBuf[i++] = targetBlock->trailingSign[j];
+	}
+
+	// write levels
+	for (int i = numCoeff - trailingOnes - 1; i >= 0; i--)
+	{
+		coeffBuf[i] = targetBlock->levels[numCoeff - trailingOnes - 1 - i];
+	}
+
+	// move levels with run_before
+	for (int i = numCoeff - 1; i > 0; i--)
+	{
+		swap(coeffBuf[i], coeffBuf[i + totalZeros]);
+		totalZeros -= targetBlock->runBefore[i];
+	}
+	swap(coeffBuf[0], coeffBuf[totalZeros]);
+
+	insert_matrix(m_coeff_matrix_luma, coeffBuf, start_idx, max_coeff_num, column_idx, row_idx);
+
+	int blkIdx = position_to_block_index(row_idx, column_idx);
+	coeff_invers_transform(m_coeff_matrix_luma[blkIdx], m_residual_matrix_luma[blkIdx]);
 }
 
 void CResidual::restore_8x8_coeff_block_chroma_DC(int(*matrix)[4][4][4], int idx)
@@ -1213,12 +1222,12 @@ void CResidual::restore_16x16_coeff_block_luma_DC(int(*matrix)[4][4])
 	UINT8 numCoeff = luma_residual16x16_DC.numCoeff;
 	UINT8 trailingOnes = luma_residual16x16_DC.trailingOnes, trailingLeft = trailingOnes;
 	UINT8 totalZeros = luma_residual16x16_DC.totalZeros;
-	int coeffBuf[16] = { 0 };
+	int coeffBuf[16] = { 0 }, coeff_block[4][4] = {{ 0 }};
 
 	// write trailing ones
-	for (int i = numCoeff - 1, j = trailingOnes - 1; j >= 0; j--)
+	for (int i = numCoeff - trailingOnes, j = trailingOnes - 1; j >= 0; j--)
 	{
-		coeffBuf[i--] = luma_residual16x16_DC.trailingSign[j];
+		coeffBuf[i++] = luma_residual16x16_DC.trailingSign[j];
 	}
 
 	// write levels
@@ -1235,43 +1244,56 @@ void CResidual::restore_16x16_coeff_block_luma_DC(int(*matrix)[4][4])
 	}
 	swap(coeffBuf[0], coeffBuf[totalZeros]);
 
-	// insert coeffBuf......
 	for (int pos = 0; pos < 16; pos++)
 	{
-		m_coeff_matrix_luma[pos][0][0] = coeffBuf[pos];
+		int row = SNGL_SCAN[pos][0], col = SNGL_SCAN[pos][1];
+		coeff_block[col][row] = coeffBuf[pos];
 	}
 
-	printf("\nBefore DC Transform:\n");
+// 	printf("\nBefore DC Transform:\n");
+// 	for (int col = 0; col < 4; col++)
+// 	{
+// 		for (int row = 0; row < 4; row++)
+// 		{
+// 			printf("%5d", coeff_block[col][row]);
+// 		}
+// 		printf("\n");
+// 	}
+
+	coeff_invers_DC_coeff(coeff_block);
+
+// 	printf("\nAfter DC Transform:\n");
+// 	for (int col = 0; col < 4; col++)
+// 	{
+// 		for (int row = 0; row < 4; row++)
+// 		{
+// 			printf("%5d", coeff_block[col][row]);
+// 		}
+// 		printf("\n");
+// 	}
+
+	// insert coeffBuf......
 	for (int col = 0; col < 4; col++)
 	{
 		for (int row = 0; row < 4; row++)
 		{
-			int blk_idx = position_to_block_index(row, col);
-			printf("%5d", m_coeff_matrix_luma[blk_idx][0][0]);
+			int idx = position_to_block_index(row, col);
+			m_coeff_matrix_luma[idx][0][0] = coeff_block[col][row];
 		}
-		printf("\n");
 	}
 }
-
-const int SNGL_SCAN[16][2] =
-{
-	{ 0, 0 }, { 1, 0 }, { 0, 1 }, { 0, 2 },
-	{ 1, 1 }, { 2, 0 }, { 3, 0 }, { 2, 1 },
-	{ 1, 2 }, { 0, 3 }, { 1, 3 }, { 2, 2 },
-	{ 3, 1 }, { 3, 2 }, { 2, 3 }, { 3, 3 }
-};
 
 void CResidual::insert_matrix(int(*matrix)[4][4], int *block, int start, int maxCoeffNum, int c, int r)
 {
 	int qp_per = m_qp / 6, qp_rem = m_qp % 6;
-	int row = 0, column = 0, startc = start / 4, startr = start % 4;
+	int row = 0, column = 0;
 	int coeff_buf[4][4] = { 0 }, residual_buf[4][4] = { 0 };
 	int block_index = position_to_block_index(r, c);
 	for (int idc = 0, pos0 = start; idc < maxCoeffNum && pos0 < 16; idc++)
 	{
 		row = SNGL_SCAN[pos0][0];
 		column = SNGL_SCAN[pos0][1];
-		matrix[block_index][column + startc][row + startr] = block[idc] * dequant_coef[qp_rem][row][column] << qp_per;
+		matrix[block_index][column][row] = block[idc] * dequant_coef[qp_rem][row][column] << qp_per;
 		pos0++;
 	}
 }
@@ -1323,18 +1345,61 @@ void CResidual::coeff_invers_transform(int(*coeff_buf)[4], int(*residual_buf)[4]
 	}
 }
 
-void CResidual::coeff_invers_DC_coeff()
+void CResidual::coeff_invers_DC_coeff(int(*coeff_buf)[4])
 {
 	int M5[4] = { 0 };
 	int M6[4] = { 0 };
 	int qp_per = (m_qp - MIN_QP) / 6;
 	int qp_rem = (m_qp - MIN_QP) % 6;
+	int row = 0, col = 0;
 
 	// horizontal
-	for (int j = 0; j < 4; j++)
+	for (col = 0; col < 4; col++)
 	{
-		for (int i = 0; i < 4; i++)
+		for (row = 0; row < 4; row++)
 		{
+			M5[row] = coeff_buf[col][row];
+		}
+
+		M6[0] = M5[0] + M5[2];
+		M6[1] = M5[0] - M5[2];
+		M6[2] = M5[1] - M5[3];
+		M6[3] = M5[1] + M5[3];
+
+		for (row = 0; row < 2; row++)
+		{
+			int wor = 3 - row;
+			coeff_buf[col][row] = M6[row] + M6[wor];
+			coeff_buf[col][wor] = M6[row] - M6[wor];
+		}
+	}
+
+	// vertical
+	for (row = 0; row < 4; row++)
+	{
+		for (col = 0; col < 4; col++)
+		{
+			M5[col] = coeff_buf[col][row];
+		}
+
+		M6[0] = M5[0] + M5[2];
+		M6[1] = M5[0] - M5[2];
+		M6[2] = M5[1] - M5[3];
+		M6[3] = M5[1] + M5[3];
+
+		for (col = 0; col < 2; col++)
+		{
+			int loc = 3 - col;
+			coeff_buf[col][row] = M6[col] + M6[loc];
+			coeff_buf[loc][row] = M6[col] - M6[loc];
+		}
+	}
+
+	for (col = 0; col < 4; col++)
+	{
+		for (row = 0; row < 4; row++)
+		{
+			coeff_buf[col][row] = ((coeff_buf[col][row] * dequant_coef[qp_rem][0][0] << qp_per) + 2) >> 2;
 		}
 	}
 }
