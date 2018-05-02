@@ -1231,7 +1231,7 @@ int CMacroblock::get_neighbor_blocks_availablility(NeighborBlocks &neighbors, in
 
 	bool left_edge_mb = (mb_idx % width_in_mb == 0);
 	bool top_edge_mb = (mb_idx < width_in_mb);
-	bool right_edge_mb = (mb_idx + 1 % width_in_mb == 0);
+	bool right_edge_mb = ((mb_idx + 1) % width_in_mb == 0);
 
 	if (!left_edge_mb)
 	{
