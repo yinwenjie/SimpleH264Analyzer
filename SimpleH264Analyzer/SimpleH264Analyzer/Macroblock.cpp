@@ -154,10 +154,9 @@ UINT32 CMacroblock::Parse_macroblock()
 
 	// Êä³ömb headerÐÅÏ¢
 	Dump_macroblock_info();
-
+	interpret_mb_mode();
 	if (m_cbp_luma > 0 || m_cbp_chroma > 0 || (m_mb_type > 0 && m_mb_type < 25))
 	{
-		interpret_mb_mode();
 		m_residual = new CResidual(m_pSODB, m_bypeOffset * 8 + m_bitOffset, this);
 		m_residual->Parse_macroblock_residual(residualLength);
 
@@ -607,7 +606,7 @@ int CMacroblock::get_pred_block_16(NeighborBlocks &neighbors, UINT8 &up_left, UI
 		{
 			return kPARSING_INVALID_PRED_MODE;
 		}
-		UINT16 H = 0, V = 0, a = 0, b = 0, c = 0;
+		int H = 0, V = 0, a = 0, b = 0, c = 0;
 		for (int idx = 0; idx < 7; idx++)
 		{
 			H += (idx + 1) * (up[8 + idx] - up[6 - idx]);
