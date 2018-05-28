@@ -114,3 +114,8 @@ int CPicParamSet::Get_pic_init_qp()
 {
 	return m_pic_init_qp;
 }
+
+bool CPicParamSet::Get_deblocking_filter_control_present_flag()
+{
+	return m_deblocking_filter_control_present_flag;
+}

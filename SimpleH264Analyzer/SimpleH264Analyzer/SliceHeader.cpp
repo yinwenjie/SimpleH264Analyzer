@@ -24,6 +24,9 @@ CSliceHeader::CSliceHeader(UINT8 *pSODB, CSeqParamSet *sps, CPicParamSet *pps, U
 	m_delta_poc_bottom = 0;
 	m_dec_ref_pic_marking = { 0, 0 };
 	m_slice_qp_delta = 0;
+	m_disable_deblocking_filter_idc = 0;
+	m_slice_alpha_c0_offset = 0;
+	m_slice_beta_offset = 0;
 }
 
 CSliceHeader::~CSliceHeader()
@@ -78,6 +81,16 @@ UINT32 CSliceHeader::Parse_slice_header()
 	}
 
 	m_slice_qp_delta = Get_sev_code_num(m_pSODB, bytePosition, bitPosition);
+	
+	if (m_pps_active->Get_deblocking_filter_control_present_flag())
+	{
+		m_disable_deblocking_filter_idc = Get_uev_code_num(m_pSODB, bytePosition, bitPosition);
+		if (m_disable_deblocking_filter_idc != 1)
+		{
+			m_slice_alpha_c0_offset = 2 * Get_sev_code_num(m_pSODB, bytePosition, bitPosition);
+			m_slice_beta_offset = 2 * Get_sev_code_num(m_pSODB, bytePosition, bitPosition);
+		}
+	}
 
 	sliceHeaderLengthInBits = 8 * bytePosition + bitPosition;
 

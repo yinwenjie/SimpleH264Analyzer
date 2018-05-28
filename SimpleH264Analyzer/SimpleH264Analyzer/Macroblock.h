@@ -161,6 +161,8 @@ private:
 
 	int get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
 	int get_neighbor_block_intra_mode(NeighborBlockPos block);
+
+	int deblock_picture();
 };
 
 #endif

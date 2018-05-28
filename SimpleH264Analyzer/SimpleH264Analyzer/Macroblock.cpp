@@ -1347,3 +1347,8 @@ int CMacroblock::get_neighbor_block_intra_mode(NeighborBlockPos block)
 
 	return m_intra_pred_mode[block_index];
 }
+
+int CMacroblock::deblock_picture()
+{
+	return kPARSING_ERROR_NO_ERROR;
+}

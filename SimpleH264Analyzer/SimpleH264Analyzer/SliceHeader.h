@@ -48,8 +48,9 @@ private:
 	int	   m_delta_poc_bottom;
 	DecRefPicMarking m_dec_ref_pic_marking;
 	int	   m_slice_qp_delta;
-
-
+	int	   m_disable_deblocking_filter_idc;
+	int    m_slice_alpha_c0_offset;
+	int    m_slice_beta_offset;
 };
 
 #endif

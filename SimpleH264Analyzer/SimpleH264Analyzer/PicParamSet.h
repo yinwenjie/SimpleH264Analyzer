@@ -21,6 +21,7 @@ public:
 	bool Get_transform_8x8_mode_flag();
 	bool Get_entropy_coding_flag();
 	int  Get_pic_init_qp();
+	bool Get_deblocking_filter_control_present_flag();
 
 	void Dump_pps_info();
 
