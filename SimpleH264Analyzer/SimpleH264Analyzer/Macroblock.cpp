@@ -7,6 +7,7 @@
 
 #include "Residual.h"
 #include "Macroblock_Defines.h"
+#include "Deblocking.h"
 
 using namespace std;
 
@@ -220,6 +221,8 @@ int CMacroblock::Decode_macroblock()
 			return err;
 		}
 	}
+
+	deblock_picture();
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -1350,5 +1353,30 @@ int CMacroblock::get_neighbor_block_intra_mode(NeighborBlockPos block)
 
 int CMacroblock::deblock_picture()
 {
+	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
+	int height_in_mb = m_slice->m_sps_active->Get_pic_height_in_mbs();
+	int total_filter_strength = 0, filter_strength_arr[16] = { 0 };
+
+	bool filterLeftMbEdgeFlag = (m_mb_idx % width_in_mb != 0);
+	bool filterTopMbEdgeFlag = (m_mb_idx >= width_in_mb);
+
+	if (m_slice->m_sliceHeader->m_disable_deblocking_filter_idc == 1)
+	{
+		return kPARSING_ERROR_NO_ERROR;
+	}
+
+	// Vertical filtering luma
+	for (int ver_edge = 0; ver_edge < 4; ver_edge++)
+	{
+		bool left_frame_edge = (ver_edge && filterLeftMbEdgeFlag);
+		if (ver_edge || left_frame_edge)
+		{
+			total_filter_strength = Get_filtering_strength(m_mb_idx, ver_edge, filter_strength_arr);
+			if (total_filter_strength)
+			{
+			}
+		}
+	}
+
 	return kPARSING_ERROR_NO_ERROR;
 }

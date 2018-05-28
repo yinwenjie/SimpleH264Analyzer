@@ -49,6 +49,9 @@
     <ClInclude Include="..\..\SimpleH264Analyzer\Residual.h">
       <Filter>6.Residual</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\SimpleH264Analyzer\Deblocking.h">
+      <Filter>8.Deblocking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\SimpleH264Analyzer\Utils.cpp">
@@ -87,6 +90,9 @@
     <ClCompile Include="..\..\SimpleH264Analyzer\Residual.cpp">
       <Filter>6.Residual</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\SimpleH264Analyzer\Deblocking.cpp">
+      <Filter>8.Deblocking</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\SimpleH264Analyzer\ReadMe.txt" />
@@ -115,6 +121,9 @@
     </Filter>
     <Filter Include="6.Residual">
       <UniqueIdentifier>{f641e8ff-c60a-466c-902c-d5211cf9f831}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="8.Deblocking">
+      <UniqueIdentifier>{0b9b0544-7000-41e6-b17e-251f174f4302}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
