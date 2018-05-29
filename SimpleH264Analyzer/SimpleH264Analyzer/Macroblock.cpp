@@ -7,7 +7,6 @@
 
 #include "Residual.h"
 #include "Macroblock_Defines.h"
-#include "Deblocking.h"
 
 using namespace std;
 
@@ -1371,11 +1370,72 @@ int CMacroblock::deblock_picture()
 		bool left_frame_edge = (ver_edge && filterLeftMbEdgeFlag);
 		if (ver_edge || left_frame_edge)
 		{
-			total_filter_strength = Get_filtering_strength(m_mb_idx, ver_edge, filter_strength_arr);
+			total_filter_strength = get_filtering_strength(ver_edge, filter_strength_arr);
 			if (total_filter_strength)
 			{
+				filter_block_edge(0, ver_edge, filter_strength_arr, 0);
 			}
 		}
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_filtering_strength(int edge, int strength[16])
+{
+	int total_strength = 0;
+	for (int idx = 0; idx < 16; idx++)
+	{
+		strength[idx] = (edge == 0) ? 4 : 3;
+		total_strength += strength[idx];
+	}
+
+	return total_strength;
+}
+
+int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int component)
+{
+	int filter_arr[8] = { 0 };
+	int left_mb_idx = -1, top_mb_idx = -1, mb_idx = -1;
+	NeighborBlocks neighbors = { 0 };
+
+	get_neighbor_mb_availablility(neighbors);
+	if (neighbors.flags & 1)
+	{
+		left_mb_idx = neighbors.left.target_mb_idx;
+	}
+	if (neighbors.flags & 2)
+	{
+		top_mb_idx = neighbors.top.target_mb_idx;
+	}
+	
+	if (!dir) // Vertical
+	{
+		mb_idx = left_mb_idx;
+	} 
+	else //Horizontal
+	{
+		mb_idx = top_mb_idx;
+	}
+
+	get_edge_pixel_item(dir, mb_idx, edge, filter_arr);
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pixel_arr[8])
+{
+	CMacroblock *target = NULL;
+	if (edge)// Internal Filtering
+	{
+		target = m_slice->Get_macroblock_at_index(target_mb_idx);
+	}
+
+	if (!dir) // Vertical
+	{
+	}
+	else //Horizontal
+	{
 	}
 
 	return kPARSING_ERROR_NO_ERROR;

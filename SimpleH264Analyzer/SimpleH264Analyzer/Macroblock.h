@@ -162,7 +162,11 @@ private:
 	int get_neighbor_blocks_availablility(NeighborBlocks &neighbors, int block_idc_row, int block_idc_column);
 	int get_neighbor_block_intra_mode(NeighborBlockPos block);
 
+	// Deblocking methods
 	int deblock_picture();
+	int get_filtering_strength(int edge, int strength[16]);
+	int filter_block_edge(int dir, int edge, int strength[16], int component);
+	int get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pixel_arr[8]);
 };
 
 #endif
