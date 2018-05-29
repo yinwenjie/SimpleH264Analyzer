@@ -146,7 +146,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\SimpleH264Analyzer\CAVLC_Defines.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Configuration.h" />
-    <ClInclude Include="..\..\SimpleH264Analyzer\Deblocking.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\ErrorInfo.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Global.h" />
     <ClInclude Include="..\..\SimpleH264Analyzer\Macroblock.h" />
@@ -164,7 +163,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\SimpleH264Analyzer\Configuration.cpp" />
-    <ClCompile Include="..\..\SimpleH264Analyzer\Deblocking.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\Macroblock.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\NALUnit.cpp" />
     <ClCompile Include="..\..\SimpleH264Analyzer\PicParamSet.cpp" />
