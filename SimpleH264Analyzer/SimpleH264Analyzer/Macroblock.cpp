@@ -1395,7 +1395,7 @@ int CMacroblock::get_filtering_strength(int edge, int strength[16])
 
 int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int component)
 {
-	int filter_arr[8] = { 0 };
+	int filter_arr[8] = { 0 }, edge_pix_cnt = -1;
 	int left_mb_idx = -1, top_mb_idx = -1, mb_idx = -1;
 	NeighborBlocks neighbors = { 0 };
 
@@ -1418,25 +1418,60 @@ int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int comp
 		mb_idx = top_mb_idx;
 	}
 
-	get_edge_pixel_item(dir, mb_idx, edge, filter_arr);
+	if (component) // Chroma
+	{
+		edge_pix_cnt = 8;
+	}
+	else // Luma
+	{
+		edge_pix_cnt = 16;
+	}
+
+	for (int idx = 0; idx < edge_pix_cnt; idx++)
+	{
+		get_edge_pixel_item(dir, mb_idx, edge, idx, 1, filter_arr);
+	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }
 
-int CMacroblock::get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pixel_arr[8])
+int CMacroblock::get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8])
 {
-	CMacroblock *target = NULL;
+	CMacroblock *target = NULL;	
+	int neighbor_blk_idx = -1, blk_idx = pix_idx / 4, pix_pos = pix_idx % 4;
+	/*
+	For luma:
+		pix_idx ranges [0,15], so blk_idx means the block index the pixel belongs to, and pix_pos means the pixel index in the sub block.
+	*/
 	if (edge)// Internal Filtering
 	{
+		target = this;
+		neighbor_blk_idx = edge - 1;
+	}
+	else
+	{
 		target = m_slice->Get_macroblock_at_index(target_mb_idx);
+		neighbor_blk_idx = 3;
 	}
 
-	if (!dir) // Vertical
+	if (luma)
 	{
+		if (!dir) // Vertical
+		{
+			for (int idx = 0; idx < 4; idx++)
+			{
+				pixel_arr[idx] = target->m_reconstructed_block[blk_idx][neighbor_blk_idx][pix_pos][idx];
+			}
+			for (int idx = 4; idx < 8; idx++)
+			{
+				pixel_arr[idx] = m_reconstructed_block[blk_idx][edge][pix_pos][idx-4];
+			}
+		}
+		else //Horizontal
+		{
+		}		
 	}
-	else //Horizontal
-	{
-	}
+
 
 	return kPARSING_ERROR_NO_ERROR;
 }

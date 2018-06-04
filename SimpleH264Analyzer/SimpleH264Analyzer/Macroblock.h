@@ -166,7 +166,7 @@ private:
 	int deblock_picture();
 	int get_filtering_strength(int edge, int strength[16]);
 	int filter_block_edge(int dir, int edge, int strength[16], int component);
-	int get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pixel_arr[8]);
+	int get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8]);
 };
 
 #endif
