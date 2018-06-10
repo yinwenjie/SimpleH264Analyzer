@@ -132,6 +132,9 @@ private:
 	UINT8 m_pred_block[16][4][4];
 	UINT8 m_reconstructed_block[4][4][4][4];
 
+	int    m_mb_alpha_c0_offset;
+	int    m_mb_beta_offset;
+
 	void interpret_mb_mode();
 
 	int get_neighbor_available(bool &available_top, bool &available_left, int &topIdx, int &leftIdx, int block_idc_row, int block_idc_column);
@@ -167,6 +170,7 @@ private:
 	int get_filtering_strength(int edge, int strength[16]);
 	int filter_block_edge(int dir, int edge, int strength[16], int component);
 	int get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8]);
+	int filter_pixel(int *pix_vals, int alpha_val, int beta_val, int *clip_table, int strength[16], int pixel_arr[8], int strength_idx, int component);
 };
 
 #endif

@@ -1364,6 +1364,9 @@ int CMacroblock::deblock_picture()
 		return kPARSING_ERROR_NO_ERROR;
 	}
 
+	m_mb_alpha_c0_offset = m_slice->m_sliceHeader->m_slice_alpha_c0_offset;
+	m_mb_beta_offset = m_slice->m_sliceHeader->m_slice_beta_offset;
+
 	// Vertical filtering luma
 	for (int ver_edge = 0; ver_edge < 4; ver_edge++)
 	{
@@ -1374,6 +1377,20 @@ int CMacroblock::deblock_picture()
 			if (total_filter_strength)
 			{
 				filter_block_edge(0, ver_edge, filter_strength_arr, 0);
+			}
+		}
+	}
+
+	// Horizontal filtering luma
+	for (int hor_edge = 0; hor_edge < 4; hor_edge++)
+	{
+		bool top_frame_edge = (hor_edge && filterTopMbEdgeFlag);
+		if (hor_edge || top_frame_edge)
+		{
+			total_filter_strength = get_filtering_strength(hor_edge, filter_strength_arr);
+			if (total_filter_strength)
+			{
+				filter_block_edge(1, hor_edge, filter_strength_arr, 0);
 			}
 		}
 	}
@@ -1393,10 +1410,29 @@ int CMacroblock::get_filtering_strength(int edge, int strength[16])
 	return total_strength;
 }
 
+#define  IClip( Min, Max, Val) (((Val)<(Min))? (Min):(((Val)>(Max))? (Max):(Val)))
+
+int ALPHA_TABLE[52] = { 0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,4,4,5,6,  7,8,9,10,12,13,15,17,  20,22,25,28,32,36,40,45,  50,56,63,71,80,90,101,113,  127,144,162,182,203,226,255,255 };
+int BETA_TABLE[52] = { 0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,2,2,2,3,  3,3,3, 4, 4, 4, 6, 6,   7, 7, 8, 8, 9, 9,10,10,  11,11,12,12,13,13, 14, 14,   15, 15, 16, 16, 17, 17, 18, 18 };
+int CLIP_TAB[52][5] =
+{
+	{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0 },{ 0, 0, 0, 1, 1 },{ 0, 0, 0, 1, 1 },{ 0, 0, 0, 1, 1 },{ 0, 0, 0, 1, 1 },{ 0, 0, 1, 1, 1 },{ 0, 0, 1, 1, 1 },{ 0, 1, 1, 1, 1 },
+	{ 0, 1, 1, 1, 1 },{ 0, 1, 1, 1, 1 },{ 0, 1, 1, 1, 1 },{ 0, 1, 1, 2, 2 },{ 0, 1, 1, 2, 2 },{ 0, 1, 1, 2, 2 },{ 0, 1, 1, 2, 2 },{ 0, 1, 2, 3, 3 },
+	{ 0, 1, 2, 3, 3 },{ 0, 2, 2, 3, 3 },{ 0, 2, 2, 4, 4 },{ 0, 2, 3, 4, 4 },{ 0, 2, 3, 4, 4 },{ 0, 3, 3, 5, 5 },{ 0, 3, 4, 6, 6 },{ 0, 3, 4, 6, 6 },
+	{ 0, 4, 5, 7, 7 },{ 0, 4, 5, 8, 8 },{ 0, 4, 6, 9, 9 },{ 0, 5, 7,10,10 },{ 0, 6, 8,11,11 },{ 0, 6, 8,13,13 },{ 0, 7,10,14,14 },{ 0, 8,11,16,16 },
+	{ 0, 9,12,18,18 },{ 0,10,13,20,20 },{ 0,11,15,23,23 },{ 0,13,17,25,25 }
+};
+
 int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int component)
 {
 	int filter_arr[8] = { 0 }, edge_pix_cnt = -1;
 	int left_mb_idx = -1, top_mb_idx = -1, mb_idx = -1;
+	int avg_qp = -1, index_a = -1, index_b = -1;
+	int alpha_val = -1, beta_val = -1;
+	int *clip_table = NULL;
+	int filtered_pixel[8] = { 0 };
 	NeighborBlocks neighbors = { 0 };
 
 	get_neighbor_mb_availablility(neighbors);
@@ -1411,11 +1447,11 @@ int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int comp
 	
 	if (!dir) // Vertical
 	{
-		mb_idx = left_mb_idx;
+		mb_idx = left_mb_idx < 0 ? m_mb_idx : left_mb_idx;
 	} 
 	else //Horizontal
 	{
-		mb_idx = top_mb_idx;
+		mb_idx = top_mb_idx < 0 ? m_mb_idx : top_mb_idx;
 	}
 
 	if (component) // Chroma
@@ -1425,11 +1461,20 @@ int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int comp
 	else // Luma
 	{
 		edge_pix_cnt = 16;
-	}
+		avg_qp = (m_mb_qp + m_slice->Get_macroblock_at_index(mb_idx)->m_mb_qp + 1) >> 1;
 
-	for (int idx = 0; idx < edge_pix_cnt; idx++)
-	{
-		get_edge_pixel_item(dir, mb_idx, edge, idx, 1, filter_arr);
+		index_a = IClip(0, MAX_QP, avg_qp + m_mb_alpha_c0_offset);
+		index_b = IClip(0, MAX_QP, avg_qp + m_mb_beta_offset);
+
+		alpha_val = ALPHA_TABLE[index_a];
+		beta_val = BETA_TABLE[index_b];
+		clip_table = CLIP_TAB[index_a];
+
+		for (int idx = 0; idx < edge_pix_cnt; idx++)
+		{
+			get_edge_pixel_item(dir, mb_idx, edge, idx, 1, filter_arr);
+			filter_pixel(filtered_pixel, alpha_val, beta_val, clip_table, strength, filter_arr, idx, component);
+		}
 	}
 
 	return kPARSING_ERROR_NO_ERROR;
@@ -1472,6 +1517,63 @@ int CMacroblock::get_edge_pixel_item(int dir, int target_mb_idx, int edge, int p
 		}		
 	}
 
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::filter_pixel(int *pix_vals, int alpha_val, int beta_val, int *clip_table, int strength[16], int pixel_arr[8], int strength_idx, int component)
+{
+	int delta = -1, abs_delta = -1;
+	int C0 = -1, c0 = -1, RL0 = -1, dif = -1;
+	int filter_strength = strength[strength_idx];
+	if (!filter_strength)
+	{
+		return kPARSING_ERROR_NO_ERROR;
+	}
+
+	RL0 = pixel_arr[4] + pixel_arr[3];
+	delta = pixel_arr[4] - pixel_arr[3];
+	abs_delta = abs(delta);
+	if (abs_delta >= alpha_val)
+	{
+		return kPARSING_ERROR_NO_ERROR;
+	}
+
+	C0 = clip_table[filter_strength];
+	int right_diff = abs(pixel_arr[4] - pixel_arr[5]) - beta_val, left_diff = abs(pixel_arr[3] - pixel_arr[2]) - beta_val;
+	int right_diff2_negative = 0, left_diff2_negative = 0;
+	if ((right_diff & left_diff) >= 0)
+	{
+		return kPARSING_ERROR_NO_ERROR;
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		pix_vals[i] = pixel_arr[i];
+	}
+
+	if (!component) // Luma
+	{
+		right_diff2_negative = (abs(pixel_arr[4] - pixel_arr[6]) - beta_val) < 0;
+		left_diff2_negative = (abs(pixel_arr[3] - pixel_arr[1]) - beta_val) < 0;
+
+		if (filter_strength == 3)
+		{
+			c0 = C0 + right_diff2_negative + left_diff2_negative;
+			dif = IClip(-c0, c0, ((delta << 2) + (pixel_arr[2] - pixel_arr[5]) + 4) >> 3);
+			pix_vals[3] = IClip(0, 255, pixel_arr[3] + dif);
+			pix_vals[4] = IClip(0, 255, pixel_arr[4] - dif);
+
+			if (right_diff2_negative)
+			{
+				pix_vals[2] += IClip(-C0, C0, (pixel_arr[1] + ((RL0 + 1) >> 1) - (pixel_arr[1] << 1)) >> 1);
+			}
+			if (left_diff2_negative)
+			{
+				pix_vals[5] += IClip(-C0, C0, (pixel_arr[6] + ((RL0 + 1) >> 1) - (pixel_arr[5] << 1)) >> 1);
+			}
+		}
+	}
 
 	return kPARSING_ERROR_NO_ERROR;
 }
