@@ -1514,6 +1514,7 @@ int CMacroblock::get_edge_pixel_item(int dir, int target_mb_idx, int edge, int p
 		}
 		else //Horizontal
 		{
+
 		}		
 	}
 
