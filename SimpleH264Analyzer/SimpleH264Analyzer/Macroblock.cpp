@@ -221,7 +221,7 @@ int CMacroblock::Decode_macroblock()
 		}
 	}
 
-	deblock_picture();
+	deblock_macroblock();
 
 	return kPARSING_ERROR_NO_ERROR;
 }
@@ -1350,7 +1350,7 @@ int CMacroblock::get_neighbor_block_intra_mode(NeighborBlockPos block)
 	return m_intra_pred_mode[block_index];
 }
 
-int CMacroblock::deblock_picture()
+int CMacroblock::deblock_macroblock()
 {
 	int width_in_mb = m_slice->m_sps_active->Get_pic_width_in_mbs();
 	int height_in_mb = m_slice->m_sps_active->Get_pic_height_in_mbs();
@@ -1474,6 +1474,7 @@ int CMacroblock::filter_block_edge(int dir, int edge, int strength[16], int comp
 		{
 			get_edge_pixel_item(dir, mb_idx, edge, idx, 1, filter_arr);
 			filter_pixel(filtered_pixel, alpha_val, beta_val, clip_table, strength, filter_arr, idx, component);
+			set_edge_pixel_item(filtered_pixel, dir, mb_idx, edge, idx, 1, filter_arr);
 		}
 	}
 
@@ -1514,7 +1515,14 @@ int CMacroblock::get_edge_pixel_item(int dir, int target_mb_idx, int edge, int p
 		}
 		else //Horizontal
 		{
-
+			for (int idx = 0; idx < 4; idx++)
+			{
+				pixel_arr[idx] = target->m_reconstructed_block[neighbor_blk_idx][blk_idx][idx][pix_pos];
+			}
+			for (int idx = 4; idx < 8; idx++)
+			{
+				pixel_arr[idx] = m_reconstructed_block[edge][blk_idx][idx - 4][pix_pos];
+			}
 		}		
 	}
 
@@ -1527,6 +1535,12 @@ int CMacroblock::filter_pixel(int *pix_vals, int alpha_val, int beta_val, int *c
 	int delta = -1, abs_delta = -1;
 	int C0 = -1, c0 = -1, RL0 = -1, dif = -1;
 	int filter_strength = strength[strength_idx];
+
+	for (int i = 0; i < 8; i++)
+	{
+		pix_vals[i] = pixel_arr[i];
+	}
+
 	if (!filter_strength)
 	{
 		return kPARSING_ERROR_NO_ERROR;
@@ -1548,11 +1562,6 @@ int CMacroblock::filter_pixel(int *pix_vals, int alpha_val, int beta_val, int *c
 		return kPARSING_ERROR_NO_ERROR;
 	}
 
-	for (int i = 0; i < 8; i++)
-	{
-		pix_vals[i] = pixel_arr[i];
-	}
-
 	if (!component) // Luma
 	{
 		right_diff2_negative = (abs(pixel_arr[4] - pixel_arr[6]) - beta_val) < 0;
@@ -1565,13 +1574,58 @@ int CMacroblock::filter_pixel(int *pix_vals, int alpha_val, int beta_val, int *c
 			pix_vals[3] = IClip(0, 255, pixel_arr[3] + dif);
 			pix_vals[4] = IClip(0, 255, pixel_arr[4] - dif);
 
-			if (right_diff2_negative)
-			{
-				pix_vals[2] += IClip(-C0, C0, (pixel_arr[1] + ((RL0 + 1) >> 1) - (pixel_arr[1] << 1)) >> 1);
-			}
 			if (left_diff2_negative)
 			{
+				pix_vals[2] += IClip(-C0, C0, (pixel_arr[1] + ((RL0 + 1) >> 1) - (pixel_arr[2] << 1)) >> 1);
+			}
+			if (right_diff2_negative)
+			{
 				pix_vals[5] += IClip(-C0, C0, (pixel_arr[6] + ((RL0 + 1) >> 1) - (pixel_arr[5] << 1)) >> 1);
+			}
+		}
+	}
+
+	return kPARSING_ERROR_NO_ERROR;
+}
+
+int CMacroblock::set_edge_pixel_item(int *pix_vals, int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8])
+{
+	CMacroblock *target = NULL;
+	int neighbor_blk_idx = -1, blk_idx = pix_idx / 4, pix_pos = pix_idx % 4;
+
+	if (edge)// Internal Filtering
+	{
+		target = this;
+		neighbor_blk_idx = edge - 1;
+	}
+	else
+	{
+		target = m_slice->Get_macroblock_at_index(target_mb_idx);
+		neighbor_blk_idx = 3;
+	}
+
+	if (luma)
+	{
+		if (!dir) // Vertical
+		{
+			for (int idx = 0; idx < 4; idx++)
+			{
+				target->m_reconstructed_block[blk_idx][neighbor_blk_idx][pix_pos][idx] = pix_vals[idx];
+			}
+			for (int idx = 4; idx < 8; idx++)
+			{
+				m_reconstructed_block[blk_idx][edge][pix_pos][idx - 4] = pix_vals[idx];
+			}
+		}
+		else //Horizontal
+		{
+			for (int idx = 0; idx < 4; idx++)
+			{
+				target->m_reconstructed_block[neighbor_blk_idx][blk_idx][idx][pix_pos] = pix_vals[idx];
+			}
+			for (int idx = 4; idx < 8; idx++)
+			{
+				m_reconstructed_block[edge][blk_idx][idx - 4][pix_pos] = pix_vals[idx];
 			}
 		}
 	}

@@ -166,11 +166,12 @@ private:
 	int get_neighbor_block_intra_mode(NeighborBlockPos block);
 
 	// Deblocking methods
-	int deblock_picture();
+	int deblock_macroblock();
 	int get_filtering_strength(int edge, int strength[16]);
 	int filter_block_edge(int dir, int edge, int strength[16], int component);
 	int get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8]);
 	int filter_pixel(int *pix_vals, int alpha_val, int beta_val, int *clip_table, int strength[16], int pixel_arr[8], int strength_idx, int component);
+	int set_edge_pixel_item(int *pix_vals, int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8]);
 };
 
 #endif
