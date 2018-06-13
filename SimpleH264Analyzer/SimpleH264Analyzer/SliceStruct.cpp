@@ -70,6 +70,11 @@ int CSliceStruct::Parse()
 		macroblockOffset += m_macroblocks[idx]->Parse_macroblock();
 		m_macroblocks[idx]->Decode_macroblock();
 	}
+
+	for (int idx = 0; idx < m_max_mb_number; idx++)
+	{
+		m_macroblocks[idx]->Deblock_macroblock();
+	}
 	
 	return kPARSING_ERROR_NO_ERROR;
 }

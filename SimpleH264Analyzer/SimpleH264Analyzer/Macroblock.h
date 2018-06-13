@@ -41,19 +41,19 @@ typedef enum
 } IntraMode16x16;
 
 // 预测模式结构
-typedef struct IntraPredStruct
+typedef struct Intrleft_diff2_negativeredStruct
 {
 	UINT8 block_mode;	//block_mode : 0 - 4x4 mode; 1 - 8x8 mode;
 	bool prev_intra_pred_mode_flag;
 	UINT8 rem_intra_pred_mode;
 
-	IntraPredStruct()
+	Intrleft_diff2_negativeredStruct()
 	{
 		block_mode = 0;
 		prev_intra_pred_mode_flag = false;
 		rem_intra_pred_mode = 0;
 	}
-} IntraPredStruct;
+} Intrleft_diff2_negativeredStruct;
 
 // 变换系数矩阵
 typedef struct MacroBlockCoeffArray
@@ -97,6 +97,7 @@ public:
 	UINT32 Parse_macroblock();
 	void Dump_macroblock_info();
 	int Decode_macroblock();
+	int Deblock_macroblock();
 
 	CPicParamSet *Get_pps_active();
 
@@ -121,7 +122,7 @@ private:
 	int    m_mb_idx;
 	bool   m_transform_size_8x8_flag;
 
-	IntraPredStruct *m_pred_struct;
+	Intrleft_diff2_negativeredStruct *m_pred_struct;
 	UINT8  m_intra_chroma_pred_mode;
 
 	UINT8  m_coded_block_pattern;
@@ -166,7 +167,6 @@ private:
 	int get_neighbor_block_intra_mode(NeighborBlockPos block);
 
 	// Deblocking methods
-	int deblock_macroblock();
 	int get_filtering_strength(int edge, int strength[16]);
 	int filter_block_edge(int dir, int edge, int strength[16], int component);
 	int get_edge_pixel_item(int dir, int target_mb_idx, int edge, int pix_idx, int luma, int pixel_arr[8]);
